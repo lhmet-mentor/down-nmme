@@ -75,7 +75,6 @@ major28 <- function(){
      275,       "TUCURUI",        "Tocantins"
 
   )
-
 }
 #stn_name(code = qnat_meta$estacao_codigo)
 stn_name(prec_nmme_cru_flat$codONS)

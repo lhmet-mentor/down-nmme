@@ -37,6 +37,8 @@ stn_name <- function(code, meta = qnat_meta){
 # monitorados pelo ONS
 major28 <- function(){
   
+  # digitado manualmente a partir de 
+  # Tabela 1 do artigo 
   tribble(
     ~codONS,  ~nome,      ~bacia,
      6,       "FURNAS",      "Grande",
@@ -77,7 +79,7 @@ major28 <- function(){
   )
 }
 #stn_name(code = qnat_meta$estacao_codigo)
-stn_name(prec_nmme_cru_flat$codONS)
+stn_name(major28()$codONS)
 
 #------------------------------------------------------------------------------
 # previsoes climaticas nmme

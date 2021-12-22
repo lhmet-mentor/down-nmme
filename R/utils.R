@@ -61,3 +61,12 @@ major28 <- function(){
 }
 # stn_name(code = qnat_meta$estacao_codigo)
 # stn_name(major28()$codONS)
+
+top6 <- function(){
+  mjrs <- major28()
+  top6_aprovhidrel <- c(156, 6, 270, 31, 24, 25)
+  dplyr::filter(mjrs, codONS %in% top6_aprovhidrel)
+}
+  
+
+

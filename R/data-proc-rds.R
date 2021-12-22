@@ -55,21 +55,21 @@ ensemble_refcst <- function(refcst_rds, var_name = "prec", stat = "median") {
 # para formar prev por ensemble (por mes de inicialização, leadtime e modelo)
 # o nome do modelo será inserido numa coluna
 # pode ser aplicado a uma lista de arquivos rds separados por lead time
-ensemble_refcst_files <- function(files_rds){
+ensemble_refcst_files <- function(files_rds, variable, statistic){
   ens <- data.table::rbindlist(
     lapply(
       files_rds,
       function(ifile) {
         cat(fs::path_file(ifile), "\n")
-        ensemble_refcst(ifile)
+        ensemble_refcst(refcst_rds = ifile, 
+                        var_name = variable, 
+                        stat = statistic
+        )
       }
     )
   )
-
+  
   #187.09 sec elapsed
   ens <- ens[order(S, L)]
   ens
 }
-
-
-

@@ -73,3 +73,34 @@ ensemble_refcst_files <- function(files_rds, variable, statistic){
   ens <- ens[order(S, L)]
   ens
 }
+
+
+
+# Para os arquivos RDS de um modelo, separados por lead time
+# media das previsoes dos 10 membros nos pontos de grade,
+# para cada mes de inicializ., lead time
+
+ensemble_model_refrcst <- function(imodel, 
+                                   path_rds,
+                                   var_name = "prec", 
+                                   stat = "median"
+){
+  # imodel = model_counts$modelo[2]  
+  #model_name_rds(model_files_rds, vname = "prec")  
+  cat(imodel, "\n")
+  model_files_rds <- dir_ls(path_rds, regexp = imodel)
+  ens_model_refcst <- ensemble_refcst_files(refcst_rds = model_files_rds, 
+                                            variable = var_name, 
+                                            statistic = stat
+  )
+  out_rds <- here(path_rds,
+                  paste0("ensemble-", 
+                         imodel, 
+                         "-", 
+                         stat,
+                         ".RDS"
+                  )
+  )
+  saveRDS(ens_model_refcst, file = out_rds)
+  out_rds
+}

@@ -26,8 +26,8 @@ arrange(qnat_meta, estacao_codigo)
 
 #------------------------------------------------------------------------------
 # previsoes climaticas nmme
-avg_type <- "arithmetic"
-#avg_type <- "weighted" # melhores resultados
+#avg_type <- "arithmetic"
+avg_type <- "weighted" # melhores resultados
 
 out_dir <- here(
   str_replace("output/rds/basin-avgs/avg_type", "avg_type", avg_type)
@@ -90,7 +90,7 @@ prec_nmme_cru_flat <-  prec_nmme_cru_lfix %>%
 nested_mlcm <- prec_nmme_cru_flat %>%
   mutate(L = as.integer(trunc(L))) %>%
   group_by(model, mes = as.integer(month(Sr)), L, codONS) %>%
-  select(-Sr) %>%
+  dplyr::select(-Sr) %>%
   nest()
 
 nested_mlcm[["data"]][[1]]
@@ -109,7 +109,7 @@ tab_cor <- nested_mlcm %>%
 gc()
 
 # sites selecionados
-i_site <- c("266", "275", "6", "287", "92")
+i_site <- top6()$codONS #c("266", "275", "6", "287", "92")
 stn_name(i_site)
 
 
@@ -127,10 +127,10 @@ stn_name(i_site)
 # View(check_leads)
 
 data_cor_plot <- tab_cor %>%
-  select(-c(data, statistic, parameter, method, alternative, contains("conf"))) %>%
-  ungroup(cols = c("model", "mes", "L","codONS")) %>%
-  filter(codONS %in% i_site) %>%
-  mutate(codONS = stn_name(codONS))
+  dplyr::select(-c(data, statistic, parameter, method, alternative, contains("conf"))) %>%
+  dplyr::ungroup(cols = c("model", "mes", "L","codONS")) %>%
+  dplyr::filter(codONS %in% i_site) %>%
+  dplyr::mutate(codONS = stn_name(codONS))
 
 limiar_alpha <- 0.05 # nivel de confiança
 

@@ -8,7 +8,7 @@ easypackages::libraries(pcks)
 #devtools::install_github("lhmet-ped/HEobs")
 
 #------------------------------------------------------------------------------
-# funcoes auziliares
+# funcoes auxiliares
 source("R/utils.R")
 
 #------------------------------------------------------------------------------
@@ -100,3 +100,12 @@ periodos <- readr::read_rds(here("output/rds/model_counts.RDS"))
 # juntar com os dados clima_by_lead_month_rate
 # e avaliar qual prec_model eh mais proxima
 # tomando em conta o periodo
+
+
+#--------------------------------------------------------------------------
+# 
+
+
+
+
+

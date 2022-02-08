@@ -12,9 +12,17 @@ library(data.table)
 #  arrange(modelo, var)
 
 ## montar tabela de ano inicial e final de cada modelo
-tabela1 <- data.table(modelo = c("CanCM4i", "CanSIPSv2", "CMC1-CanCM3",
-                                "CMC2-CanCM4", "GEM-NEMO", "NASA-GEOSS2S",
-                                "NCAR-CESM1", "NCEP-CFSv2"),
+tabela1 <- data.table(modelo = c("CanCM4i", 
+                                 "CanSIPSv2", 
+                                 "CMC1-CanCM3",
+                                "CMC2-CanCM4", 
+                                "GEM-NEMO", 
+                                "NASA-GEOSS2S",
+                                "NCAR-CESM1", 
+                                "NCEP-CFSv2", 
+                                "CanSIPS-IC3", 
+                                "GFDL-SPEAR"),
+                      
                      centro = c("Canadian Meteorological Centre (CMC) – Canada",
                                 "Canadian Meteorological Centre (CMC) – Canada",
                                 "Canadian Meteorological Centre (CMC) – Canada",
@@ -22,16 +30,42 @@ tabela1 <- data.table(modelo = c("CanCM4i", "CanSIPSv2", "CMC1-CanCM3",
                                 "Recherche en Prévision Numérique (RPN)",
                                 "National Aeronautics and Space Administration (NASA) – United States",
                                 "National Center for Atmospheric Research (NCAR)",
-                                "National Centers for Environmental Prediction (NOAA/NCEP) – United States"),
-                     periodo = c("1981-2018", "1981-2018", "1981-2010",  
-                                 "1981-2010", "1981-2018", "1981-2017",   
-                                 "1980-2010", "1982-2010"),
-                     n_membros = c(10, 20, 10,
-                                   10, 10, 4,
-                                   10, 24),
-                     lead = c("0.5-11.5", "0.5-11.5", "0.5-11.5",
-                              "0.5-11.5", "0.5-11.5", "0.5-8.5",
-                              "0.5-11.5", "0.5-9.5"),
+                                "National Centers for Environmental Prediction (NOAA/NCEP) – United States",
+                                "Canadian Meteorological Centre (CMC) – Canada",
+                                "Geophysical Fluid Dynamics Laboratory (NOAA)"
+                     ),
+                     periodo = c("1981-2018", 
+                                 "1981-2018", 
+                                 "1981-2010",  
+                                 "1981-2010", 
+                                 "1981-2018", 
+                                 "1981-2017",   
+                                 "1980-2010", 
+                                 "1982-2010", 
+                                 "1980-2020",
+                                 "1991-2020"
+                                 ),
+                     n_membros = c(10, 
+                                   20, 
+                                   10,
+                                   10, 
+                                   10, 
+                                   4,
+                                   10, 
+                                   24, 
+                                   20,
+                                   15),
+                     lead = c("0.5-11.5", 
+                              "0.5-11.5", 
+                              "0.5-11.5",
+                              "0.5-11.5", 
+                              "0.5-11.5", 
+                              "0.5-8.5",
+                              "0.5-11.5", 
+                              "0.5-9.5", 
+                              "0.5-11.5",
+                              "0.5-11.5"
+                              ),
                      referencia = c("Kirtman et al. (2014)",
                                     "Kirtman et al. (2014)",
                                     "Merryfield et al. (2013)",
@@ -39,7 +73,10 @@ tabela1 <- data.table(modelo = c("CanCM4i", "CanSIPSv2", "CMC1-CanCM3",
                                     "Kirtman et al. (2014)",
                                     "Vernieres et al. (2012)",
                                     "Lawrence et al. (2012)",
-                                    "Saha et al. (2014)")
+                                    "Saha et al. (2014)",
+                                    "Kirtman et al. (2014)", # verificar
+                                    "Delworth et al. (2020)"
+                                    )
                      # variaveis = c("Precipitation (prec; mm/day), Maximum Temperature (tmax; K), Minimum Temperature (tmin; K)",
                      #               "",
                      #               "",
@@ -57,13 +94,13 @@ tabela1
 #             row.names = FALSE, sep = ";"
 #             )
 
-# verificacao
-files_nc <- dir_ls(here("output/prec"), glob = "*.nc")
+## verificacao
+#files_nc <- dir_ls(here("output/prec"), glob = "*.nc")
 
 #range(rast(files_nc[1])[])
 #range(rast(files_nc[2])[])
-nrow((ht_nc <- tidync::hyper_tibble(files_nc[1])))
-table((ht_nc$S))
-nrow((metr_nc <- metR::ReadNetCDF(files_nc[1])))
-table((metr_nc$S))
+#nrow((ht_nc <- tidync::hyper_tibble(files_nc[1])))
+#table((ht_nc$S))
+#nrow((metr_nc <- metR::ReadNetCDF(files_nc[1])))
+#table((metr_nc$S))
 #summary(tidync::hyper_tibble(files_nc[2]))

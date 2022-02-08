@@ -28,10 +28,12 @@ easypackages::libraries(c("tidyverse"))
 
 # Descrição
 
-1. `test-down-nmme.R`: *Download* dos dados por modelo e ano, no format NetCDF. O domínio espacial dos dados é a América do Sul.
+1. `down-hindcasts-nmme.R`: script com looping para baixar arquivos NetCDF para um intervalo de anos e uma lista de modelos.
 
-  - depende do script `models-nmme.R` que gera objeto chamado `tabela1` com informações dos modelos, como nomes e períodos.
+  - depende do script `models-nmme.R` que gera objeto chamado `tabela1` com informações dos modelos, como nomes e períodos. Requer alteracao quando inserir novos modelos.
   
+  - depende do script `down-nmme.R`: funçao para *download* dos dados por modelo e ano, no formato NetCDF. O domínio espacial dos dados é a América do Sul.
+
   - arquivos de saída em `output/prec` no padrão `nmme_{variavel}_{modelo}_{ano}.nc`
 
 

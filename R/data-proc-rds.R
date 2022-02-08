@@ -83,9 +83,10 @@ ensemble_refcst_files <- function(files_rds, variable, statistic){
 ensemble_model_refrcst <- function(imodel, 
                                    path_rds,
                                    var_name = "prec", 
-                                   stat = "median"
+                                   stat = "mean"
 ){
-  # imodel = model_counts$modelo[2]  
+  # imodel = model_counts$modelo[2] 
+  # path_rds = path_rds_files
   #model_name_rds(model_files_rds, vname = "prec")  
   cat(imodel, "\n")
   model_files_rds <- dir_ls(path_rds, regexp = imodel)

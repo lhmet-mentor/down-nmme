@@ -1,14 +1,8 @@
 
-# teste de download NMME
-pcks <- c("terra", "tidync", "tidyverse", "fs", "tictoc", "data.table",
-          "here")
-
-easypackages::libraries(pcks)
-options(timeout = 150)
-
+#download NMME
 
 download_file_safe <- purrr::safely(download.file)
-  
+
 
 
 #' Baixa o arquivo anual da previsao retrospectiva do NMME para a AS
@@ -45,14 +39,14 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
   )
   
   prefix <- paste0("nmme_", variavel, "_", modelo, "_", ano) 
-  file <- str_replace(path_file(data_link), "data", prefix)
-  dest_file <- here("output", variavel, file) 
+  file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
+  dest_file <- here::here("output", variavel, file) 
   
   Sys.sleep(1)
   
-  data_link_ano <- str_replace_all(data_link, "variavel", variavel)
-  data_link_ano <- str_replace_all(data_link_ano, "modelo", modelo)
-  data_link_ano <- str_replace_all(data_link_ano, "YYYY", ano)
+  data_link_ano <- stringr::str_replace_all(data_link, "variavel", variavel)
+  data_link_ano <- stringr::str_replace_all(data_link_ano, "modelo", modelo)
+  data_link_ano <- stringr::str_replace_all(data_link_ano, "YYYY", ano)
   
   #path_file(data_link_ano)
   message("Baixando arquivo: ", dest_file)
@@ -74,28 +68,4 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
 }
 
 
-
-
-#------------------------------------------------------------------------------
-source(here("R", "models-nmme.R"))
-
-start_y <- 1993
-end_y <- 1995
-#modelos <- tabela1$modelo
-modelos <- tail(tabela1$modelo, 2)
-
-# tabela com a combinacao de anos e modelos
-tab_mod_anos <- expand.grid(modelos, start_y:end_y) %>%
-  as_tibble() %>%
-  mutate(across(.fns = as.character)) %>%
-  rename("modelo" = "Var1", "ano" = "Var2") %>%
-  arrange(modelo)
-
-# lista para map2
-modelos_l <- as.list(tab_mod_anos$modelo)
-anos_l <- as.list(tab_mod_anos$ano)
-
-tic()
-baixados_prec <- map2(modelos_l, anos_l, ~down_nmme(modelo = .x, ano = .y))
-toc()
 

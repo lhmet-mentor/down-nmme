@@ -1,8 +1,14 @@
 
 # teste de download NMME
-pcks <- c("terra", "tidync", "tidyverse", "fs", "tictoc", "data.table")
+pcks <- c("terra", "tidync", "tidyverse", "fs", "tictoc", "data.table",
+          "here")
+
 easypackages::libraries(pcks)
-options(timeout=150)
+options(timeout = 150)
+
+
+download_file_safe <- purrr::safely(download.file)
+  
 
 
 #' Baixa o arquivo anual da previsao retrospectiva do NMME para a AS
@@ -19,7 +25,8 @@ options(timeout=150)
 #'
 #' @examples
 down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
-  # ano <- as.character(1981);  modelo <- "CanCM4i";variavel <- "prec"
+  # ano = 1980;  modelo = "CanSIPS-IC3"; variavel = "prec"
+  # ano = 1992;  modelo = "GFDL-SPEAR"; variavel = "prec"
   
   ano <- as.character(ano)
   
@@ -38,9 +45,8 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
   )
   
   prefix <- paste0("nmme_", variavel, "_", modelo, "_", ano) 
-  dest_file <- path("/home/andreza/Desktop/test-down-NMME/output", 
-                    str_replace(path_file(data_link), "data", prefix)
-  )
+  file <- str_replace(path_file(data_link), "data", prefix)
+  dest_file <- here("output", variavel, file) 
   
   Sys.sleep(1)
   
@@ -51,34 +57,45 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
   #path_file(data_link_ano)
   message("Baixando arquivo: ", dest_file)
   
-  download.file(data_link_ano, destfile = dest_file, mode = "wb")
+  res <- download_file_safe(data_link_ano, destfile = dest_file, mode = "wb")
   
+  
+  
+  if(!is.null(res$error)){ # arquivo para ano nao encontrado
+    warning("Nao foi possivel baixar o arquivo: \n", data_link_ano)
+    return(NULL)
+  }   
+  
+  # se deu tudo certo ...
   if(file.exists(dest_file)){
     return(dest_file)
   }
   
-  return(paste0("Nao foi possivel baixar o arquivo: ", dest_file))  
 }
 
-tic()
 
+
+
+#------------------------------------------------------------------------------
 source(here("R", "models-nmme.R"))
 
-start_y <- 1980
-end_y <- 2018
-modelos = tabela1$modelo
+start_y <- 1993
+end_y <- 1995
+#modelos <- tabela1$modelo
+modelos <- tail(tabela1$modelo, 2)
 
-# baixados_prec_CanCM4i <- lapply(start_y : end_y,
-#                                 function(iano) down_nmme(ano = iano)
-#                                 )
-baixados_prec <- lapply(start_y : end_y,
-                        function(iano) down_nmme(modelo = modelos, ano = iano)
-)
-baixados_temp <- lapply(start_y : end_y,
-                        function(iano) down_nmme(modelo = modelos, variavel = temp, ano = iano)
-)
-# baixados_dados <- lapply(start_y : end_y,
-#                         function(iano) down_nmme(modelo = modelos, variavel = variaveis, ano = iano)
-# )
+# tabela com a combinacao de anos e modelos
+tab_mod_anos <- expand.grid(modelos, start_y:end_y) %>%
+  as_tibble() %>%
+  mutate(across(.fns = as.character)) %>%
+  rename("modelo" = "Var1", "ano" = "Var2") %>%
+  arrange(modelo)
 
+# lista para map2
+modelos_l <- as.list(tab_mod_anos$modelo)
+anos_l <- as.list(tab_mod_anos$ano)
+
+tic()
+baixados_prec <- map2(modelos_l, anos_l, ~down_nmme(modelo = .x, ano = .y))
 toc()
+

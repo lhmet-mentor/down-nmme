@@ -103,4 +103,37 @@ easypackages::libraries(c("tidyverse"))
   - calcula a correlação entre prev e obs para os diferentes tempos de antecedências por meses e apresenta visualização para algumas Bacias Hidrográficas;
   
 
+9. `comparacao-climatol-cru-nmme.R` TO DO DESC.
+
+
+- - - 
+
+
+# Próximas etapas
+
+
+# Inserir dados processados para novos modelos do NMME 
+
+Executar todas etapas de processamento usando: 
+
+http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.CanSIPS-IC3/.HINDCAST/
+http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.GFDL-SPEAR/.HINDCAST/
+
+
+
+
+# Comparação da climatologia dos modelos NMME
+
+
+- Arquivos de NetCDF da climatologia falta o modelo ... NCAR-CESM1
+ Fonte http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/
+ 
+ Arquivos de climatologia [aqui](https://drive.google.com/drive/folders/1A8h0WrCei2rM8U6OKNNirh7GJ_XscC8K?usp=sharing).
+
+- Notamos um modelo novo 'GFDL-SPEAR'
+ http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.GFDL-SPEAR/.HINDCAST/  
   
+ 
+ 
+ 
+ 

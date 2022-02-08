@@ -1,4 +1,17 @@
 
+# # Comparação da climatologia dos modelos NMME
+# 
+# 
+# - Arquivos de NetCDF da climatologia falta o modelo ... NCAR-CESM1
+# Fonte http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/
+#   
+#   Arquivos de climatologia [aqui](https://drive.google.com/drive/folders/1A8h0WrCei2rM8U6OKNNirh7GJ_XscC8K?usp=sharing).
+# 
+# - Notamos um modelo novo 'GFDL-SPEAR'
+# http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.GFDL-SPEAR/.HINDCAST/  
+  
+
+
 pcks <- c("tidyverse", "here", "HEobs",
           "checkmate", "lubridate",
           "tictoc", "openair", "ggpubr", "ggExtra", "viridis", "see")

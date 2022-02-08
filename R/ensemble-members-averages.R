@@ -19,7 +19,11 @@ models <- model_counts$modelo
 
 # looping nos modelos para calculo da media ou mediana do ensemble
 tic()
-map(models, ensemble_model_refrcst, path_rds = path_rds_files)
+map(models, 
+    ensemble_model_refrcst, 
+    path_rds = path_rds_files,
+    var_name = "prec",
+    stat = "mean")
 toc()
 
 

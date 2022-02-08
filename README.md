@@ -14,7 +14,7 @@ easypackages::libraries(c("tidyverse"))
 #> Loading required package: tidyverse
 #> ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
 #> ✓ ggplot2 3.3.5          ✓ purrr   0.3.4     
-#> ✓ tibble  3.1.4          ✓ dplyr   1.0.5     
+#> ✓ tibble  3.1.6          ✓ dplyr   1.0.5     
 #> ✓ tidyr   1.1.3.9000     ✓ stringr 1.4.0     
 #> ✓ readr   1.4.0          ✓ forcats 0.5.1
 #> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
@@ -27,11 +27,16 @@ easypackages::libraries(c("tidyverse"))
 
 # Descrição
 
-1.  `test-down-nmme.R`: *Download* dos dados por modelo e ano, no format
-    NetCDF. O domínio espacial dos dados é a América do Sul.
+1.  `down-hindcasts-nmme.R`: script com looping para baixar arquivos
+    NetCDF para um intervalo de anos e uma lista de modelos.
 
 -   depende do script `models-nmme.R` que gera objeto chamado `tabela1`
-    com informações dos modelos, como nomes e períodos.
+    com informações dos modelos, como nomes e períodos. Requer alteracao
+    quando inserir novos modelos.
+
+-   depende do script `down-nmme.R`: funçao para *download* dos dados
+    por modelo e ano, no formato NetCDF. O domínio espacial dos dados é
+    a América do Sul.
 
 -   arquivos de saída em `output/prec` no padrão
     `nmme_{variavel}_{modelo}_{ano}.nc`
@@ -112,3 +117,16 @@ easypackages::libraries(c("tidyverse"))
 -   calcula a correlação entre prev e obs para os diferentes tempos de
     antecedências por meses e apresenta visualização para algumas Bacias
     Hidrográficas;
+
+9.  `comparacao-climatol-cru-nmme.R` TO DO DESC.
+
+------------------------------------------------------------------------
+
+# Próximas etapas
+
+# Inserir dados processados para novos modelos do NMME
+
+Executar todas etapas de processamento usando:
+
+<http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.CanSIPS-IC3/.HINDCAST/>
+<http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.GFDL-SPEAR/.HINDCAST/>

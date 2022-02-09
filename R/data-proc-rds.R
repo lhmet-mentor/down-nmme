@@ -61,7 +61,7 @@ ensemble_refcst_files <- function(files_rds = model_files_rds,
                                   ){
   ens <- data.table::rbindlist(
     lapply(
-      files_rds[1],
+      files_rds,
       function(ifile) {
         cat(fs::path_file(ifile), "\n")
         ensemble_refcst(refcst_rds = ifile, 

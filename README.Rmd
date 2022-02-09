@@ -44,7 +44,7 @@ easypackages::libraries(c("tidyverse"))
   
     - arquivos de entrada em `output/{variavel}/nmme_{variavel}_{modelo}_{ano}.nc`
   
-  - arquivos de saída em `output/rds` nomeados no padrão `nmme_{var_name}_{model_id}_lt{lead_time}.RDS` (cada arquivo com tamanho de ~1.1 GB)
+  - arquivos de saída em `output/rds/nmme_{var_name}_{model_id}_lt{lead_time}.RDS` (cada arquivo com tamanho de ~1.1 GB)
 
 
 

@@ -16,7 +16,9 @@ nc_dir <- here("output", "prec")
 #   table()
 ## total de arquivos nc
 # count_ncs
-#  271
+#  271 
+# Apos incluir CanSIPS-IC3 e GFDL-SPEAR
+# 342
 
 nc_files <- fs::dir_ls(path = nc_dir, glob = "*.nc")
 
@@ -24,14 +26,15 @@ model_counts <- nc_files_by_model_year(nc_files)
 # modelo       start   end  freq check_span
 # <chr>        <int> <int> <int>      <dbl>
 # 1 CanCM4i       1981  2018    38         38
-# 2 CanSIPSv2     1981  2018    38         38
-# 3 CMC1-CanCM3   1981  2010    30         30
-# 4 CMC2-CanCM4   1981  2010    30         30
-# 5 GEM-NEMO      1981  2018    38         38
-# 6 NASA-GEOSS2S  1981  2017    37         37
-# 7 NCAR-CESM1    1980  2010    31         31
-# 8 NCEP-CFSv2    1982  2010    29         29
-
+# 2 CanSIPS-IC3   1980  2020    41         41
+# 3 CanSIPSv2     1981  2018    38         38
+# 4 CMC1-CanCM3   1981  2010    30         30
+# 5 CMC2-CanCM4   1981  2010    30         30
+# 6 GEM-NEMO      1981  2018    38         38
+# 7 GFDL-SPEAR    1991  2020    30         30
+# 8 NASA-GEOSS2S  1981  2017    37         37
+# 9 NCAR-CESM1    1980  2010    31         31
+# 10 NCEP-CFSv2   1982  2010    29         29
 
 # como o nome dos arquivos especifica o nome dos modelos
 #model_nm <- "CanCM4i"
@@ -39,8 +42,8 @@ model_counts <- nc_files_by_model_year(nc_files)
 #files_model <- nc_files[grep(model_nms, nc_files)]
 
 
-# # para obter informacao do leat time
-# model_nm <- "CanCM4i"
+# # # para obter informacao do lead time
+# model_nm <- "CanSIPS-IC3"
 # model_files <- nc_files[grep(model_nm, nc_files)]
 # # variaveis e dimensoes com funcao do pacote metR
 # nc_info <- GlanceNetCDF(model_files[1])
@@ -52,11 +55,17 @@ model_counts <- nc_files_by_model_year(nc_files)
 # (lt <- nc_info$dims$L$vals)
 
 
-# looping para processar dados (excluindo os modelos já processados)
+# looping para processar dados 
+# model_nms <- model_nms[c(2, 7)]
 map(model_nms,
     function(imodel){
       # imodel = model_nms[1]
       cat(imodel, "-------\n", "\n")
       gc()
-      proc_ncs_by_lt(model = imodel, ncfiles_d = nc_dir)
+      proc_ncs_by_lt(model = imodel, 
+                     variavel = "prec",
+                     lead_time = seq(0.5, 11.5, by = 1), 
+                     input_d = nc_dir,
+                     output_d = here("output", "rds")
+                    )
     })

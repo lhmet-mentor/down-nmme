@@ -14,12 +14,25 @@ source(here("R", "data-proc-rds.R"))
 path_rds_files <- here("output", "rds")
 model_counts <- readr::read_rds(here(path_rds_files, "model_counts.RDS"))
 models <- model_counts$modelo
-#files_rds <- dir_ls(path_rds, pattern = "CanCM4i")
+
+files_rds <- dir_ls(path_rds_files, pattern = "nmme_prec")
+
+#-------------------------------------------------------------------------------
+# selecao de files dos modelos acrescentados
+files_rds <- files_rds %>%
+  #basename() %>%
+  grep("CanSIPS-IC3|GFDL-SPEAR", ., value = TRUE)
 
 
+#-------------------------------------------------------------------------------
 # looping nos modelos para calculo da media ou mediana do ensemble
+
+# so para os modelos acrescentados
+models <- models[c(2, 7)]
+
+
 tic()
-map(models, 
+res_ens_memb <- map(models, 
     ensemble_model_refrcst, 
     path_rds = path_rds_files,
     var_name = "prec",

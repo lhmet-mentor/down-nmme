@@ -144,7 +144,20 @@ data_model_lt <- function(
 
 
 #Processa ncs de um modelo para todos lead times--------------------------------
-proc_ncs_by_lt <- function(model = model_nms[3], 
+#' Title
+#'
+#' @param model nome do modelo NMME
+#' @param variavel nome da variável a ser processada 
+#' @param input_d diretório com os arquivos NetCDF
+#' @param output_d diretório de saída para os arquivos RDS com os dados 
+#' @inheritParams data_model_lt
+#' processados
+#'
+#' @return
+#' @export
+#'
+#' @examples
+proc_ncs_by_lt <- function(model = model_nms[1], 
                            lead_time = seq(0.5, 11.5, by = 1),
                            variavel = "prec",
                            input_d = here("output", "prec"),

@@ -20,7 +20,7 @@ model_name_rds <- function(file_rds, vname = "prec"){
 
 # Média e desvio padrao dos membros de prec (ensemble) para cada ponto----------
 ensemble_refcst <- function(refcst_rds, var_name = "prec", stat = "median") {
-  # refcst_rds <- model_files_rds[2];var_name = "prec"; stat = "median"
+  # refcst_rds <- model_files_rds[2]; var_name = "prec"; stat = "mean"
   refcst <- readr::read_rds(refcst_rds)
   
   if(stat == "median"){
@@ -55,10 +55,13 @@ ensemble_refcst <- function(refcst_rds, var_name = "prec", stat = "median") {
 # para formar prev por ensemble (por mes de inicialização, leadtime e modelo)
 # o nome do modelo será inserido numa coluna
 # pode ser aplicado a uma lista de arquivos rds separados por lead time
-ensemble_refcst_files <- function(files_rds, variable, statistic){
+ensemble_refcst_files <- function(files_rds = model_files_rds,
+                                  variable = "prec", 
+                                  statistic = "mean"
+                                  ){
   ens <- data.table::rbindlist(
     lapply(
-      files_rds,
+      files_rds[1],
       function(ifile) {
         cat(fs::path_file(ifile), "\n")
         ensemble_refcst(refcst_rds = ifile, 
@@ -81,7 +84,7 @@ ensemble_refcst_files <- function(files_rds, variable, statistic){
 # para cada mes de inicializ., lead time
 
 ensemble_model_refrcst <- function(imodel, 
-                                   path_rds,
+                                   path_rds = path_rds_files,
                                    var_name = "prec", 
                                    stat = "mean"
 ){
@@ -90,10 +93,12 @@ ensemble_model_refrcst <- function(imodel,
   #model_name_rds(model_files_rds, vname = "prec")  
   cat(imodel, "\n")
   model_files_rds <- dir_ls(path_rds, regexp = imodel)
-  ens_model_refcst <- ensemble_refcst_files(refcst_rds = model_files_rds, 
+  
+  ens_model_refcst <- ensemble_refcst_files(files_rds = model_files_rds, 
                                             variable = var_name, 
                                             statistic = stat
   )
+  
   out_rds <- here(path_rds,
                   paste0("ensemble-", 
                          imodel, 

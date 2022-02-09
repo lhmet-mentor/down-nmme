@@ -147,9 +147,10 @@ data_model_lt <- function(
 proc_ncs_by_lt <- function(model = model_nms[3], 
                            lead_time = seq(0.5, 11.5, by = 1),
                            variavel = "prec",
-                           ncfiles_d = here("output", "prec")){
+                           input_d = here("output", "prec"),
+                           output_d = here("output", "rds")){
   
-  nc_files <- fs::dir_ls(path = ncfiles_d, 
+  nc_files <- fs::dir_ls(path = input_d, 
                          regexp = paste0(model, ".*\\.nc"),
   )
   
@@ -157,7 +158,8 @@ proc_ncs_by_lt <- function(model = model_nms[3],
           ~.x %>% 
             data_model_lt(nc_files, 
                           lead_time = ., 
-                          var_name = variavel
+                          var_name = variavel,
+                          dest_dir = output_d
             )
   )
 }

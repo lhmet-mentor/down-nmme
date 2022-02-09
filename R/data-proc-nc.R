@@ -145,7 +145,8 @@ data_model_lt <- function(
 
 #Processa ncs de um modelo para todos lead times--------------------------------
 proc_ncs_by_lt <- function(model = model_nms[3], 
-                           lead_time = seq(0.5, 11.5, by = 1), 
+                           lead_time = seq(0.5, 11.5, by = 1),
+                           variavel = "prec",
                            ncfiles_d = here("output", "prec")){
   
   nc_files <- fs::dir_ls(path = ncfiles_d, 
@@ -156,7 +157,7 @@ proc_ncs_by_lt <- function(model = model_nms[3],
           ~.x %>% 
             data_model_lt(nc_files, 
                           lead_time = ., 
-                          var_name = "prec"
+                          var_name = variavel
             )
   )
 }

@@ -30,7 +30,7 @@ res_ens_memb <- map(models,
     ensemble_model_refrcst, 
     path_rds = path_rds_files,
     var_name = "prec",
-    stat = "median")
+    stat = "mean")
 toc()
 
 unlist(res_ens_memb)

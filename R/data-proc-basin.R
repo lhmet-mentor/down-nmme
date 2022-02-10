@@ -11,32 +11,31 @@ res_estim <- function(grid){
 raster_from_points <- function(datagrid, prj = "+proj=longlat +datum=WGS84"){
   # datagrid = ens_data[["data"]][[1]]
   mat <- datagrid %>%
-    dplyr::select(X, Y, prec_ensmean) %>%
     as.matrix()
   
   #tic()
+  #r <- raster::rasterFromXYZ(mat, res = res_estim(datagrid))
   r <- terra::rast(mat, type = "xyz")
   terra::crs(r) <- prj 
   #toc()
-  # tic()
-  # r <- raster::rasterFromXYZ(mat, res = res_estim(datagrid))
-  # toc()
-  # assumindo sem confirmar
   
   r
 }
 
 # basin averages over pols -----------------------------------------------------
 basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
-  # datagrid = ens_data[["data"]][[1]]
+  # datagrid = ens_data[["data"]][[1]]; summary(datagrid)
   
   r <- raster_from_points(datagrid)
+  
+  #! PRECISO COMPARAR SE ESTE RESULTADO ESTA IGUAL AO PROCESSAMENTO PELO RAST DO GITHUB
+  #! E SE ESTA MAIS RAPIDO
   
   if(raster){
     # demora demaiiiiisssssssssss!
     #tic()
     avg_basin <- c(t(raster::extract(
-      raster(r),
+      raster::raster(r),
       pols,
       weights = TRUE,
       normalizeWeights = TRUE,
@@ -107,6 +106,7 @@ basin_avg_model <- function(file_model,
   tic()
   ens_data <- readr::read_rds(file_model)
   toc()
+  # 28 sec elapsed
   # 7.127 sec elapsed
 
   ## definicao/criacao do dir de saida das medias espaciais
@@ -286,82 +286,6 @@ basin_average_cru <- function(ncfile_obs = obs_nc_file,
   prec_cru_avg_basin
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -24,7 +24,7 @@ raster_from_points <- function(datagrid, prj = "+proj=longlat +datum=WGS84"){
 
 # basin averages over pols -----------------------------------------------------
 basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
-  # datagrid = ens_data[["data"]][[1]]; summary(datagrid)
+  # datagrid = ens_data[["data"]][[1]]; summary(datagrid); pols = pols_inc_sp
   
   r <- raster_from_points(datagrid)
   
@@ -35,14 +35,27 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     # demora demaiiiiisssssssssss!
     #tic()
     avg_basin <- c(t(raster::extract(
-      raster::raster(r),
+      raster(r),
       pols,
       weights = TRUE,
       normalizeWeights = TRUE,
       fun = mean
     )))
-    #toc()
+    toc()
     # 5s
+    
+    # tic()
+    # avg_basin2 <- terra::extract(
+    #   r,
+    #   terra::vect(pols),
+    #   fun = mean,
+    #   exact = TRUE
+    #   #method = "bilinear"
+    # )[, "prec_ensmean"]
+    # toc()
+    #check <- tibble(avg_basin, avg_basin2, dif = avg_basin2-avg_basin)
+    #tail(check)
+    
   } else {
     #tic()
     avg_basin <- terra::extract(

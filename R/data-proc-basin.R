@@ -27,20 +27,18 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
   # datagrid = ens_data[["data"]][[1]]; summary(datagrid); pols = pols_inc_sp
   
   r <- raster_from_points(datagrid)
-  
-  #! PRECISO COMPARAR SE ESTE RESULTADO ESTA IGUAL AO PROCESSAMENTO PELO RAST DO GITHUB
-  #! E SE ESTA MAIS RAPIDO
+
   
   if(raster){
     # demora demaiiiiisssssssssss!
     #tic()
-    avg_basin <- c(t(raster::extract(
-      raster(r),
+    avg_basin <- raster::extract(
+      raster::stack(r),
       pols,
       weights = TRUE,
       normalizeWeights = TRUE,
       fun = mean
-    )))
+    ) %>% tibble::as_tibble()
     toc()
     # 5s
     
@@ -64,13 +62,15 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
       fun = mean,
       touches = TRUE,
       method = "bilinear"
-    )[, "prec_ensmean"]
+    ) %>%
+      dplyr::select(-ID) %>%
+      tibble::as_tibble()
     #toc()
     # 0.4 s
     
   }
   
-  tibble(codONS = pols$codONS, prec = avg_basin)
+  tibble(codONS = pols$codONS, avg_basin)
 }
 
 

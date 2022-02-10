@@ -19,26 +19,24 @@ files_rds <- dir_ls(path_rds_files, pattern = "nmme_prec")
 
 #-------------------------------------------------------------------------------
 # selecao de files dos modelos acrescentados
-files_rds <- files_rds %>%
-  #basename() %>%
-  grep("CanSIPS-IC3|GFDL-SPEAR", ., value = TRUE)
+#files_rds <- files_rds %>%  grep("CanSIPS-IC3|GFDL-SPEAR", ., value = TRUE)
 
 
 #-------------------------------------------------------------------------------
 # looping nos modelos para calculo da media ou mediana do ensemble
-
-# so para os modelos acrescentados
-models <- models[c(2, 7)]
-
 
 tic()
 res_ens_memb <- map(models, 
     ensemble_model_refrcst, 
     path_rds = path_rds_files,
     var_name = "prec",
-    stat = "mean")
+    stat = "median")
 toc()
 
+unlist(res_ens_memb)
+
+#files_ens <- dir_ls(path_rds_files, regexp = "ensemble.*RDS")
+#ens_check <- read_rds(res_ens_memb[1]])
 
 
 

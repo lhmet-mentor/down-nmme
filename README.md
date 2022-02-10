@@ -60,24 +60,26 @@ easypackages::libraries(c("tidyverse"))
     a média ou a mediana (para cada ponto, por data de inicialização e
     lead time) de todos membros de um dado modelo.
 
--   arquivos de saída em `output/rds` no fomato RDS no padrão
-    `ensemble_{model_id}.RDS` (cada arquivo em torno de 290 MB)
+-   arquivos de saída em `output/rds/ensemble-{model_id}-{stat}.RDS`
+    (cada arquivo em torno de 290 MB)
 
 4.  `spatial-average-nmme-basins.R`: requer a versão do github do pacote
     [terra](https://github.com/rspatial/terra)
     (`remotes::install_github("rspatial/terra")`).
+
+-   arquivos de entrada em `output/rds/ensemble-{model_id}-{stat}.RDS`
 
 -   depende do script `data-proc-basin.R` que contém as funções para
     obter a média na área das principais bacias do SIN (por data de
     inicialização e lead time) da prec média (ou mediana) do ensemble de
     cada modelo.
 
-    -   Há duas opções para média espacial: aritmética (`arithmetic`) ou
-        ponderada pela fração de área das células do modelo dentro da
-        bacia hidrográfica (`weighted`).
+    -   Há duas opções para agregação espacial: média aritmética
+        (`arithmetic`) ou média ponderada pela fração de área das
+        células do modelo dentro da bacia hidrográfica (`weighted`).
 
 -   arquivos de saída em
-    `output/rds/basin/avgs/{spatial_average_type}/{model_id}`. Os
+    `output/rds/basin/avgs/{spatial_average_type}/{model_id}-{stat}`. Os
     arquivos são separados por tipo de média espacial, modelo, mês de
     inicialização e lead time. O nome dos aquivos RDS segue o padrão
     `{model_id}_S{YYYYMMDD}_L{0.5-11.5}_{spatial_average_type}_avg.RDS`

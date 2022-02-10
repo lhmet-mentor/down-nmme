@@ -63,11 +63,14 @@ easypackages::libraries(c("tidyverse"))
 -   arquivos de saída em `output/rds` no fomato RDS no padrão
     `ensemble_{model_id}.RDS` (cada arquivo em torno de 290 MB)
 
-4.  `spatial-average-nmme-basins.R`:
+4.  `spatial-average-nmme-basins.R`: requer a versão do github do pacote
+    [terra](https://github.com/rspatial/terra)
+    (`remotes::install_github("rspatial/terra")`).
 
 -   depende do script `data-proc-basin.R` que contém as funções para
     obter a média na área das principais bacias do SIN (por data de
-    inicialização e lead time) da prec média do ensemble de cada modelo.
+    inicialização e lead time) da prec média (ou mediana) do ensemble de
+    cada modelo.
 
     -   Há duas opções para média espacial: aritmética (`arithmetic`) ou
         ponderada pela fração de área das células do modelo dentro da

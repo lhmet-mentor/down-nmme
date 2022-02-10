@@ -57,7 +57,7 @@ easypackages::libraries(c("tidyverse"))
   ou a mediana (para cada ponto, por data de inicialização e lead time) de todos 
   membros de um dado modelo.
   
-  - arquivos de saída em `output/rds` no fomato RDS no padrão `ensemble_{model_id}.RDS` (cada arquivo em torno de 290 MB)
+  - arquivos de saída em `output/rds/ensemble_{model_id}.RDS` (cada arquivo em torno de 290 MB)
 
   
 

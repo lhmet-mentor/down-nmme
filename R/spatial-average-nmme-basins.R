@@ -24,7 +24,7 @@ ens_files <- here("output", "rds") %>%
   dir_ls(regexp = glue::glue("ensemble.*{stat}.RDS"))
 length(ens_files)
 
-# ens_files <- ens_files[c(4, 7)]
+ens_files <- ens_files[c(4, 7)]
 
 # devido ao longo tempo de processamento das medias
 # escrita de um arquivo rds das medias na area 

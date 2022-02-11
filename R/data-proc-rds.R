@@ -5,11 +5,15 @@
 # Funcao par extrai nome do modelo a partir do arquivo rds
 model_name_rds <- function(file_rds, vname = "prec"){
   
-  #file_rds = files_rds; vname = "prec"
+  #file_rds = files[1]; vname = "prec"
   #file_rds
+  ext <- fs::path_ext(file_rds)[1]
+  
   nm <- fs::path_file(file_rds) %>%
     stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
-    stringr::str_replace_all(pattern = "_lt[0-9]{1,2}\\.[0-9]{1}\\.RDS", "") %>%
+    stringr::str_replace_all(
+      pattern = paste0("_lt[0-9]{1,2}\\.[0-9]{1}\\.", ext), ""
+      ) %>%
     unique()
   
   assert_true(length(nm) == 1)
@@ -19,14 +23,17 @@ model_name_rds <- function(file_rds, vname = "prec"){
 
 
 # Média e desvio padrao dos membros de prec (ensemble) para cada ponto----------
-ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
-  # refcst_rds <- files_rds[1]; var_name = "prec"; stat = "identity"
+ensemble_members <- function(refcst_file, var_name = "prec", stat = "median") {
+  # refcst_file <- files[1]; var_name = "prec"; stat = "mean"
   
   checkmate::assert_choice(stat, c("mean", "median", "identity"))
   
-  tic()
-  refcst <- readr::read_rds(refcst_rds)
-  toc()
+  if(fs::path_ext(refcst_file) == "qs"){
+    refcst <- qs::qread(refcst_file)
+  } else {
+    refcst <- readr::read_rds(refcst_file)
+  }
+  
   
   if(stat == "median"){
     refcst <- refcst[,
@@ -37,7 +44,7 @@ ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
                      #keyby = .(S, L)
                      by = c("S", "L", "X", "Y")
     ]  
-    refcst[, model := model_name_rds(refcst_rds, var_name)]
+    refcst[, model := model_name_rds(refcst_file, var_name)]
     return(refcst)
   }
   
@@ -52,7 +59,7 @@ ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
                      #keyby = .(S, L)
                      by = c("S", "L", "X", "Y")
     ]
-    refcst[, model := model_name_rds(refcst_rds, var_name)]  
+    refcst[, model := model_name_rds(refcst_file, var_name)]  
     return(refcst)
   }
   
@@ -70,7 +77,7 @@ ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
                      ~ paste0(var_name, "_", .x), 
                      dplyr::matches("[0-9]")
                      )
-  
+  refcst_wide
   
 }
 
@@ -79,17 +86,18 @@ ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
 # para formar prev por ensemble (por mes de inicialização, leadtime e modelo)
 # o nome do modelo será inserido numa coluna
 # pode ser aplicado a uma lista de arquivos rds separados por lead time
-ensemble_refcst_files <- function(files_rds = model_files_rds,
+ensemble_refcst_files <- function(files = model_files_rds,
                                   variable = "prec", 
                                   statistic = "mean"
                                   ){
+  
   ens <- data.table::rbindlist(
     lapply(
-      files_rds,
+      files,
       function(ifile) {
         cat(fs::path_file(ifile), "\n")
         # ifile = files_rds[1]
-        ensemble_members(refcst_rds = ifile, 
+        ensemble_members(refcst_file = ifile, 
                         var_name = variable, 
                         stat = statistic
         )
@@ -109,33 +117,34 @@ ensemble_refcst_files <- function(files_rds = model_files_rds,
 # para cada mes de inicializ., lead time
 
 ensemble_model_refrcst <- function(imodel, 
-                                   path_rds = path_rds_files,
+                                   path_files = path_qs_files,
                                    var_name = "prec", 
                                    stat = "mean"
 ){
-  # imodel = "GFDL-SPEAR"
-  # path_rds = path_rds_files
-  #model_name_rds(model_files_rds, vname = "prec")  
+  # imodel = "GFDL-SPEAR"; path_files = path_qs_files
+  # model_name_rds(model_files_rds, vname = "prec")  
   cat(imodel, "\n")
   
-  model_files_rds <- dir_ls(
-    path_rds, 
-    regexp = glue::glue('{imodel}_lt[0-9]\\.[0-9]\\.RDS')
+  model_files <- dir_ls(
+    path_files, 
+    regexp = glue::glue('{imodel}_lt[0-9]\\.[0-9]')
   )
+  bin_file_ext <- fs::path_ext(model_files) %>% unique()
   
-  ens_model_refcst <- ensemble_refcst_files(files_rds = model_files_rds, 
+  ens_model_refcst <- ensemble_refcst_files(files = model_files, 
                                             variable = var_name, 
                                             statistic = stat
   )
   
-  out_rds <- here(path_rds,
+  out_ens_file <- here(path_files,
                   paste0("ensemble-", 
                          imodel, 
                          "-", 
                          stat,
-                         ".RDS"
+                         ".", 
+                         bin_file_ext
                   )
   )
-  saveRDS(ens_model_refcst, file = out_rds)
-  out_rds
+  saveRDS(ens_model_refcst, file = out_ens_file)
+  out_ens_file
 }

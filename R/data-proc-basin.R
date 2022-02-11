@@ -31,7 +31,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
   
   if(raster){
     # demora demaiiiiisssssssssss!
-    #tic()
+    tic()
     avg_basin <- raster::extract(
       raster::stack(r),
       pols,
@@ -55,7 +55,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     #tail(check)
     
   } else {
-    #tic()
+    tic()
     avg_basin <- terra::extract(
       r,
       terra::vect(pols),
@@ -65,7 +65,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     ) %>%
       dplyr::select(-ID) %>%
       tibble::as_tibble()
-    #toc()
+    toc()
     # 0.4 s
     
   }

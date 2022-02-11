@@ -20,7 +20,9 @@ model_name_rds <- function(file_rds, vname = "prec"){
 
 # Média e desvio padrao dos membros de prec (ensemble) para cada ponto----------
 ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
-  # refcst_rds <- files_rds[1]; var_name = "prec"; stat = "mean"
+  # refcst_rds <- files_rds[1]; var_name = "prec"; stat = "identity"
+  
+  checkmate::assert_choice(stat, c("mean", "median", "identity"))
   
   tic()
   refcst <- readr::read_rds(refcst_rds)
@@ -61,6 +63,9 @@ ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
                     value.var = var_name
                     )
   toc()
+  gc()
+  #1 min
+  
   refcst_wide <- dplyr::rename_with(refcst_wide, 
                      ~ paste0(var_name, "_", .x), 
                      dplyr::matches("[0-9]")

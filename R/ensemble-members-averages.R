@@ -15,11 +15,14 @@ path_rds_files <- here("output", "rds")
 model_counts <- readr::read_rds(here(path_rds_files, "model_counts.RDS"))
 models <- model_counts$modelo
 
-files_rds <- dir_ls(path_rds_files, pattern = "nmme_prec")
+files_rds <- dir_ls(
+  path_rds_files, 
+  regexp = "nmme_prec.*_lt[0-9]{1,2}\\.[0-9]{1}\\.RDS"
+  )
 
 #-------------------------------------------------------------------------------
 # selecao de files dos modelos acrescentados
-#files_rds <- files_rds %>%  grep("CanSIPS-IC3|GFDL-SPEAR", ., value = TRUE)
+# files_rds <- files_rds %>%  grep("CanSIPS-IC3|GFDL-SPEAR", ., value = TRUE)
 
 
 #-------------------------------------------------------------------------------

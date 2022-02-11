@@ -196,11 +196,10 @@ data_model_lt <- function(
     dt_file <- fs::path(dest_dir, dt_file)
     
     if(use_qs){
-      .save_qs(DT, dt_file, overwrite)
+      return(.save_qs(DT, dt_file, overwrite))
     }
     
-    .save_rds(DT, dt_file, overwrite)
-    
+    return(.save_rds(DT, dt_file, overwrite))
   }
   
   DT

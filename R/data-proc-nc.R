@@ -99,6 +99,8 @@ filter_lead_time <- function(nc_file, lead_time = 0.5, var_name = "prec"){
 #' @param lead_time tempo de antecedência de interesse (de 0.5 a 11.5)
 #' @param dest_dir diretório de destino para o arquivo RDS. Pré definido como
 #' `output/rds`. Se for NULL os dados não são exportados para um arquivo RDS.
+#' @param use_qs logical, TRUE for quickly saving and reading objects to and 
+#' from disk with qs package.
 #' @return data.table
 #' @details 
 #' @export
@@ -117,8 +119,12 @@ data_model_lt <- function(
   nc_model_files,
   lead_time, 
   var_name, 
-  dest_dir = here("output", "rds")
+  dest_dir = here("output", "rds"),
+  use_qs = FALSE
 ) {
+  # nc_model_files <- nc_files; lead_time = 0.5; dest_dir = here("output", "rds"); use_qs = TRUE
+  
+  tictoc::tic()
   DT <- data.table::rbindlist(
     lapply(
       nc_model_files,
@@ -128,12 +134,30 @@ data_model_lt <- function(
       }
     )
   )
+  tictoc::toc()
+  
   if(!is.null(dest_dir)){
     if(!dir_exists(dest_dir)) fs::dir_create(dest_dir)
     model_id <- DT[["model"]][1]
     dt_file <- glue::glue("nmme_{var_name}_{model_id}_lt{lead_time}.RDS")
     dt_file <- fs::path(dest_dir, dt_file)
-    readr::write_rds(DT, dt_file)
+    
+    if(use_qs){
+      dt_file <- stringr::str_replace(dt_file, "RDS", "qs")
+      
+      #tictoc::tic()
+       qs::qsave(DT, dt_file) # 133 MB, 5 sec elapsed
+      #tictoc::toc()
+      
+      checkmate::check_file_exists(dt_file)
+      message("data were save at ", "\n", dt_file)
+      return(dt_file)  
+    }
+    
+    #tictoc::tic()
+     readr::write_rds(DT, dt_file) # 3 GB, 24 sec elapsed
+    #tictoc::toc()
+     
     checkmate::check_file_exists(dt_file)
     message("data were save at ", "\n", dt_file)
     return(dt_file)

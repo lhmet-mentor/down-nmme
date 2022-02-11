@@ -122,7 +122,7 @@ data_model_lt <- function(
   dest_dir = here("output", "rds"),
   use_qs = FALSE
 ) {
-  # nc_model_files <- nc_files; lead_time = 0.5; dest_dir = here("output", "rds"); use_qs = TRUE
+  # nc_model_files <- nc_files; lead_time = 0.5; dest_dir = here("output", "rds"); use_qs = TRUE; var_name = "prec"
   
   tictoc::tic()
   DT <- data.table::rbindlist(
@@ -165,7 +165,13 @@ data_model_lt <- function(
   DT
 }
 
-
+# read text with qs-------------------------------------------------------------
+# gc()
+microbenchmark::microbenchmark(
+  base = read_rds(dt_file),  
+  qs = qs::qread(stringr::str_replace(dt_file, "RDS", "qs")), 
+  times = 1
+)
 
 #Processa ncs de um modelo para todos lead times--------------------------------
 #' Title
@@ -193,7 +199,7 @@ proc_ncs_by_lt <- function(model = model_nms[1],
   
   map_chr(lead_time, 
           ~.x %>% 
-            data_model_lt(nc_files, 
+            data_model_lt(nc_model_files = nc_files, 
                           lead_time = ., 
                           var_name = variavel,
                           dest_dir = output_d

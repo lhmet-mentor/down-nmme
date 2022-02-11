@@ -19,7 +19,7 @@ model_name_rds <- function(file_rds, vname = "prec"){
 
 
 # Média e desvio padrao dos membros de prec (ensemble) para cada ponto----------
-ensemble_refcst <- function(refcst_rds, var_name = "prec", stat = "median") {
+ensemble_members <- function(refcst_rds, var_name = "prec", stat = "median") {
   # refcst_rds <- files_rds[1]; var_name = "prec"; stat = "mean"
   
   tic()
@@ -84,7 +84,7 @@ ensemble_refcst_files <- function(files_rds = model_files_rds,
       function(ifile) {
         cat(fs::path_file(ifile), "\n")
         # ifile = files_rds[1]
-        ensemble_refcst(refcst_rds = ifile, 
+        ensemble_members(refcst_rds = ifile, 
                         var_name = variable, 
                         stat = statistic
         )

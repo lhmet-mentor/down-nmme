@@ -92,6 +92,58 @@ filter_lead_time <- function(nc_file, lead_time = 0.5, var_name = "prec"){
 # https://trello.com/c/DWnuJWnT
 
 
+.save_qs <- function(.DT, .dt_file_rds, .overwrite = FALSE){
+  #.DT = DT; .dt_file = dt_file
+  .dt_file <- stringr::str_replace(.dt_file_rds, "RDS", "qs")
+  
+  if(!checkmate::test_file_exists(.dt_file)){
+    #tictoc::tic()
+    qs::qsave(.DT, .dt_file) # 133 MB, 5 sec elapsed
+    #tictoc::toc()
+    message("data were save at ", "\n", .dt_file)
+    return(.dt_file)
+  }
+  
+  # arquivo existe
+  
+  if(!.overwrite){
+    return(.dt_file)
+  } 
+  
+    qs::qsave(.DT, .dt_file) # 133 MB, 5 sec elapsed
+    #tictoc::toc()
+    message("data were save at ", "\n", .dt_file)
+    .dt_file
+
+}
+
+
+.save_rds <- function(.DT, .dt_file, .overwrite = FALSE){
+  #.DT = DT; .dt_file = dt_file
+  
+  if(!checkmate::test_file_exists(.dt_file)){
+    #tictoc::tic()
+    readr::write_rds(.DT, .dt_file)
+    #tictoc::toc()
+    message("data were save at ", "\n", .dt_file)
+    return(.dt_file)
+  }
+  
+  # arquivo existe
+  
+  if(!.overwrite){
+    return(.dt_file)
+  } 
+  
+  readr::write_rds(.DT, .dt_file)
+  #tictoc::toc()
+  message("data were save at ", "\n", .dt_file)
+  .dt_file
+  
+}
+
+
+
 #' Extrai os dados de todos arquivos netcdf de um modelo, para 1 lead time.
 #'
 #' @param nc_model_files vetor do tipo character com nomes dos arquivos netCDF.
@@ -120,7 +172,8 @@ data_model_lt <- function(
   lead_time, 
   var_name, 
   dest_dir = here("output", "rds"),
-  use_qs = FALSE
+  use_qs = TRUE,
+  overwrite = FALSE
 ) {
   # nc_model_files <- nc_files; lead_time = 0.5; dest_dir = here("output", "rds"); use_qs = TRUE; var_name = "prec"
   
@@ -143,35 +196,29 @@ data_model_lt <- function(
     dt_file <- fs::path(dest_dir, dt_file)
     
     if(use_qs){
-      dt_file <- stringr::str_replace(dt_file, "RDS", "qs")
-      
-      #tictoc::tic()
-       qs::qsave(DT, dt_file) # 133 MB, 5 sec elapsed
-      #tictoc::toc()
-      
-      checkmate::check_file_exists(dt_file)
-      message("data were save at ", "\n", dt_file)
-      return(dt_file)  
+      .save_qs(DT, dt_file, overwrite)
     }
     
-    #tictoc::tic()
-     readr::write_rds(DT, dt_file) # 3 GB, 24 sec elapsed
-    #tictoc::toc()
-     
-    checkmate::check_file_exists(dt_file)
-    message("data were save at ", "\n", dt_file)
-    return(dt_file)
+    .save_rds(DT, dt_file, overwrite)
+    
   }
+  
   DT
 }
 
 # read text with qs-------------------------------------------------------------
 # gc()
-microbenchmark::microbenchmark(
-  base = read_rds(dt_file),  
-  qs = qs::qread(stringr::str_replace(dt_file, "RDS", "qs")), 
-  times = 1
-)
+# microbenchmark::microbenchmark(
+#   base = read_rds(dt_file),  
+#   qs = qs::qread(stringr::str_replace(dt_file, "RDS", "qs")), 
+#   times = 1
+# )
+# Unit: seconds
+# expr      min       lq     mean   median       uq      max neval
+# base 26.06404 26.06404 26.06404 26.06404 26.06404 26.06404     1
+# qs  4.83701  4.83701  4.83701  4.83701  4.83701  4.83701     1
+
+
 
 #Processa ncs de um modelo para todos lead times--------------------------------
 #' Title
@@ -180,6 +227,8 @@ microbenchmark::microbenchmark(
 #' @param variavel nome da variável a ser processada 
 #' @param input_d diretório com os arquivos NetCDF
 #' @param output_d diretório de saída para os arquivos RDS com os dados 
+#' @param qs lógico, TRUE para salvar e ler rapidamenteobjetos para e a 
+#' partir do disco com o pacote `qs`.
 #' @inheritParams data_model_lt
 #' processados
 #'
@@ -191,7 +240,9 @@ proc_ncs_by_lt <- function(model = model_nms[1],
                            lead_time = seq(0.5, 11.5, by = 1),
                            variavel = "prec",
                            input_d = here("output", "prec"),
-                           output_d = here("output", "rds")){
+                           output_d = here("output", "rds"),
+                           qs = TRUE,
+                           overwrite = FALSE){
   
   nc_files <- fs::dir_ls(path = input_d, 
                          regexp = paste0(model, ".*\\.nc"),
@@ -202,7 +253,9 @@ proc_ncs_by_lt <- function(model = model_nms[1],
             data_model_lt(nc_model_files = nc_files, 
                           lead_time = ., 
                           var_name = variavel,
-                          dest_dir = output_d
+                          dest_dir = output_d,
+                          use_qs = qs, 
+                          overwrite 
             )
   )
 }

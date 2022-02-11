@@ -1,4 +1,4 @@
-pcks <- c("terra", "tidyverse", "here", "checkmate", "metR", "fs", "glue")
+pcks <- c("terra", "tidyverse", "here", "checkmate", "metR", "fs", "glue", "qs")
 easypackages::libraries(pcks)
 
 ## Funções para processamento dos dados netcdf------------------------------
@@ -66,6 +66,7 @@ map(model_nms,
                      variavel = "prec",
                      lead_time = seq(0.5, 11.5, by = 1), 
                      input_d = nc_dir,
-                     output_d = here("output", "rds")
+                     output_d = here("output", "qs"),
+                     overwrite = FALSE
                     )
     })

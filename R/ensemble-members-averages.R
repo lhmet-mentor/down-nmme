@@ -12,12 +12,14 @@ source(here("R", "data-proc-rds.R"))
 
 
 path_rds_files <- here("output", "rds")
+path_qs_files <- here("output", "qs")
+
 model_counts <- readr::read_rds(here(path_rds_files, "model_counts.RDS"))
 models <- model_counts$modelo
 
 files_rds <- dir_ls(
-  path_rds_files, 
-  regexp = "nmme_prec.*_lt[0-9]{1,2}\\.[0-9]{1}\\.RDS"
+  path_qs_files, 
+  regexp = "nmme_prec.*_lt[0-9]{1,2}\\.[0-9]{1}\\.qs"
   )
 
 #-------------------------------------------------------------------------------
@@ -31,7 +33,7 @@ files_rds <- dir_ls(
 tic()
 res_ens_memb <- map(models, 
     ensemble_model_refrcst, 
-    path_rds = path_rds_files,
+    path_files = path_qs_files,
     var_name = "prec",
     stat = "mean")
 toc()

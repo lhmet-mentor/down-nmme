@@ -21,7 +21,10 @@ model_name_rds <- function(file_rds, vname = "prec"){
 # Média e desvio padrao dos membros de prec (ensemble) para cada ponto----------
 ensemble_refcst <- function(refcst_rds, var_name = "prec", stat = "median") {
   # refcst_rds <- files_rds[1]; var_name = "prec"; stat = "mean"
+  
+  tic()
   refcst <- readr::read_rds(refcst_rds)
+  toc()
   
   if(stat == "median"){
     refcst <- refcst[,
@@ -36,18 +39,34 @@ ensemble_refcst <- function(refcst_rds, var_name = "prec", stat = "median") {
     return(refcst)
   }
   
-  refcst <- refcst[,
-                   .(prec_ensmean = mean(prec),
-                     prec_enssd = sd(prec)#,
-                     # mediana e mad (medidas stats + robustas)
-                     #prec_ensmed = median(prec),
-                     #prec_ensmad = mad(prec)
-                   ),
-                   #keyby = .(S, L)
-                   by = c("S", "L", "X", "Y")
-  ]
-  refcst[, model := model_name_rds(refcst_rds, var_name)]
-  refcst
+  if(stat == "mean"){
+    refcst <- refcst[,
+                     .(prec_ensmean = mean(prec),
+                       prec_enssd = sd(prec)#,
+                       # mediana e mad (medidas stats + robustas)
+                       #prec_ensmed = median(prec),
+                       #prec_ensmad = mad(prec)
+                     ),
+                     #keyby = .(S, L)
+                     by = c("S", "L", "X", "Y")
+    ]
+    refcst[, model := model_name_rds(refcst_rds, var_name)]  
+    return(refcst)
+  }
+  
+  # case identity
+  tic()
+  refcst_wide <- data.table::dcast(refcst, 
+                    S + L + X + Y + model ~ M,  
+                    value.var = var_name
+                    )
+  toc()
+  refcst_wide <- dplyr::rename_with(refcst_wide, 
+                     ~ paste0(var_name, "_", .x), 
+                     dplyr::matches("[0-9]")
+                     )
+  
+  
 }
 
 

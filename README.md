@@ -25,6 +25,14 @@ easypackages::libraries(c("tidyverse"))
 #  fs::path_file()
 ```
 
+# Dependências
+
+``` r
+remotes::install_cran("qs", type = "source", configure.args = "--with-simd=AVX2")
+remotes::install_github("rspatial/terra")
+remotes::install_github("rspatial/raster")
+```
+
 # Descrição
 
 1.  `down-hindcasts-nmme.R`: script com looping para baixar arquivos
@@ -51,8 +59,8 @@ easypackages::libraries(c("tidyverse"))
         `output/{variavel}/nmme_{variavel}_{modelo}_{ano}.nc`
 
 -   arquivos de saída em
-    `output/rds/nmme_{var_name}_{model_id}_lt{lead_time}.RDS` (cada
-    arquivo com tamanho de \~1.1 GB)
+    `output/{rds,qs}/nmme_{var_name}_{model_id}_lt{lead_time}.{rds, qs}`
+    (arquivo `.qs` com tamanho de \~300 MB contra \~3 GB do `.rds`)
 
 3.  `ensemble-members-averages.R`:
 
@@ -60,8 +68,9 @@ easypackages::libraries(c("tidyverse"))
     a média ou a mediana (para cada ponto, por data de inicialização e
     lead time) de todos membros de um dado modelo.
 
--   arquivos de saída em `output/rds/ensemble-{model_id}-{stat}.RDS`
-    (cada arquivo em torno de 290 MB)
+-   arquivos de saída em
+    `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS,qs}` (cada arquivo
+    \~290 MB)
 
 4.  `spatial-average-nmme-basins.R`: requer a versão do github do pacote
     [terra](https://github.com/rspatial/terra)
@@ -82,7 +91,7 @@ easypackages::libraries(c("tidyverse"))
     `output/rds/basin/avgs/{spatial_average_type}/{model_id}-{stat}`. Os
     arquivos são separados por tipo de média espacial, modelo, mês de
     inicialização e lead time. O nome dos aquivos RDS segue o padrão
-    `{model_id}_S{YYYYMMDD}_L{0.5-11.5}_{spatial_average_type}_avg.RDS`
+    `{model_id}_S{YYYYMMDD}_L{0.5-11.5}_{spatial_agreggation_type}_avg.RDS`
     (cada arquivo em torno de 4.5 KB)
 
 5.  `join-spavg-nmme-basins.R`:

@@ -8,41 +8,49 @@ source(here("R", "data-proc-basin.R"))
 
 ## poligonos bacias ------------------------------------------------------------
 # arquivo RDS disponibilizado em 
-pols_inc <- readr::read_rds(here("input", "poligonos-bacias-incrementais.RDS")) %>%
+path_pols_bhs <- here("input", "poligonos-bacias-incrementais.RDS")
+pols_inc_sp <- readr::read_rds(path_pols_bhs) %>%
   sf::st_transform(crs = "+proj=longlat +datum=WGS84") %>%
-  dplyr::select(codONS, nome, area)
+  dplyr::select(codONS, nome, area) %>%
+  sf::as_Spatial()
 
-pols_inc_sp <- as(pols_inc, "Spatial")
+
+
 #plot(pols_inc_sp)
 
 ## dados ensemble -------------------------------------------------------------
 
-# definir a estatistica usada para o ensemble ('mean' or 'median')
-stat <- "mean"
+# definir a estatistica usada para o ensemble ('mean', 'median', 'identity')
+stat <- "identity"
+ext <- "qs"
 
-ens_files <- here("output", "rds") %>%
-  dir_ls(regexp = glue::glue("ensemble.*{stat}.RDS"))
+ens_files <- here("output", ext) %>%
+  dir_ls(regexp = glue::glue("ensemble.*{stat}.{ext}"))
 length(ens_files)
 
-ens_files <- ens_files[c(4, 7)]
+#ens_files <- ens_files[c(4, 7)]
 
 # devido ao longo tempo de processamento das medias
 # escrita de um arquivo rds das medias na area 
 # por ano
 
-out_basin_avg_d <- here("output/rds/basin-avgs")
-checkmate::check_directory_exists(out_basin_avg_d)
+basin_avg_d <- glue::glue("output/{ext}/basin-avgs")
+out_basin_avg_d <- here(basin_avg_d)
+if(!checkmate::test_directory_exists(out_basin_avg_d)){
+  fs::dir_create(out_basin_avg_d)
+}
 
 out_basin_avgs <- map(seq_along(ens_files), 
                          #1:2,
                          function(i) {
                            # i = 1
-                           #cat(path_file(ens_files[i]), "\n")
+                           # cat(path_file(ens_files[i]), "\n")
                            basin_avg_model(
                              file_model = ens_files[i], 
                              pols_sp = pols_inc_sp, 
                              weighted_mean = TRUE,  # media ponderada?
-                             dest_path = out_basin_avg_d
+                             dest_path = out_basin_avg_d,
+                             format = "qs"
                            )
                          }
                       )

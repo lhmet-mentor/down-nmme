@@ -37,7 +37,8 @@ res_ens_memb <- map(models,
     ensemble_model_refrcst, 
     path_files = path_qs_files,
     var_name = "prec",
-    stat = "identity") # elpased ~1 h
+    stat = "identity",
+    output_format = "qs") # elpased ~1 h
 toc()
 
 unlist(res_ens_memb)

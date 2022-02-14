@@ -72,16 +72,15 @@ remotes::install_github("rspatial/raster")
     `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS,qs}` (cada arquivo
     \~290 MB)
 
-4.  `spatial-average-nmme-basins.R`: requer a versão do github do pacote
-    [terra](https://github.com/rspatial/terra)
-    (`remotes::install_github("rspatial/terra")`).
+4.  `spatial-average-nmme-basins.R`
 
--   arquivos de entrada em `output/rds/ensemble-{model_id}-{stat}.RDS`
+-   arquivos de entrada em
+    `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS, qs}`
 
 -   depende do script `data-proc-basin.R` que contém as funções para
-    obter a média na área das principais bacias do SIN (por data de
-    inicialização e lead time) da prec média (ou mediana) do ensemble de
-    cada modelo.
+    obter a média na área das bacias hirográficas do SIN (por data de
+    inicialização e *lead time*) da variável de interesse (precipitação,
+    temperatura) agregada (média, mediana ou identidade) de cada modelo.
 
     -   Há duas opções para agregação espacial: média aritmética
         (`arithmetic`) ou média ponderada pela fração de área das

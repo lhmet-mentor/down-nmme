@@ -1,10 +1,15 @@
-join_rds_model_nmme <- function(model_dir){
+
+
+
+# junta medias nas bacias dos membros nmme
+join_rds_model_nmme <- function(model_dir, format = c("qs", "RDS")){
   
   # model_dir <- nmme_models_d[5]
+  checkmate::assert_choice(format, c("qs", "RDS"))
   
   files_rds <- fs::dir_ls(model_dir, 
                           type = "file",
-                          glob = "*.RDS"
+                          glob = glue::glue("*.{format}")
                           )
   data_rds <- purrr::map_df(files_rds, readr::read_rds)
   

@@ -22,7 +22,7 @@ model_name_rds <- function(file_rds, vname = "prec"){
 }
 
 
-# Média e desvio padrao dos membros de prec (ensemble) para cada ponto----------
+# Agregacao dos membros dos modelos (ensemble) para cada ponto-----------------
 ensemble_members <- function(refcst_file, var_name = "prec", stat = "median") {
   # refcst_file <- files[1]; var_name = "prec"; stat = "mean"
   
@@ -34,7 +34,7 @@ ensemble_members <- function(refcst_file, var_name = "prec", stat = "median") {
     refcst <- readr::read_rds(refcst_file)
   }
   
-  
+  # case median----------------------------------------------------------------
   if(stat == "median"){
     refcst <- refcst[,
                      .(# mediana e mad (medidas stats + robustas)
@@ -47,7 +47,7 @@ ensemble_members <- function(refcst_file, var_name = "prec", stat = "median") {
     refcst[, model := model_name_rds(refcst_file, var_name)]
     return(refcst)
   }
-  
+  # case mean------------------------------------------------------------------
   if(stat == "mean"){
     refcst <- refcst[,
                      .(prec_ensmean = mean(prec),
@@ -63,7 +63,7 @@ ensemble_members <- function(refcst_file, var_name = "prec", stat = "median") {
     return(refcst)
   }
   
-  # case identity
+  # case identity---------------------------------------------------------------
   tic()
   refcst_wide <- data.table::dcast(refcst, 
                     S + L + X + Y + model ~ M,  

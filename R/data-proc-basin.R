@@ -121,13 +121,13 @@ basin_avg_model <- function(file_model,
                             format = c("qs", "rds")
                             ) {
   # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs"); format = "qs" 
-  tic()
+  #tic()
   if(format == "qs"){
     ens_data <- qs::qread(file_model)  
   } else {
     ens_data <- readr::read_rds(file_model)  
   }
-  toc()
+  #toc()
   
   # 28 sec elapsed
   # 7.127 sec elapsed
@@ -171,7 +171,8 @@ basin_avg_model <- function(file_model,
   # bas_avg_model <- map(samp[["data"]], ~basin_average(.x))
   # bas_avg_model <- furrr::future_map(ens_data[["data"]] , ~basin_average(.x))
   #model_basin_avg_files <- furrr::future_map(
-  model_basin_avg_files <- purrr::map(
+  #model_basin_avg_files <- purrr::map(
+    model_basin_avg_files <- parallel::mclapply(
     1:nrow(ens_data),
     #1:12,
     function(isl) {
@@ -192,14 +193,21 @@ basin_avg_model <- function(file_model,
         #raster = FALSE
       )
       
-      basin_data <- dplyr::bind_cols(iSLM, bas_avg)
-      readr::write_rds(basin_data, basin_file_path)
       gc()
       
-      cat(path_file(basin_file_path), "\n")
+      basin_data <- dplyr::bind_cols(iSLM, bas_avg)
+      
+      if(format == "qs"){
+        qs::qsave(basin_data, basin_file_path)
+      } else {
+        readr::write_rds(basin_data, basin_file_path)
+      }
+      
+      assert_file_exists(basin_file_path)
+      message("saving ... ", path_file(basin_file_path), "\n")
       
       basin_file_path
-    }
+    }, mc.cores = parallel::detectCores()-1
   )
 
   toc()

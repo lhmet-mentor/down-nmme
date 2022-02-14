@@ -93,10 +93,12 @@ basin_avg_file_name <- function(slm, weight_mean = FALSE) {
 
 
 ## definicao/criacao do dir de saida das medias espaciais ---------------------
-output_path_basin_avgs <- function(file, w_mean, out_path){
+output_path_basin_avgs <- function(file, w_mean, out_path, .format = c("qs", "RDS")){
+  # file = file_model; w_mean = TRUE
   imodel <- fs::path_file(file) %>%
     stringr::str_replace("ensemble-", "") %>%
-    stringr::str_replace("\\.RDS", "")
+    stringr::str_replace(glue::glue("\\.{format}"), "") %>%
+    stringr::str_replace("-mean|-median|-identity", "")
   
   out_path <- ifelse(w_mean, 
                       here(out_path, "weighted", imodel), 
@@ -113,17 +115,27 @@ output_path_basin_avgs <- function(file, w_mean, out_path){
 basin_avg_model <- function(file_model, 
                             pols_sp = pols_inc_sp, 
                             weighted_mean = FALSE,
-                            dest_path = here("output/{rds,qs}/basin-avgs")
+                            dest_path = here("output/{rds,qs}/basin-avgs"),
+                            format = c("")
                             ) {
-  # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/rds/basin-avgs") 
+  # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs") 
   tic()
-  ens_data <- readr::read_rds(file_model)
+  if(fs::path_ext(file_model) == "qs"){
+    ens_data <- qs::qread(file_model)  
+  } else {
+    ens_data <- readr::read_rds(file_model)  
+  }
   toc()
+  
   # 28 sec elapsed
   # 7.127 sec elapsed
 
   ## definicao/criacao do dir de saida das medias espaciais
-  dest_path <- output_path_basin_avgs(file_model, weighted_mean, dest_path)
+  dest_path <- output_path_basin_avgs(file_model, 
+                                      weighted_mean, 
+                                      dest_path,
+                                      .format = fs::path_ext(file_model)
+                                      )
     
   ## caso incompleto de NCEP-CFSv2, CMC2-CanCM4
   # ens_data <- ens_data %>%

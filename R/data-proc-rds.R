@@ -119,17 +119,20 @@ ensemble_refcst_files <- function(files = model_files_rds,
 ensemble_model_refrcst <- function(imodel, 
                                    path_files = path_qs_files,
                                    var_name = "prec", 
-                                   stat = "mean"
+                                   stat = "mean",
+                                   output_format = "qs"
 ){
   # imodel = "GFDL-SPEAR"; path_files = path_qs_files
   # model_name_rds(model_files_rds, vname = "prec")  
+  checkmate::assert_choice(output_format, c("RDS", "rds", "qs"))
+  
   cat(imodel, "\n")
   
   model_files <- dir_ls(
     path_files, 
     regexp = glue::glue('{imodel}_lt[0-9]\\.[0-9]')
   )
-  bin_file_ext <- fs::path_ext(model_files) %>% unique()
+  #bin_file_ext <- fs::path_ext(model_files) %>% unique()
   
   ens_model_refcst <- ensemble_refcst_files(files = model_files, 
                                             variable = var_name, 
@@ -142,9 +145,15 @@ ensemble_model_refrcst <- function(imodel,
                          "-", 
                          stat,
                          ".", 
-                         bin_file_ext
+                         output_format
                   )
   )
-  saveRDS(ens_model_refcst, file = out_ens_file)
+  
+  if(output_format == "qs"){
+    qs::qsave(ens_model_refcst, out_ens_file)
+  } else {
+    saveRDS(ens_model_refcst, file = out_ens_file)  
+  }
+  
   out_ens_file
 }

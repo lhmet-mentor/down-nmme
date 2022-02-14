@@ -162,7 +162,7 @@ basin_avg_model <- function(file_model,
   tic()
   
   #model_basin_avg_files <- purrr::map(
-    model_basin_avg_files <- parallel::mclapply(
+  model_basin_avg_files <- parallel::mclapply(
     1:nrow(ens_data),
     #1:12,
     function(isl) {
@@ -174,7 +174,10 @@ basin_avg_model <- function(file_model,
                                         .format = format)
       basin_file_path <- here(dest_path, basin_file)
       
-      if(fs::file_exists(basin_file_path)) return(basin_file_path)
+      if(fs::file_exists(basin_file_path)) {
+        #message("file already exists ... ", path_file(basin_file_path), "\n")
+        return(basin_file_path)
+      }
       
       bas_avg <- basin_average(
         datagrid = ens_data[["data"]][[isl]], 
@@ -188,12 +191,11 @@ basin_avg_model <- function(file_model,
       export_bin_file(basin_data, basin_file_path)
       
       #assert_file_exists(basin_file_path)
-      #message("saving ... ", path_file(basin_file_path), "\n")
+      message("saving ... ", path_file(basin_file_path), "\n")
       basin_file_path
       
-    }, 
-    mc.cores = parallel::detectCores()-1
-  )
+    }, mc.cores = parallel::detectCores()-1
+    )
 
   toc()
   # 35 s com raster

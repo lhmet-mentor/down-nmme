@@ -3,7 +3,7 @@ pcks <- c("raster", "terra", "tidyverse", "here",
           "tictoc", "furrr")
 easypackages::libraries(pcks)
 
-
+source(here("R", "data-proc-rds.R"))
 source(here("R", "data-proc-basin.R"))
 
 ## poligonos bacias ------------------------------------------------------------
@@ -44,7 +44,7 @@ out_basin_avgs <- map(seq_along(ens_files),
                          #1:2,
                          function(i) {
                            # i = 1
-                           # cat(path_file(ens_files[i]), "\n")
+                           cat(path_file(ens_files[i]), "\n")
                            basin_avg_model(
                              file_model = ens_files[i], 
                              pols_sp = pols_inc_sp, 
@@ -52,11 +52,36 @@ out_basin_avgs <- map(seq_along(ens_files),
                              dest_path = out_basin_avg_d,
                              format = "qs"
                            )
-                         }
+                         } 
                       )
 
-# para diagnostico dos meses de inicialização presentes
-#writexl::write_xlsx(out_basin_avgs, path = here("output", "check-forecast-start-time.xlsx"))
+# check dispersao entre os membros ----------------------------------------
+# source("R/utils.R")
+# out_p <- here("output/qs/basin-avgs/weighted/CMC1-CanCM3")
+# fls <- dir_ls(out_p, glob = "*.qs")
+# data_fls <- map_df(fls, qs::qread)
+# tail(data_fls)
+# 
+# x <- dplyr::filter(data_fls, codONS == 6, L == 1.5) %>%
+#   dplyr::mutate(
+#     Sr = floor_date(S + ddays(15), "month"),
+#     date_lead = Sr + dmonths(trunc(L)) + ddays(15),
+#     date_lead = lubridate::as_date(lubridate::floor_date(date_lead, "month")),
+#     S = NULL, 
+#     date = date_lead, date_lead = NULL,
+#     L = trunc(L)
+#   ) %>%
+#   dplyr::relocate(model, L, Sr, date)
+# 
+#  x_clim <- x %>%
+#    group_by(mes = month(Sr)) %>%
+#    summarise(dplyr::across(contains("prec"), ~median(.x, na.rm = TRUE)*30.25)) %>%
+#    mutate(date = lubridate::ym(paste0("1980-", mes))) %>%
+#    relocate(date)
+#  x_clim %>% 
+#   openair::timePlot(., names(.)[-c(1:2)], 
+#                     group = TRUE, 
+#                     key.columns = 4)
 
 
 # tail(ens_data_nest)

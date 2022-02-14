@@ -29,17 +29,21 @@ models <- model_counts$modelo
 
 
 #-------------------------------------------------------------------------------
-# looping nos modelos para calculo da media ou mediana do ensemble
+# looping nos modelos para agregacao dos membros dos modelos pela media, mediana,
+# ou identidade (matem todos membros)
 
 tic()
 res_ens_memb <- map(models, 
     ensemble_model_refrcst, 
     path_files = path_qs_files,
     var_name = "prec",
-    stat = "mean")
+    stat = "identity") # elpased ~1 h
 toc()
 
 unlist(res_ens_memb)
+
+
+
 
 #files_ens <- dir_ls(path_rds_files, regexp = "ensemble.*RDS")
 #ens_check <- read_rds(res_ens_memb[1]])

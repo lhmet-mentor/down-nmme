@@ -47,17 +47,17 @@ year_from_ncfile <- function(nc_files){
 
 
 # Contagem de arquivos por modelo e ano
-nc_files_by_model_year <- function(nc_files){
+nc_files_by_model_year <- function(nc_files, format = c("RDS", "qs")){
   # verificação do numero de arquivos com periodos
-  model_counts <- tibble(file = nc_files, 
+  model_counts <- tibble::tibble(file = nc_files, 
                          modelo = model_name(nc_files, vname = "prec"),
                          ano = year_from_ncfile(nc_files)
   ) %>%
-    group_by(modelo) %>%
-    summarise(start = min(ano), end = max(ano), freq = n()) %>%
-    mutate(check_span = end-start+1)
+    dplyr::group_by(modelo) %>%
+    dplyr::summarise(start = min(ano), end = max(ano), freq = n()) %>%
+    dplyr::mutate(check_span = end-start+1)
   
-  saveRDS(model_counts, file = here("output", "rds", "model_counts.RDS"))
+  saveRDS(model_counts, file = here("output", format, "model_counts.RDS"))
   model_counts
 }
 

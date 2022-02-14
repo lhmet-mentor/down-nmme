@@ -1,6 +1,20 @@
 # Funções para processamento dos dados
 # de reforecast dos modelos nmme pre-processados (convertidos de nc para rds)
 
+
+import_bin_file <- function(file){
+  ext <- fs::path_ext(file)
+  if(ext == "qs") return(qs::qread(file))
+  readr::read_rds(file)
+}
+
+export_bin_file <- function(data, file){
+  ext <- fs::path_ext(file)
+  if(ext == "qs") return(qs::qsave(data, file))
+  readr::write_rds(data, file)
+}
+
+
 ##------------------------------------------------------------------------------
 # Funcao par extrai nome do modelo a partir do arquivo rds
 model_name_rds <- function(file_rds, vname = "prec"){
@@ -28,11 +42,7 @@ ensemble_members <- function(refcst_file, var_name = "prec", stat = "median") {
   
   checkmate::assert_choice(stat, c("mean", "median", "identity"))
   
-  if(fs::path_ext(refcst_file) == "qs"){
-    refcst <- qs::qread(refcst_file)
-  } else {
-    refcst <- readr::read_rds(refcst_file)
-  }
+  refcst <- import_bin_file(refcst_file)
   
   # case median----------------------------------------------------------------
   if(stat == "median"){
@@ -149,11 +159,7 @@ ensemble_model_refrcst <- function(imodel,
                   )
   )
   
-  if(output_format == "qs"){
-    qs::qsave(ens_model_refcst, out_ens_file)
-  } else {
-    saveRDS(ens_model_refcst, file = out_ens_file)  
-  }
+  export_bin_file(ens_model_refcst, out_ens_file)
   
   out_ens_file
 }

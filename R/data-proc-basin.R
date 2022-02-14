@@ -31,7 +31,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
   
   if(raster){
     # demora demaiiiiisssssssssss!
-    tic()
+    #tic()
     avg_basin <- raster::extract(
       raster::stack(r),
       pols,
@@ -39,7 +39,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
       normalizeWeights = TRUE,
       fun = mean
     ) %>% tibble::as_tibble()
-    toc()
+    #toc()
     # 5s
     
     # tic()
@@ -55,7 +55,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     #tail(check)
     
   } else {
-    tic()
+    #tic()
     avg_basin <- terra::extract(
       r,
       terra::vect(pols),
@@ -65,7 +65,7 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     ) %>%
       dplyr::select(-ID) %>%
       tibble::as_tibble()
-    toc()
+    #toc()
     # 0.4 s
     
   }
@@ -165,12 +165,7 @@ basin_avg_model <- function(file_model,
   # [1] 6.6 horas
 
   tic()
-  #plan(multisession, workers = 6)
-  # samp <- ens_data[1:8,"data"]
-  # bas_avg_model <- furrr::future_map(samp[["data"]], ~basin_average(.x))
-  # bas_avg_model <- map(samp[["data"]], ~basin_average(.x))
-  # bas_avg_model <- furrr::future_map(ens_data[["data"]] , ~basin_average(.x))
-  #model_basin_avg_files <- furrr::future_map(
+  
   #model_basin_avg_files <- purrr::map(
     model_basin_avg_files <- parallel::mclapply(
     1:nrow(ens_data),
@@ -203,8 +198,8 @@ basin_avg_model <- function(file_model,
         readr::write_rds(basin_data, basin_file_path)
       }
       
-      assert_file_exists(basin_file_path)
-      message("saving ... ", path_file(basin_file_path), "\n")
+      #assert_file_exists(basin_file_path)
+      #message("saving ... ", path_file(basin_file_path), "\n")
       
       basin_file_path
     }, mc.cores = parallel::detectCores()-1

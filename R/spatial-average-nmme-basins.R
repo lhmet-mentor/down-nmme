@@ -43,7 +43,7 @@ if(!checkmate::test_directory_exists(out_basin_avg_d)){
 out_basin_avgs <- map(seq_along(ens_files), 
                          #1:2,
                          function(i) {
-                           # i = 1
+                           # i = 3
                            cat(path_file(ens_files[i]), "\n")
                            basin_avg_model(
                              file_model = ens_files[i], 

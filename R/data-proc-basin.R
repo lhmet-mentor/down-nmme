@@ -74,9 +74,9 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
 }
 
 
-# Nome para os arquivos das medias nas bacias por S e L-------------------------
-basin_avg_file_name <- function(slm, weight_mean = FALSE) {
-  # slm <- iSLM
+# Constroi nome para os arquivos das medias nas bacias por S e L-----------------
+basin_avg_file_name <- function(slm, weight_mean = FALSE, .format = c("qs", "RDS")) {
+  # slm <- iSLM; weight_mean = FALSE; .format = c("qs")
   
   fname <- paste0(
     c("", "S", "L"),
@@ -84,25 +84,27 @@ basin_avg_file_name <- function(slm, weight_mean = FALSE) {
   ) %>%
     paste(collapse = "_") 
   
-  if(weight_mean) return(paste0(fname, "_basin-weigthed_avg.RDS"))
+  if(weight_mean) {
+    return(paste0(fname, glue::glue("_basin-weigthed-avg.{.format}")))
+  }
   
-  paste0(fname, "_basin-avg.RDS")
+  paste0(fname, glue::glue("_basin-arithmetic-avg.{.format}"))
   
 }
 
 
 
 ## definicao/criacao do dir de saida das medias espaciais ---------------------
-output_path_basin_avgs <- function(file, w_mean, out_path, .format = c("qs", "RDS")){
-  # file = file_model; w_mean = TRUE
+output_path_basin_avgs <- function(file, w_mean, .dest_path, .format = c("qs", "RDS")){
+  # file = file_model; w_mean = TRUE; .dest_path = here("output/qs/basin-avgs"); .format = "qs"
   imodel <- fs::path_file(file) %>%
     stringr::str_replace("ensemble-", "") %>%
-    stringr::str_replace(glue::glue("\\.{format}"), "") %>%
+    stringr::str_replace(glue::glue("\\.{.format}"), "") %>%
     stringr::str_replace("-mean|-median|-identity", "")
   
   out_path <- ifelse(w_mean, 
-                      here(out_path, "weighted", imodel), 
-                      here(out_path, "arithmetic", imodel)
+                      here(.dest_path, "weighted", imodel), 
+                      here(.dest_path, "arithmetic", imodel)
   )
   
   if(!fs::dir_exists(out_path)) fs::dir_create(out_path)
@@ -116,11 +118,11 @@ basin_avg_model <- function(file_model,
                             pols_sp = pols_inc_sp, 
                             weighted_mean = FALSE,
                             dest_path = here("output/{rds,qs}/basin-avgs"),
-                            format = c("")
+                            format = c("qs", "rds")
                             ) {
-  # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs") 
+  # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs"); format = "qs" 
   tic()
-  if(fs::path_ext(file_model) == "qs"){
+  if(format == "qs"){
     ens_data <- qs::qread(file_model)  
   } else {
     ens_data <- readr::read_rds(file_model)  
@@ -133,8 +135,8 @@ basin_avg_model <- function(file_model,
   ## definicao/criacao do dir de saida das medias espaciais
   dest_path <- output_path_basin_avgs(file_model, 
                                       weighted_mean, 
-                                      dest_path,
-                                      .format = fs::path_ext(file_model)
+                                      .dest_path = dest_path,
+                                      .format = format
                                       )
     
   ## caso incompleto de NCEP-CFSv2, CMC2-CanCM4
@@ -176,7 +178,9 @@ basin_avg_model <- function(file_model,
       # isl = 1
       
       iSLM <- select(ens_data, S:model)[isl, ]
-      basin_file <- basin_avg_file_name(slm = iSLM, weight_mean = weighted_mean)
+      basin_file <- basin_avg_file_name(slm = iSLM, 
+                                        weight_mean = weighted_mean,
+                                        .format = format)
       basin_file_path <- here(dest_path, basin_file)
       
       if(fs::file_exists(basin_file_path)) return(basin_file_path)

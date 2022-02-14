@@ -113,7 +113,7 @@ output_path_basin_avgs <- function(file, w_mean, out_path){
 basin_avg_model <- function(file_model, 
                             pols_sp = pols_inc_sp, 
                             weighted_mean = FALSE,
-                            dest_path = here("output/rds/basin-avgs")
+                            dest_path = here("output/{rds,qs}/basin-avgs")
                             ) {
   # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/rds/basin-avgs") 
   tic()

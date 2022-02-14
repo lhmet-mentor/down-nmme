@@ -121,13 +121,8 @@ basin_avg_model <- function(file_model,
                             format = c("qs", "rds")
                             ) {
   # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs"); format = "qs" 
-  #tic()
-  if(format == "qs"){
-    ens_data <- qs::qread(file_model)  
-  } else {
-    ens_data <- readr::read_rds(file_model)  
-  }
-  #toc()
+  ens_data <- import_bin_file(file_model)
+  
   
   # 28 sec elapsed
   # 7.127 sec elapsed
@@ -189,20 +184,15 @@ basin_avg_model <- function(file_model,
       )
       
       gc()
-      
       basin_data <- dplyr::bind_cols(iSLM, bas_avg)
-      
-      if(format == "qs"){
-        qs::qsave(basin_data, basin_file_path)
-      } else {
-        readr::write_rds(basin_data, basin_file_path)
-      }
+      export_bin_file(basin_data, basin_file_path)
       
       #assert_file_exists(basin_file_path)
       #message("saving ... ", path_file(basin_file_path), "\n")
-      
       basin_file_path
-    }, mc.cores = parallel::detectCores()-1
+      
+    }, 
+    mc.cores = parallel::detectCores()-1
   )
 
   toc()

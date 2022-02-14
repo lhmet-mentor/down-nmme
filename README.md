@@ -9,7 +9,17 @@
 O objetivo do download-hindcast-NMME é processar os dados das previsões
 climática do NMME.
 
+# Dependências
+
 ``` r
+remotes::install_cran("qs", type = "source", configure.args = "--with-simd=AVX2")
+remotes::install_github("rspatial/terra")
+remotes::install_github("rspatial/raster")
+```
+
+``` r
+pcks <- c("tidyverse", "data.table", "metR", "raster", "terra", "qs", "readr", 
+          "here", "checkmate", "fs", "glue", "purrr", "stringr")
 easypackages::libraries(c("tidyverse"))
 #> Loading required package: tidyverse
 #> ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
@@ -23,14 +33,12 @@ easypackages::libraries(c("tidyverse"))
 #> All packages loaded successfully
 #fs::dir_ls(here("R"), glob = "*.R") %>%
 #  fs::path_file()
-```
-
-# Dependências
-
-``` r
-remotes::install_cran("qs", type = "source", configure.args = "--with-simd=AVX2")
-remotes::install_github("rspatial/terra")
-remotes::install_github("rspatial/raster")
+packageVersion("terra")
+#> [1] '1.5.20'
+packageVersion("raster")
+#> [1] '3.5.15'
+packageVersion("qs")
+#> [1] '0.25.2'
 ```
 
 # Descrição
@@ -135,14 +143,3 @@ remotes::install_github("rspatial/raster")
     Hidrográficas;
 
 9.  `comparacao-climatol-cru-nmme.R` TO DO DESC.
-
-------------------------------------------------------------------------
-
-# Próximas etapas
-
-# Inserir dados processados para novos modelos do NMME
-
-Executar todas etapas de processamento usando:
-
-<http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.CanSIPS-IC3/.HINDCAST/>
-<http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.GFDL-SPEAR/.HINDCAST/>

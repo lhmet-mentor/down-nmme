@@ -34,7 +34,8 @@ remotes::install_github("rspatial/raster")
 
 ```{r}
 pcks <- c("tidyverse", "data.table", "metR", "raster", "terra", "qs", "readr", 
-          "here", "checkmate", "fs", "glue", "purrr", "stringr")
+          "here", "checkmate", "fs", "glue", "purrr", "stringr", "tictoc",
+          "lubridate")
 easypackages::libraries(c("tidyverse"))
 #fs::dir_ls(here("R"), glob = "*.R") %>%
 #  fs::path_file()

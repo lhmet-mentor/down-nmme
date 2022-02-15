@@ -249,7 +249,7 @@ basin_average_cru <- function(ncfile_obs = obs_nc_file,
                               vname = "pre",
                               prj = "+proj=longlat +datum=WGS84",
                               pols = pols_inc_sp, 
-                              raster = FALSE) {
+                              weighted_mean = TRUE) {
   cru_prec <- raster::brick(obs_nc_file, varname = vname)
   # recorte da AS para regiao dos poligonos das bacias
   cru_prec_basins <- raster::crop(cru_prec, pols)
@@ -266,7 +266,7 @@ basin_average_cru <- function(ncfile_obs = obs_nc_file,
   
   #plot(cru_prec_basins)
   
-  if(raster){
+  if(weighted_mean){
     # demora mais!
     tic()
     avg_basin <- raster::extract(

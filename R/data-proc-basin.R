@@ -284,8 +284,6 @@ basin_average_cru <- function(ncfile_obs = obs_nc_file,
     avg_basin <- terra::extract(
       terra::rast(cru_prec_basins),
       terra::vect(pols),
-      #weights = TRUE,
-      #normalizeWeights = TRUE,
       fun = mean,
       touches = TRUE,
       method = "bilinear"

@@ -1,33 +1,25 @@
-pcks <- c("raster", "terra", "tidyverse", "here", 
-          "checkmate", "metR", "fs", "lubridate",
-          "tictoc", "furrr")
+pcks <- c(
+  "raster", "terra", "tidyverse", "here",
+  "checkmate", "metR", "fs", "lubridate",
+  "tictoc", "furrr"
+)
 easypackages::libraries(pcks)
 
 
 source(here("R/data-join-rds.R"))
+source(here("R/data-proc-rds.R"))
 
-## join rds files ------------------------------------------------------------
-basin_avg_d <- here("output/rds/basin-avgs/arithmetic")
-#basin_avg_d <- here("output/rds/basin-avgs/weighted")
-nmme_models_d <- dir_ls(basin_avg_d, type = "directory")
-joined_rds <- path(basin_avg_d, "nmme-models-arithmetic-avg-basins-ons.RDS")
-#joined_rds <- path(basin_avg_d, "nmme-models-weighted-avg-basins-ons.RDS")
 
-if(!checkmate::test_file_exists(joined_rds)){
-  
-  tictoc::tic()
-   basin_avg_nmme <- map_df(nmme_models_d, join_rds_model_nmme)
-  tictoc::toc()
-  # 5 min elapsed
-   basin_avg_nmme <- basin_avg_nmme %>%
-    group_by(model) %>%
-    nest()
-  write_rds(basin_avg_nmme, 
-            file = joined_rds
-  )
-} else {
-  basin_avg_nmme <- readr::read_rds(joined_rds)
-}
+prec_nmme_basin_avg <- join_nmme_basin_avg_files()
+
+stop()
+
+
+# stop --------------------------------------------------------------------
+
+
+
+
 
 
 # Verificação do período de dados dos modelos--------------------

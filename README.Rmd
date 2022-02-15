@@ -79,7 +79,7 @@ packageVersion("qs")
   
 
   
-4. `spatial-average-nmme-basins.R`
+4. `spatial-average-nmme-basins.R` (etapa mais demorada)
 
   - arquivos de entrada em `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS, qs}`
 

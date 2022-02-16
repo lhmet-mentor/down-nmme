@@ -85,7 +85,7 @@ packageVersion("qs")
   - arquivos de entrada em `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS, qs}`
 
   - depende do script `data-proc-basin.R` que contém as funções para obter a média 
-  na área das bacias hirográficas do SIN (por data de inicialização e *lead time*) da variável de interesse (precipitação, temperatura) agregada (média, mediana ou identidade) de cada modelo. 
+  na área das bacias hirográficas (por data de inicialização e *lead time*) da variável de interesse (precipitação, temperatura) agregada (média, mediana ou identidade) de cada modelo. 
   
     - Há duas opções para agregação espacial: média aritmética (`arithmetic`) ou média ponderada pela fração de área das células do modelo dentro da bacia hidrográfica (`weighted`).
   
@@ -106,7 +106,7 @@ packageVersion("qs")
 6. `spatial-average-obs-basins.R`:
 
   - depende do script `data-proc-basin.R` que contém as funções para obter a média 
-  na área das principais bacias do SIN para os dados do CRU. 
+  na área bacias hidrográficas para os dados do CRU. 
   
   - arquivos de saída em `output/rds/basin/avgs/{sp_average}` no formato RDS no padrão `cru-prec-basins-{sp_average}-avg.RDS` (cada arquivo em torno de 3.6 MB)
 
@@ -115,7 +115,7 @@ packageVersion("qs")
 
   - combina os dados observados e previsões das médias dos membros dos modelos. 
   
-  - arquivos de saída em `output/rds/basin/avgs/{spatial_average_type}` no fomato RDS no padrão `nmme-cru-mly-{spatial_average_type}-avg-basins-ons.RDS` (cada arquivo em torno de 180 MB)
+  - arquivos de saída em `output/rds/basin/avgs/{sp_average}` no fomato RDS no padrão `nmme-cru-mly-{sp_average}-avg-basins-ons.RDS` (cada arquivo em torno de 180 MB)
   
 
 8. `evaluation-cru-nmme.R`:

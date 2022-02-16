@@ -1,37 +1,37 @@
 
 # estimativa da resolução-------------------------------------------------------
-res_estim <- function(grid){
+res_estim <- function(grid) {
   xy <- dplyr::distinct(grid, X, Y)
   dx <- unique(diff(unique(sort(xy$X))))
-  dy <- unique(diff(unique(sort(xy$Y))))  
+  dy <- unique(diff(unique(sort(xy$Y))))
   c(dx, dy)
 }
 
 # build raster from dataframe with xyz -----------------------------------------
-raster_from_points <- function(datagrid, prj = "+proj=longlat +datum=WGS84"){
+raster_from_points <- function(datagrid, prj = "+proj=longlat +datum=WGS84") {
   # datagrid = ens_data[["data"]][[1]]
   mat <- datagrid %>%
     as.matrix()
-  
-  #tic()
-  #r <- raster::rasterFromXYZ(mat, res = res_estim(datagrid))
+
+  # tic()
+  # r <- raster::rasterFromXYZ(mat, res = res_estim(datagrid))
   r <- terra::rast(mat, type = "xyz")
-  terra::crs(r) <- prj 
-  #toc()
-  
+  terra::crs(r) <- prj
+  # toc()
+
   r
 }
 
 # basin averages over pols -----------------------------------------------------
-basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
+basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE) {
   # datagrid = ens_data[["data"]][[1]]; summary(datagrid); pols = pols_inc_sp
-  
+
   r <- raster_from_points(datagrid)
 
-  
-  if(raster){
+
+  if (raster) {
     # demora demaiiiiisssssssssss!
-    #tic()
+    # tic()
     avg_basin <- raster::extract(
       raster::stack(r),
       pols,
@@ -39,9 +39,9 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
       normalizeWeights = TRUE,
       fun = mean
     ) %>% tibble::as_tibble()
-    #toc()
+    # toc()
     # 5s
-    
+
     # tic()
     # avg_basin2 <- terra::extract(
     #   r,
@@ -51,11 +51,10 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     #   #method = "bilinear"
     # )[, "prec_ensmean"]
     # toc()
-    #check <- tibble(avg_basin, avg_basin2, dif = avg_basin2-avg_basin)
-    #tail(check)
-    
+    # check <- tibble(avg_basin, avg_basin2, dif = avg_basin2-avg_basin)
+    # tail(check)
   } else {
-    #tic()
+    # tic()
     avg_basin <- terra::extract(
       r,
       terra::vect(pols),
@@ -65,11 +64,10 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
     ) %>%
       dplyr::select(-ID) %>%
       tibble::as_tibble()
-    #toc()
+    # toc()
     # 0.4 s
-    
   }
-  
+
   tibble(codONS = pols$codONS, avg_basin)
 }
 
@@ -77,78 +75,76 @@ basin_average <- function(datagrid, pols = pols_inc_sp, raster = FALSE){
 # Constroi nome para os arquivos das medias nas bacias por S e L-----------------
 basin_avg_file_name <- function(slm, weight_mean = FALSE, .format = c("qs", "RDS")) {
   # slm <- iSLM; weight_mean = FALSE; .format = c("qs")
-  
+
   fname <- paste0(
     c("", "S", "L"),
     c(slm$model, format(slm$S, "%Y%m%d"), slm$L)
   ) %>%
-    paste(collapse = "_") 
-  
-  if(weight_mean) {
+    paste(collapse = "_")
+
+  if (weight_mean) {
     return(paste0(fname, glue::glue("_basin-weigthed-avg.{.format}")))
   }
-  
+
   paste0(fname, glue::glue("_basin-arithmetic-avg.{.format}"))
-  
 }
 
 
 
 ## definicao/criacao do dir de saida das medias espaciais ---------------------
-output_path_basin_avgs <- function(file, w_mean, .dest_path, .format = c("qs", "RDS")){
+output_path_basin_avgs <- function(file, w_mean, .dest_path, .format = c("qs", "RDS")) {
   # file = file_model; w_mean = TRUE; .dest_path = here("output/qs/basin-avgs"); .format = "qs"
   imodel <- fs::path_file(file) %>%
     stringr::str_replace("ensemble-", "") %>%
     stringr::str_replace(glue::glue("\\.{.format}"), "") %>%
     stringr::str_replace("-mean|-median|-identity", "")
-  
-  out_path <- ifelse(w_mean, 
-                      here(.dest_path, "weighted", imodel), 
-                      here(.dest_path, "arithmetic", imodel)
+
+  out_path <- ifelse(w_mean,
+    here(.dest_path, "weighted", imodel),
+    here(.dest_path, "arithmetic", imodel)
   )
-  
-  if(!fs::dir_exists(out_path)) fs::dir_create(out_path)
+
+  if (!fs::dir_exists(out_path)) fs::dir_create(out_path)
   out_path
 }
 
 
 
 ## medias espaciais ------------------------------------------------------------
-basin_avg_model <- function(file_model, 
-                            pols_sp = pols_inc_sp, 
+basin_avg_model <- function(file_model,
+                            pols_sp = pols_inc_sp,
                             weighted_mean = FALSE,
                             dest_path = here("output/{rds,qs}/basin-avgs"),
-                            format = c("qs", "rds")
-                            ) {
-  # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs"); format = "qs" 
+                            format = c("qs", "rds")) {
+  # file_model <- ens_files[1]; pols_sp = pols_inc_sp; weighted_mean = TRUE;dest_path = here("output/qs/basin-avgs"); format = "qs"
   ens_data <- import_bin_file(file_model)
-  
-  
+
+
   # 28 sec elapsed
   # 7.127 sec elapsed
 
   ## definicao/criacao do dir de saida das medias espaciais
-  dest_path <- output_path_basin_avgs(file_model, 
-                                      weighted_mean, 
-                                      .dest_path = dest_path,
-                                      .format = format
-                                      )
-    
+  dest_path <- output_path_basin_avgs(file_model,
+    weighted_mean,
+    .dest_path = dest_path,
+    .format = format
+  )
+
   ## caso incompleto de NCEP-CFSv2, CMC2-CanCM4
   # ens_data <- ens_data %>%
   #   dplyr::filter(S >= lubridate::as_date("1997-07-01"))
   #   dplyr::filter(S >= lubridate::as_date("1994-07-01"))
   #  dplyr::filter(S >= lubridate::as_date("2005-03-01"))
-    
-    
+
+
   ens_data <- ens_data %>%
     dplyr::mutate(S = lubridate::as_date(S)) %>%
     dplyr::group_by(model, S, L) %>%
     tidyr::nest() %>%
     ungroup()
 
-  
-  
+
+
   # tic()
   # basin_average(datagrid = ens_data[["data"]][[1]])
   # diff(unique(ens_data$S)) # 30 dias entre as inicializações
@@ -160,42 +156,44 @@ basin_avg_model <- function(file_model,
   # [1] 6.6 horas
 
   tic()
-  
-  #model_basin_avg_files <- purrr::map(
+
+  # model_basin_avg_files <- purrr::map(
   model_basin_avg_files <- parallel::mclapply(
     1:nrow(ens_data),
-    #1:12,
+    # 1:12,
     function(isl) {
       # isl = 1
-      
+
       iSLM <- select(ens_data, S:model)[isl, ]
-      basin_file <- basin_avg_file_name(slm = iSLM, 
-                                        weight_mean = weighted_mean,
-                                        .format = format)
+      basin_file <- basin_avg_file_name(
+        slm = iSLM,
+        weight_mean = weighted_mean,
+        .format = format
+      )
       basin_file_path <- here(dest_path, basin_file)
-      
-      if(fs::file_exists(basin_file_path)) {
-        #message("file already exists ... ", path_file(basin_file_path), "\n")
+
+      if (fs::file_exists(basin_file_path)) {
+        # message("file already exists ... ", path_file(basin_file_path), "\n")
         return(basin_file_path)
       }
-      
+
       bas_avg <- basin_average(
-        datagrid = ens_data[["data"]][[isl]], 
-        pols = pols_sp, 
+        datagrid = ens_data[["data"]][[isl]],
+        pols = pols_sp,
         raster = weighted_mean
-        #raster = FALSE
+        # raster = FALSE
       )
-      
+
       gc()
       basin_data <- dplyr::bind_cols(iSLM, bas_avg)
       export_bin_file(basin_data, basin_file_path)
-      
-      #assert_file_exists(basin_file_path)
+
+      # assert_file_exists(basin_file_path)
       message("saving ... ", path_file(basin_file_path), "\n")
       basin_file_path
-      
-    }, mc.cores = parallel::detectCores()-1
-    )
+    },
+    mc.cores = parallel::detectCores() - 1
+  )
 
   toc()
   # 35 s com raster
@@ -207,11 +205,11 @@ basin_avg_model <- function(file_model,
 
 
 # dates from rds files with basin averages ------------------------------------
-dates_from_model_rds_files <- function(dir_model_rds){
+dates_from_model_rds_files <- function(dir_model_rds) {
   x <- fs::dir_ls(dir_model_rds) %>%
     fs::path_file() %>%
     str_extract_all("S[0-9]{8}", simplify = TRUE) %>%
-    as.Date("S%Y%m%d")  
+    as.Date("S%Y%m%d")
   x
 }
 # imodel <- "CanCM4i"
@@ -248,25 +246,26 @@ dates_from_model_rds_files <- function(dir_model_rds){
 basin_average_cru <- function(ncfile_obs = obs_nc_file,
                               vname = "pre",
                               prj = "+proj=longlat +datum=WGS84",
-                              pols = pols_inc_sp, 
+                              pols = pols_inc_sp,
                               weighted_mean = TRUE) {
   cru_prec <- raster::brick(obs_nc_file, varname = vname)
   # recorte da AS para regiao dos poligonos das bacias
   cru_prec_basins <- raster::crop(cru_prec, pols)
-  rm(cru_prec); gc()
+  rm(cru_prec)
+  gc()
   # define nome das datas
   cru_prec_basins <- raster::setZ(cru_prec_basins,
-                                  z = getZ(cru_prec_basins),
-                                  name = "Date"
+    z = getZ(cru_prec_basins),
+    name = "Date"
   )
-  
-  # raster::writeRaster(cru_prec_basins, 
-  #                     filename = "input/cru_ts4.04.1901.2019.bacias.nc", 
+
+  # raster::writeRaster(cru_prec_basins,
+  #                     filename = "input/cru_ts4.04.1901.2019.bacias.nc",
   #                     overwrite = TRUE)
-  
-  #plot(cru_prec_basins)
-  
-  if(weighted_mean){
+
+  # plot(cru_prec_basins)
+
+  if (weighted_mean) {
     # demora mais!
     tic()
     avg_basin <- raster::extract(
@@ -289,25 +288,70 @@ basin_average_cru <- function(ncfile_obs = obs_nc_file,
       method = "bilinear"
     )
     toc()
-     
   }
-  
+
   prec_cru_avg_basin <- avg_basin %>%
     as.data.frame() %>%
-    as_tibble() %>%
-    pivot_longer(cols = contains("X"), names_to = "date", values_to = "prec") %>%
-    mutate(
-      date = as_date(date, format = "X%Y.%m.%d"),
+    tibble::as_tibble() %>%
+    tidyr::pivot_longer(
+      cols = dplyr::contains("X"),
+      names_to = "date",
+      values_to = "prec"
+    ) %>%
+    dplyr::mutate(
+      date = lubridate::as_date(date, format = "X%Y.%m.%d"),
       codONS = pols$codONS[ID]
     ) %>%
-    relocate(codONS, ID, date, prec) %>% 
-    rename(prec_obs = prec)
-  
-  
-  #tail(prec_cru_avg_basin)
+    dplyr::relocate(codONS, ID, date, prec) %>%
+    dplyr::rename(prec_obs = prec)
+
+
+  # tail(prec_cru_avg_basin)
   prec_cru_avg_basin
-  
 }
 
 
-
+# aplica basin_average_cru -----------------------------------------------------
+calc_basin_avg_cru <- function(
+  path_pols_bhs = here("input", "poligonos-bacias-incrementais.RDS"),
+  path_obs_nc_file = "~/Dropbox/datasets/climate_datasets/superficie/CRU-TS4.04/cru_ts4.04.1901.2019.pre.dat.nc",
+  ext = "qs",
+  sp_average = "weighted",
+  var_name = "pre"
+){
+  ## poligonos bacias ------------------------------------------------------------
+  # arquivo RDS disponibilizado em 
+  pols_inc_sp <- readr::read_rds(path_pols_bhs) %>%
+    sf::st_transform(crs = "+proj=longlat +datum=WGS84") %>%
+    dplyr::select(codONS, nome, area) %>%
+    sf::as_Spatial()
+  
+  
+  
+  
+  ## dados CRU (observacoes) ------------------------------------------------
+  #"input/obs/prec/cru_ts4.04.1901.2019.pre.dat.nc"
+  file.exists(path_obs_nc_file)
+  # prec_cru <- ReadNetCDF(obs_nc_file)
+  # gc()
+  #prec_cru[!is.na(pre), ]
+  
+  
+  cru_prec_avg_pols <- basin_average_cru(
+    ncfile_obs = path_obs_nc_file,
+    vname = var_name,
+    prj = "+proj=longlat +datum=WGS84",
+    pols = pols_inc_sp,
+    weighted_mean = TRUE
+  )
+  
+  cru_prec_basin_file <- here(
+    glue::glue("output/{ext}/basin-avgs/{sp_average}"), 
+    "cru-prec-basins-{sp_average}-avg.{ext}"
+  )
+  
+  export_bin_file(cru_prec_avg_pols, cru_prec_basin_file)
+  checkmate::assert_file_exists(cru_prec_basin_file)
+  
+  return(cru_prec_basin_file)
+}

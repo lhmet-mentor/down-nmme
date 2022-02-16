@@ -204,6 +204,52 @@ basin_avg_model <- function(file_model,
 }
 
 
+# Medias espaciais dos membros do NMME nas areas das bacias --------------------
+sp_avg_nmme_basin <- function(
+  path_ensemb_files = here("output", ext),
+  suffix_ensemb_files = glue::glue("ensemble.*{stat}.{ext}"),
+  pols = pols_inc_sp,
+  stat = c('mean', 'median', 'identity'),
+  ext = "qs"  
+){
+  
+  ens_files <- path_ensemb_files %>%
+    dir_ls(regexp = suffix_ensemb_files)
+  length(ens_files)
+  
+  #ens_files <- ens_files[c(4, 7)]
+  
+  # devido ao longo tempo de processamento das medias
+  # escrita de um arquivo rds das medias na area 
+  # por ano
+  
+  basin_avg_d <- glue::glue("output/{ext}/basin-avgs")
+  out_basin_avg_d <- here(basin_avg_d)
+  if(!checkmate::test_directory_exists(out_basin_avg_d)){
+    fs::dir_create(out_basin_avg_d)
+  }
+  
+  out_basin_avgs <- map(seq_along(ens_files), 
+                        #1:2,
+                        function(i) {
+                          # i = 3
+                          cat(path_file(ens_files[i]), "\n")
+                          basin_avg_model(
+                            file_model = ens_files[i], 
+                            pols_sp = pols, 
+                            weighted_mean = TRUE,  # media ponderada?
+                            dest_path = out_basin_avg_d,
+                            format = "qs"
+                          )
+                        } 
+  )
+  
+  out_basin_avgs
+  
+}
+
+
+
 # dates from rds files with basin averages ------------------------------------
 dates_from_model_rds_files <- function(dir_model_rds) {
   x <- fs::dir_ls(dir_model_rds) %>%

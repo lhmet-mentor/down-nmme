@@ -20,40 +20,15 @@ pols_inc_sp <- readr::read_rds(path_pols_bhs) %>%
 
 ## dados ensemble -------------------------------------------------------------
 
-# definir a estatistica usada para o ensemble ('mean', 'median', 'identity')
-stat <- "identity"
-ext <- "qs"
+sp_avg_nmme_basin(
+  path_ensemb_files = here("output", ext),
+  suffix_ensemb_files = glue::glue("ensemble.*{stat}.{ext}"),
+  pols = pols_inc_sp,
+  stat = c('mean', 'median', 'identity'),
+  ext = "qs"
+)
+ 
 
-ens_files <- here("output", ext) %>%
-  dir_ls(regexp = glue::glue("ensemble.*{stat}.{ext}"))
-length(ens_files)
-
-#ens_files <- ens_files[c(4, 7)]
-
-# devido ao longo tempo de processamento das medias
-# escrita de um arquivo rds das medias na area 
-# por ano
-
-basin_avg_d <- glue::glue("output/{ext}/basin-avgs")
-out_basin_avg_d <- here(basin_avg_d)
-if(!checkmate::test_directory_exists(out_basin_avg_d)){
-  fs::dir_create(out_basin_avg_d)
-}
-
-out_basin_avgs <- map(seq_along(ens_files), 
-                         #1:2,
-                         function(i) {
-                           # i = 3
-                           cat(path_file(ens_files[i]), "\n")
-                           basin_avg_model(
-                             file_model = ens_files[i], 
-                             pols_sp = pols_inc_sp, 
-                             weighted_mean = TRUE,  # media ponderada?
-                             dest_path = out_basin_avg_d,
-                             format = "qs"
-                           )
-                         } 
-                      )
 
 # check dispersao entre os membros ----------------------------------------
 # source("R/utils.R")

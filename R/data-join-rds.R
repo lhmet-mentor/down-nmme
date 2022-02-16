@@ -2,15 +2,15 @@
 
 
 # junta medias nas bacias dos membros nmme
-join_files_model_nmme <- function(model_dir, format = c("qs", "RDS")){
+join_files_model_nmme <- function(model_dir, .ext = c("qs", "RDS")){
   
-  # model_dir <- nmme_models_d[7]; format = c("qs")
-  checkmate::assert_choice(format, c("qs", "RDS"))
+  # model_dir <- nmme_models_d[7]; ext = c("qs")
+  checkmate::assert_choice(.ext, c("qs", "RDS"))
   
   # lista arquivos
   files_bin <- fs::dir_ls(model_dir, 
                           type = "file",
-                          glob = glue::glue("*.{format}")
+                          glob = glue::glue("*.{.ext}")
                           )
   
   # importa
@@ -36,25 +36,25 @@ join_files_model_nmme <- function(model_dir, format = c("qs", "RDS")){
 # join bin files of basin averages of a model by S and L ------------------
 
 
-join_nmme_basin_avg_files <- function(sp_average = "weighted", format = "qs"){
+join_nmme_basin_avg_files <- function(sp_average = "weighted", ext = "qs"){
   
   # diretorio das medias nas areas das bacias da variavel de interesse
   # diretorios separados por modelo
-  basin_avg_d <- here(glue::glue("output/{format}/basin-avgs/{sp_average}"))
+  basin_avg_d <- here(glue::glue("output/{ext}/basin-avgs/{sp_average}"))
   # arquivos separados por S e L
   nmme_models_d <- dir_ls(basin_avg_d, type = "directory")
   
   # nome do arquivo de saida com juncao dos dados dos arquivos
   joined_basin_avgs <- path(
     basin_avg_d,
-    glue::glue("nmme-models-{sp_average}-avg-basins-ons.{format}")
+    glue::glue("nmme-models-{sp_average}-avg-basins-ons.{ext}")
   )  
   
   
   if(!checkmate::test_file_exists(joined_basin_avgs)){
     
     tictoc::tic()
-    basin_avg_nmme <- map_df(nmme_models_d, join_files_model_nmme)
+    basin_avg_nmme <- map_df(nmme_models_d, join_files_model_nmme, .ext = ext)
     tictoc::toc()
     # 5 min elapsed
     basin_avg_nmme <- basin_avg_nmme %>%

@@ -12,14 +12,16 @@
 #' @examples
 tidy_nmme_basin_data <- function(.var_name = "prec", 
                                  .sp_average = "weighted",
-                                 .ext = "qs",
-                                 .stat = "identity",
-                                 .out_dir = here(glue::glue("output/{.ext}/basin-avgs/{.sp_average}"))
+                                 extension = "qs",
+                                 .stat = "identity"
                                  ) {
   
+  .out_dir = here(glue::glue("output/{extension}/basin-avgs/{.sp_average}"))
+                  
+  #ext <- .ext
   basin_avg_nmme_file <- here(
     .out_dir,
-    glue::glue("nmme-models-{.sp_average}-avg-basins-ons.{.ext}")
+    glue::glue("nmme-models-{.sp_average}-avg-basins-ons.{extension}")
   )
   
   checkmate::assert_file_exists(basin_avg_nmme_file)
@@ -30,7 +32,7 @@ tidy_nmme_basin_data <- function(.var_name = "prec",
   path_model_summary <- fs::path_join(
     path_model_summary[1:(grep("basin", path_model_summary)-1)]
   )
-  models_summary <- import_bin_file(glue::glue("{path_model_summary}/model_counts.{.ext}"))
+  models_summary <- import_bin_file(glue::glue("{path_model_summary}/model_counts.{extension}"))
   
   # importa dados nmme medias nas bacias
   prec_nmme_avg_basin <- import_bin_file(basin_avg_nmme_file) %>%
@@ -97,13 +99,14 @@ tidy_nmme_basin_data <- function(.var_name = "prec",
 tidy_cru_basin_data <- function(
   .var_name = "prec",
   .sp_average = "weighted",
-  .ext = "qs",
-  .out_dir = here(glue::glue("output/{.ext}/basin-avgs/{.sp_average}"))
+  extension = "qs"
 ){
   
+  .out_dir = here(glue::glue("output/{extension}/basin-avgs/{.sp_average}"))
+                  
   basin_avg_cru_file <- here(
     .out_dir,
-    glue::glue("cru-{.var_name}-basins-{.sp_average}-avg.{.ext}")
+    glue::glue("cru-{.var_name}-basins-{.sp_average}-avg.{extension}")
   )  
   
   checkmate::assert_file_exists(basin_avg_cru_file)
@@ -138,24 +141,24 @@ tidy_cru_basin_data <- function(
 join_cru_nmme_basin_data <- function(sp_average = "weighted",
                                      ext = "qs",
                                      var_name = "prec",
-                                     stat = "identity",
-                                     out_dir = here(glue::glue("output/{ext}/basin-avgs/{sp_average}"))
-) {
+                                     stat = "identity"
+                                     ) {
+  #print(ext)
   # nmme -------------------------------------------------------------------------
+  out_dir <- here(glue::glue("output/{ext}/basin-avgs/{sp_average}"))
+                  
   nmme_basin_data <- tidy_nmme_basin_data(
     .var_name = var_name,
     .sp_average = sp_average,
-    .ext = ext,
-    .stat = stat,
-    .out_dir = out_dir
+    extension = ext,
+    .stat = stat
   )
   gc()
   # cru obs ----------------------------------------------------------------
   cru_basin_data <- tidy_cru_basin_data(
     .var_name = var_name,
     .sp_average = sp_average,
-    .ext = ext,
-    .out_dir = out_dir
+    extension = ext
   )
   
   # join ----------------------------------------------------------------

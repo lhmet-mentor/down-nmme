@@ -4,56 +4,88 @@ pcks <- c("tidyverse", "here",
           "tictoc")
 easypackages::libraries(pcks)
 
-avg_type <- "arithmetic"
+source(here("R/data-proc-rds.R"))
 
-out_dir <- here(str_replace("output/rds/basin-avgs/average_type", "average_type", avg_type))
+sp_average = "weighted"
+ext = "qs"
+var_name = "prec"
+stat = "identity"
+out_dir = here(glue::glue("output/{ext}/basin-avgs/{sp_average}"))
+basin_avg_nmme_file = here(out_dir, 
+                           glue::glue("nmme-models-{sp_average}-avg-basins-ons.{ext}")
+                      )
 
-# nmme
-prec_nmme_avg_basin_file <- here(out_dir, 
-                                 str_replace("nmme-models-average_type-avg-basins-ons.RDS",
-                                             "average_type", 
-                                             avg_type
-                                             )
-                                 )
 
-prec_nmme_avg_basin <- readr::read_rds(prec_nmme_avg_basin_file) %>%
-  mutate(data = map(data, 
-                    ~.x %>% 
-                      rename("date" = date_lead,
-                             "prec_model" = prec) %>%
-                      mutate(prec_model = prec_model * 30) # 30 eh o num de dias no calendario dos modelos
-                    )
-         # ,
-         # prec_min = map_dbl(data, 
-         #                    function(x) min(x$prec_model, na.rm = TRUE)
-         # ),
-         # prec_max = map_dbl(data, 
-         #                    function(x) max(x$prec_model, na.rm = TRUE)
-         # )
-) # 30.4175
+# --- nmme 
+
+
+prec_nmme_avg_basin <- import_bin_file(basin_avg_nmme_file) %>%
+  mutate(data = map(
+    data, ~ .x %>%
+      rename("date" = date_lead)
+  ))
+
+#prec_nmme_avg_basin[["data"]][[1]] 
+prec_nmme_avg_basin %>%
+  #unnest(cols = data) %>%
+  mutate(n_members = map(
+    data, ~ .x %>%
+      ?data.table::uniqueN
+  ))
+
+if (stat == "identity") {
+  # pivota membros nas linhas
+  prec_nmme_avg_basin <- prec_nmme_avg_basin %>%
+    mutate(data = map(
+      data,
+      ~ .x %>%
+        pivot_longer(
+          cols = contains("prec"),
+          names_to = "member", 
+          names_prefix = "prec_", 
+          names_transform = list(member = as.integer),
+          values_to = "prec_model"
+        ) %>%
+        mutate(prec_model = prec_model * 30) # 30 eh o num de dias no calendario dos modelos
+    ))
+  
+} else {
+  prec_nmme_avg_basin <- prec_nmme_avg_basin %>%
+    mutate(data = map(
+      data,
+      ~ .x %>%
+        rename("prec_model" = prec) %>%
+        mutate(prec_model = prec_model * 30,
+               member = 0L) # 30 eh o num de dias no calendario dos modelos
+    ))
+}
+  
+
 
 
 # obs ----------------------------------------------------------------
-prec_cru_avg_basin_file <- here(out_dir, 
-                                str_replace("cru-prec-basins-average_type-avg.RDS",
-                                            "average_type", 
-                                            avg_type
-                                            )
-                                )
-prec_cru_avg_basin <- readr::read_rds(prec_cru_avg_basin_file) %>%
-  mutate(ID = NULL,
-         # ajuste das datas
-         date = lubridate::floor_date(date, unit = "months"))
+basin_avg_cru_file <- here(out_dir, 
+                           glue::glue("cru-prec-basins-{sp_average}-avg.{ext}")
+                           )
+
+prec_cru_avg_basin <- import_bin_file(basin_avg_cru_file) %>%
+  mutate(
+    ID = NULL,
+    # ajuste das datas
+    date = lubridate::floor_date(date, unit = "months")
+  )
 str(prec_cru_avg_basin)
 summary(prec_cru_avg_basin)
 
 # check how to join-----
-# pred <- prec_nmme_avg_basin[["data"]][[1]] 
-# summary(pred)
-# comb_nmme_obs <- dplyr::inner_join(pred, prec_cru_avg_basin, 
-#                                    by = c("date", "codONS")
-#                                    )
-# tail(as.data.frame(comb_prec_obs), 30)
+pred <- prec_nmme_avg_basin[["data"]][[1]]
+summary(pred)
+comb_nmme_obs <- dplyr::inner_join(pred, prec_cru_avg_basin,
+                                   by = c("date", "codONS")
+                                   )
+filter(comb_nmme_obs, codONS == 1, date == as_date("1991-01-01"), L == 0.5) %>%
+  as.data.frame()
+tail(as.data.frame(comb_prec_obs), 30)
 
 
 # Combinacao de dados prec Obs e Model-----------------------------------------
@@ -72,7 +104,7 @@ readr::write_rds(prec_nmme_avg_basin,
                  file = here(out_dir, 
                              str_replace("nmme-cru-mly-average_type-avg-basins-ons.RDS",
                                          "average_type",
-                                         avg_type
+                                         sp_average
                                          )
                  ))
 summary(prec_nmme_avg_basin[["data"]][[1]])

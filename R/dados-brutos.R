@@ -2,7 +2,7 @@ pcks <- c("terra", "tidyverse", "here", "checkmate", "metR", "fs", "glue", "qs")
 easypackages::libraries(pcks)
 
 ## Funções para processamento dos dados netcdf------------------------------
-source(here("R", "data-proc-nc.R"))
+source(here("R/data-proc-nc.R"))
 
 ## util somente no caso de obter os dados do google drive ----------------------
 # source(here("R", "unzip-nc.R"))
@@ -49,10 +49,12 @@ model_counts <- nc_files_by_model_year(nc_files)
 # nc_info <- GlanceNetCDF(model_files[1])
 # nc_info
 # # nc_info é uma lista
-# #str(info)
+# str(nc_info)
 # # lead time pode ser obtido dela
 # str(nc_info$dims$L)
 # (lt <- nc_info$dims$L$vals)
+# membros
+# n_members <- length(nc_info$dims$M$vals)
 
 
 # looping para processar dados 

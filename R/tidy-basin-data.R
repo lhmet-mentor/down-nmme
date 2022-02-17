@@ -11,9 +11,10 @@
 #'
 #' @examples
 tidy_nmme_basin_data <- function(var_name = "prec", 
-                                 out_dir = here(glue::glue("output/{ext}/basin-avgs/{sp_average}")),
                                  sp_average = "weighted",
-                                 ext = "qs") {
+                                 ext = "qs",
+                                 out_dir = here(glue::glue("output/{ext}/basin-avgs/{sp_average}"))
+                                 ) {
   
   basin_avg_nmme_file <- here(
     out_dir,

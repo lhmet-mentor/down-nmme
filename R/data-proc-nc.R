@@ -46,19 +46,78 @@ year_from_ncfile <- function(nc_files){
 }
 
 
-# Contagem de arquivos por modelo e ano
-nc_files_by_model_year <- function(nc_files, format = c("RDS", "qs")){
-  # verificação do numero de arquivos com periodos
+# numero de membros e tempos de antecedencia dos modelo ------------------------
+.n_dim_nc <- function(nc_file, dim_name = "M"){
+  # nc_file = .nc_files[1]; dim_name = c("L", "M")
+  dim_name <- toupper(dim_name)
+  checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
+  nc_info <- GlanceNetCDF(nc_file)
+  dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
+  dim_info[dim_name]
+}
+
+#.n_dim_nc(nc_file, c("M", "L", "S", "X", "Y"))
+#.n_dim_nc(nc_file, c("L"))
+
+
+# sorteia arquivo NetCDF para os modelos ---------------------------------------
+.sample_model_nc_file <- function(.nc_files, .model, .var_name = "prec", .n = 1){
+  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .var_name = "prec"
+  model_names_nmme <- unique(model_name(.nc_files, vname = .var_name))
+  assert_subset(.model, model_names_nmme)
+  
+  model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
+    
+  files_samp <- grep(model_regex, .nc_files, value = TRUE) %>%
+    unique() %>%
+    split(., model_name(., vname = .var_name)) %>%
+    map(., ~.x %>% sample(., size = .n)) %>%
+    unlist()
+    
+  files_samp
+}
+
+
+
+
+# Contagem de arquivos por modelo e ano ----------------------------------------
+nc_files_by_model_year <- function(nc_files, 
+                                   out_ext = c("RDS", "qs"), 
+                                   var_name = "prec"){
+  # periodos
   model_counts <- tibble::tibble(file = nc_files, 
-                         modelo = model_name(nc_files, vname = "prec"),
+                         modelo = model_name(nc_files, vname = var_name),
                          ano = year_from_ncfile(nc_files)
   ) %>%
     dplyr::group_by(modelo) %>%
     dplyr::summarise(start = min(ano), end = max(ano), freq = n()) %>%
-    dplyr::mutate(check_span = end-start+1)
+    dplyr::mutate(
+      check_span = end-start+1
+    )
+
+  # dimensoes
+  files_samp <- .sample_model_nc_file(
+    nc_files,
+    model_counts$modelo, 
+    .var_name = var_name,
+    .n = 1
+  )
   
-  saveRDS(model_counts, file = here("output", format, "model_counts.RDS"))
-  model_counts
+  model_dimensions <- map_dfr(files_samp, 
+          .n_dim_nc, 
+          dim_name = c("M", "L", "S", "X", "Y"), 
+          .id = "modelo"
+          )
+  
+  models_info <- dplyr::full_join(model_counts, model_dimensions)
+  
+  out_file <- glue::glue("output/{out_ext}/model_counts.{out_ext}")
+  export_bin_file(
+    models_info, 
+    here(out_file)
+  )
+  message("data exported to: ", out_file)
+  models_info
 }
 
 
@@ -219,8 +278,8 @@ data_model_lt <- function(
 
 
 
-#Processa ncs de um modelo para todos lead times--------------------------------
-#' Title
+#--------------------------------
+#' Processa ncs de um modelo para todos lead times
 #'
 #' @param model nome do modelo NMME
 #' @param variavel nome da variável a ser processada 

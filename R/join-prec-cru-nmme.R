@@ -16,8 +16,9 @@ basin_avg_nmme_file = here(out_dir,
                       )
 
 
-# --- nmme 
 
+# --- nmme 
+models_summary <- import_bin_file(glue::glue("output/{ext}/model_counts.{ext}"))
 
 prec_nmme_avg_basin <- import_bin_file(basin_avg_nmme_file) %>%
   mutate(data = map(
@@ -25,17 +26,18 @@ prec_nmme_avg_basin <- import_bin_file(basin_avg_nmme_file) %>%
       rename("date" = date_lead)
   ))
 
-#prec_nmme_avg_basin[["data"]][[1]] 
-prec_nmme_avg_basin %>%
-  #unnest(cols = data) %>%
-  mutate(n_members = map(
-    data, ~ .x %>%
-      ?data.table::uniqueN
-  ))
+# prec_nmme_avg_basin[["data"]][[1]] # wide
+
+prec_nmme_avg_basin <- prec_nmme_avg_basin %>%
+  inner_join(dplyr::select(models_summary, modelo, M), 
+             by = c("model" = "modelo")) %>%
+  dplyr::rename("n_members" = "M")
+
 
 if (stat == "identity") {
   # pivota membros nas linhas
-  prec_nmme_avg_basin <- prec_nmme_avg_basin %>%
+  tictoc::tic()
+  prec_nmme_avg_basin_long <- prec_nmme_avg_basin %>%
     mutate(data = map(
       data,
       ~ .x %>%
@@ -46,20 +48,26 @@ if (stat == "identity") {
           names_transform = list(member = as.integer),
           values_to = "prec_model"
         ) %>%
-        mutate(prec_model = prec_model * 30) # 30 eh o num de dias no calendario dos modelos
+        mutate(prec_model = prec_model * 30) #%>% # 30 eh o num de dias no calendario dos modelos
+        #arrange(S, L, codONS, member)
     ))
+  tictoc::toc()
   
 } else {
-  prec_nmme_avg_basin <- prec_nmme_avg_basin %>%
+  prec_nmme_avg_basin_long <- prec_nmme_avg_basin %>%
     mutate(data = map(
       data,
       ~ .x %>%
         rename("prec_model" = prec) %>%
         mutate(prec_model = prec_model * 30,
-               member = 0L) # 30 eh o num de dias no calendario dos modelos
-    ))
+               member = 0L
+               ) #%>% # 30 eh o num de dias no calendario dos modelos
+        #arrange( S, L, codONS, member)
+    )
+    ) 
 }
   
+
 
 
 

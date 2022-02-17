@@ -19,7 +19,8 @@ remotes::install_github("rspatial/raster")
 
 ``` r
 pcks <- c("tidyverse", "data.table", "metR", "raster", "terra", "qs", "readr", 
-          "here", "checkmate", "fs", "glue", "purrr", "stringr")
+          "here", "checkmate", "fs", "glue", "purrr", "stringr", "tictoc",
+          "lubridate")
 easypackages::libraries(c("tidyverse"))
 #> Loading required package: tidyverse
 #> ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
@@ -80,13 +81,13 @@ packageVersion("qs")
     `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS,qs}` (cada arquivo
     \~290 MB)
 
-4.  `spatial-average-nmme-basins.R`
+4.  `spatial-average-nmme-basins.R` (etapa mais demorada)
 
 -   arquivos de entrada em
     `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS, qs}`
 
 -   depende do script `data-proc-basin.R` que contém as funções para
-    obter a média na área das bacias hirográficas do SIN (por data de
+    obter a média na área das bacias hirográficas (por data de
     inicialização e *lead time*) da variável de interesse (precipitação,
     temperatura) agregada (média, mediana ou identidade) de cada modelo.
 
@@ -104,33 +105,32 @@ packageVersion("qs")
 5.  `join-spavg-nmme-basins.R`:
 
 -   depende do script `data-join-rds.R` que contém a função para juntar
-    todos arquivos RDS.
+    todos arquivos binários (`.qs` ou `.RDS`).
 
--   arquivos de saída em `output/rds/basin/avgs/{spatial_average_type}`
-    no fomato RDS no padrão
-    `nmme-models-{spatial_average_type}-avg-basins-ons.RDS` (cada
+-   arquivos de saída em `output/rds/basin/avgs/{sp_average}` no fomato
+    RDS no padrão `nmme-models-{sp_average}-avg-basins-ons.RDS` (cada
     arquivo em torno de 160 MB)
 
 6.  `spatial-average-obs-basins.R`:
 
 -   depende do script `data-proc-basin.R` que contém as funções para
-    obter a média na área das principais bacias do SIN para os dados do
-    CRU.
+    obter a média na área bacias hidrográficas para os dados do CRU.
 
--   arquivos de saída em `output/rds/basin/avgs/{spatial_average_type}`
-    no fomato RDS no padrão
-    `cru-prec-basins-{spatial_average_type}-avg.RDS` (cada arquivo em
-    torno de 3.6 MB)
+-   arquivos de saída em `output/rds/basin/avgs/{sp_average}` no formato
+    RDS no padrão `cru-prec-basins-{sp_average}-avg.RDS` (cada arquivo
+    em torno de 3.6 MB)
 
-7.  `join-prec-cru-nmme.R`:
+7.  `join-prec-cru-nmme.R`: combina os dados observados e previsões dos
+    membros dos modelos.
 
--   combina os dados observados e previsões das médias dos membros dos
-    modelos.
+-   depende do script `tidy-basin_data.R` que arruma os dados das
+    previsões dos membros dos modelos no formato *tidy* para combiná-los
+    com as observações do CRU.
 
--   arquivos de saída em `output/rds/basin/avgs/{spatial_average_type}`
-    no fomato RDS no padrão
-    `nmme-cru-mly-{spatial_average_type}-avg-basins-ons.RDS` (cada
-    arquivo em torno de 180 MB)
+-   arquivo de saída em
+    `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-{sp_average}-avg-basins-ons.qs`,
+    onde `ext = 'qs' ou 'RDS'` e
+    `sp_average =  'weighted' ou 'arithmetic'`.
 
 8.  `evaluation-cru-nmme.R`:
 

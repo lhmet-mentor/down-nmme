@@ -118,7 +118,12 @@ packageVersion("qs")
   - arquivo de saída em `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-{sp_average}-avg-basins-ons.qs`, onde `ext = 'qs' ou 'RDS'` e `sp_average =  'weighted' ou 'arithmetic'`.
   
 
-8. `evaluation-cru-nmme.R`:
+8. `climatology-cru-nmme.R` 
+
+  - calcula estatísticas básicas climatológicas mensais entre as previsões e observações para os diferentes tempos de antecedência;
+
+
+9. `view-eval-cru-nmme.R`:
 
   - depende do script `utils.R` que contém as funções auxiliares para obter nomes dos postos e tabela com código e nome das '28' maiores hidrelétricas e dos 6 maiores aproveitamentos hidrelétricos do SIN. 
   
@@ -126,7 +131,7 @@ packageVersion("qs")
   - calcula a correlação entre prev e obs para os diferentes tempos de antecedências por meses e apresenta visualização para algumas Bacias Hidrográficas;
   
 
-9. `comparacao-climatol-cru-nmme.R` TO DO DESC.
+
 
 
 

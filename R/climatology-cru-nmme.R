@@ -1,20 +1,13 @@
 
-# # Comparação da climatologia dos modelos NMME
+## Comparação da climatologia dos modelos NMME com obs do CRU
 # 
-# 
-# - Arquivos de NetCDF da climatologia falta o modelo ... NCAR-CESM1
-# Fonte http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/
-#   
-#   Arquivos de climatologia [aqui](https://drive.google.com/drive/folders/1A8h0WrCei2rM8U6OKNNirh7GJ_XscC8K?usp=sharing).
-# 
-# - Notamos um modelo novo 'GFDL-SPEAR'
-# http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.GFDL-SPEAR/.HINDCAST/  
-  
+# periodo dos dados processados
 
-
+#remotes::install_github("dreamRs/esquisse")
 pcks <- c("tidyverse", "here", "HEobs",
           "checkmate", "lubridate",
-          "tictoc", "openair", "ggpubr", "ggExtra", "viridis", "see")
+          "tictoc", "openair", "ggpubr", "ggExtra", "viridis", "see", "ggh4x")
+
 easypackages::libraries(pcks)
 
 
@@ -23,6 +16,8 @@ easypackages::libraries(pcks)
 #------------------------------------------------------------------------------
 # funcoes auxiliares
 source("R/utils.R")
+source("R/data-proc-rds.R")
+
 
 #------------------------------------------------------------------------------
 # Metadata - codigos bacias e nomes
@@ -33,91 +28,132 @@ source("R/utils.R")
 #readr::write_rds(qnat_meta, file = here("input/obs/qnat", "qnat_meta_ons.RDS"))
 
 qnat_meta <- readr::read_rds(here("input/obs/qnat", "qnat_meta_ons.RDS"))
-glimpse(qnat_meta)
+#glimpse(qnat_meta)
 arrange(qnat_meta, estacao_codigo)
+# para escolher um posto ONS a partir do codONS
+top6()
 
+(models_summary <- import_bin_file("output/qs/model_counts.qs"))
 
 #------------------------------------------------------------------------------
-# previsoes climaticas nmme e observacoes do CRU
-#avg_type <- "arithmetic"
+# dados das previsoes climaticas nmme e CRU------------------------------
 avg_type <- "weighted" # melhores resultados
+extension <- "qs"
 
-out_dir <- here(
-  str_replace("output/rds/basin-avgs/avg_type", "avg_type", avg_type)
-  )
+out_dir <- here(glue::glue("output/{extension}/basin-avgs/{avg_type}"))
+nmme_cru_basin_data <- import_bin_file(
+  here(out_dir, glue::glue("nmme-cru-mly-{avg_type}-avg-basins-ons.{extension}"))
+) %>%
+  dplyr::rename("n_L" = L)
 
-prec_nmme_cru <- readr::read_rds(
-  file = here(out_dir,
-              str_replace("nmme-cru-mly-avg_type-avg-basins-ons.RDS",
-                          "avg_type",
-                          avg_type
-                          )
-              )
-  ) 
 
-#prec_nmme_cru[["data"]][[1]]
+nmme_cru_basin_clim <- clim_stats(nmme_cru_basin_data, 
+                                  "prec", 
+                                  funs_l = list(
+                                    avg = mean,
+                                    med = median,
+                                    sd = sd,
+                                    mad = mad
+                                  ))
 
-prec_nmme_cru_lfix <- prec_nmme_cru %>%
-  mutate(data = map(data, 
-                    ~ .x %>% mutate(S = NULL,
-                                    # para facilitar interpretacao do lead time
-                                    L = as.integer(trunc(L))
-                                    )
-                    )
-  )
-
-# para deixar os dados em tibble comum (sem dados aninhados)
-prec_nmme_cru_flat <-  prec_nmme_cru_lfix %>%
+nmme_cru_basin_clim <- nmme_cru_basin_clim %>%
+  select(model, data) %>%
   unnest() %>%
   ungroup()
 
-saveRDS(prec_nmme_cru_flat, file = here(out_dir, "prec_nmme_cru_tidy.RDS"))
-rm(prec_nmme_cru_lfix, prec_nmme_cru)
-
 #-------------------------------------------------------------------------------
-# Climatologia do NMME e do CRU para lead 0
-models <- prec_nmme_cru_flat$model %>% unique()
+# Viz
 
-clima_by_lead_month_tot <- 
- filter(prec_nmme_cru_flat, 
-       #model == models[1]
-       #L == 0
-       ) %>%
-  group_by(codONS, month = lubridate::month(date), L, model) %>%
-  summarise_at(.vars = vars(contains("prec")), .funs = list(mean)) %>%
-  arrange(model, codONS, L, month)
+imodel <- "CanSIPS-IC3"
+ibasin <- 6
+var_stat <- c("avg", "sd")
 
-clima_by_lead_month_tot
+obs_stat <- glue::glue("obs_{var_stat}")
+regex_str <- ifelse(length(obs_stat) > 1, paste0(obs_stat, collapse = "|"), obs_stat)
 
 
 
-ndias <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-names(ndias) <- 1:12
+vars_obs <- grep(
+  regex_str, 
+  names(nmme_cru_basin_clim), 
+  value = TRUE
+)
+
+vars_model <- str_replace(vars_obs, "obs", "model")
+
+m <- month.abb %>% set_names(., 1:12)
+
+plot_data <- nmme_cru_basin_clim %>%
+  dplyr::filter(codONS %in% ibasin) %>%
+  dplyr::select(model:month, one_of(vars_obs, vars_model)) %>%
+  pivot_longer(cols = contains("prec"), names_to = "prec", values_to = "valor") %>%
+  mutate(prec = str_replace_all(prec, "prec_", "")) %>%
+  separate(prec, c("type", "stat")) %>%
+  pivot_wider(names_from = "stat", values_from = "valor") %>%
+  dplyr::mutate(
+    L = as.character(L),
+    month = ordered(month, levels = c(7:12, 1:6)),
+    month = recode(month, !!!m)
+  ) 
+
+# Climatologia dos modelos por lead time ---------------------------------------
+ggplot(plot_data, aes(x = month, y = avg, group = type)) +
+  geom_ribbon(aes(ymin = avg + sd, 
+                  ymax = avg - sd,
+                  fill = type), 
+              alpha = 0.3) +
+  geom_line(aes(colour = type), size = 1) +
+  facet_grid(vars(L), vars(model)) + #,scales = "free", independent = "y"
+  scale_x_discrete(labels = ~.x %>% str_sub(1, 1)) +
+  theme_bw() +
+  theme(
+    strip.background = element_blank(),
+    strip.placement = "outside",
+    legend.position = "top",
+    legend.direction = "horizontal"
+  )
+  
+# Climatologia dos modelos com lead times no mesmo plot-------------------------
+ggplot(filter(plot_data, type == "model") %>%
+         select(-type), 
+       aes(x = month, y = avg, group = L)) +
+  # geom_ribbon(aes(ymin = avg + sd, 
+  #                 ymax = avg - sd,
+  #                 fill = type), 
+  #             alpha = 0.3) +
+  geom_line(aes(colour = L)) +
+  facet_wrap(vars(model)) + #,scales = "free", independent = "y"
+  scale_x_discrete(labels = ~.x %>% str_sub(1, 1)) +
+  theme_bw() +
+  theme(
+    strip.background = element_blank(),
+    strip.placement = "outside",
+    legend.position = "top",
+    legend.direction = "horizontal"
+  ) +
+  geom_line(
+    data = filter(plot_data, type == "obs"),
+    aes(x = month, y = avg)
+  )
 
 
-clima_by_lead_month_rate <- clima_by_lead_month_tot %>%
-  mutate(prec_model_dly_variav =  prec_model/ndias[as.character(month)],
-         prec_model_dly_fix = prec_model/30
-         ) %>%
-  ungroup()
+
+
+# ndias <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+# names(ndias) <- 1:12
+# 
+# 
+# clima_by_lead_month_rate <- clima_by_lead_month_tot %>%
+#   mutate(prec_model_dly_variav =  prec_model/ndias[as.character(month)],
+#          prec_model_dly_fix = prec_model/30
+#          ) %>%
+#   ungroup()
 
 # descobrindo os periodos das climatologias de cada modelo
 # prec_nmme_cru_flat %>%
 #   group_by(model) %>%
 #   summarise(sdate = min(date), edate = max(date))
-periodos <- readr::read_rds(here("output/rds/model_counts.RDS"))
-
-# TO DO
-# Ler netcdfs das clomatologias e formata-los em um tibble
-#metR::ReadNetCDF
-# juntar com os dados clima_by_lead_month_rate
-# e avaliar qual prec_model eh mais proxima
-# tomando em conta o periodo
-
-
-#--------------------------------------------------------------------------
-# 
-
+#periodos <- readr::read_rds(here("output/rds/model_counts.RDS"))
 
 
 

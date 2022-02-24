@@ -50,11 +50,14 @@ nmme_cru_basin_data[["data"]][[1]] %>%
   select(-S) %>%
   dplyr::mutate(L = factor(trunc(L))) %>%
   group_by(codONS, L, month = month(date)) %>%
-  summarise(mean_ens = mean(prec_model),
-            med_ens = median(prec_model), 
-            sd_ens = sd(prec_model),
-            mad_ens = mad(prec_model),
-            .groups = "drop") %>% View()
+  summarise(across(contains("prec"), 
+                   list(avg = mean, 
+                        med = median,
+                        sd = sd,
+                        mad = mad
+                        )),
+            .groups = "drop"
+            ) %>% View()
 
 # nmme_cru_basin_data <- nmme_cru_basin_data %>%
 #   mutate(data = map(data,

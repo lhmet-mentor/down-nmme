@@ -27,11 +27,11 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
   data_link <- paste0(
     "http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/",
     # modelo
-    ".modelo/.HINDCAST/.MONTHLY/",
+    ".{modelo}/.HINDCAST/.MONTHLY/",
     # variavel
-    ".variavel/",
+    ".{variavel}/",
     # Forecast Start Time (forecast_reference_time)
-    "S/%280000%201%20Jan%20YYYY%29%280000%2030%20Dec%20YYYY",
+    "S/%280000%201%20Jan%20{YYYY}%29%280000%2030%20Dec%20{YYYY}",
     # sub dominio
     "%29RANGEEDGES/X/%2830W%29%2885W%29RANGEEDGES/Y/%2860S%29%2815N%29RANGEEDGES/",
     # nome dop arq default
@@ -44,9 +44,12 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
   
   Sys.sleep(1)
   
-  data_link_ano <- stringr::str_replace_all(data_link, "variavel", variavel)
-  data_link_ano <- stringr::str_replace_all(data_link_ano, "modelo", modelo)
-  data_link_ano <- stringr::str_replace_all(data_link_ano, "YYYY", ano)
+
+  # data_link_ano <- stringr::str_replace_all(data_link, "variavel", variavel)
+  # data_link_ano <- stringr::str_replace_all(data_link_ano, "modelo", modelo)
+  # data_link_ano <- stringr::str_replace_all(data_link_ano, "YYYY", ano)
+  
+  data_link_ano <- glue::glue(data_link)
   
   #path_file(data_link_ano)
   message("Baixando arquivo: ", dest_file)

@@ -17,7 +17,7 @@ easypackages::libraries(pcks)
 # funcoes auxiliares
 source("R/utils.R")
 source("R/data-proc-rds.R")
-
+source("R/plot-clim-models-funs.R")
 
 #------------------------------------------------------------------------------
 # Metadata - codigos bacias e nomes
@@ -37,8 +37,9 @@ top6()
 
 #------------------------------------------------------------------------------
 # dados das previsoes climaticas nmme e CRU------------------------------
-avg_type <- "weighted" # melhores resultados
-extension <- "qs"
+avg_type = "weighted" # melhores resultados
+extension = "qs"
+var_name = "prec"
 
 out_dir <- here(glue::glue("output/{extension}/basin-avgs/{avg_type}"))
 nmme_cru_basin_data <- import_bin_file(
@@ -58,83 +59,21 @@ nmme_cru_basin_clim <- clim_stats(nmme_cru_basin_data,
 
 nmme_cru_basin_clim <- nmme_cru_basin_clim %>%
   select(model, data) %>%
-  unnest() %>%
+  unnest(cols = c(data)) %>%
   ungroup()
 
 #-------------------------------------------------------------------------------
 # Viz
 
-imodel <- "CanSIPS-IC3"
-ibasin <- 6
-var_stat <- c("avg", "sd")
+plot_clim <- ggp_climatologia(monthly_data = nmme_cru_basin_clim,
+                              var_name = "prec",
+                              ibasin = 6,
+                              var_stat = c("avg", "sd")
+                              #var_stat = c("med", "mad")
+                              )
 
-obs_stat <- glue::glue("obs_{var_stat}")
-regex_str <- ifelse(length(obs_stat) > 1, paste0(obs_stat, collapse = "|"), obs_stat)
-
-
-
-vars_obs <- grep(
-  regex_str, 
-  names(nmme_cru_basin_clim), 
-  value = TRUE
-)
-
-vars_model <- str_replace(vars_obs, "obs", "model")
-
-m <- month.abb %>% set_names(., 1:12)
-
-plot_data <- nmme_cru_basin_clim %>%
-  dplyr::filter(codONS %in% ibasin) %>%
-  dplyr::select(model:month, one_of(vars_obs, vars_model)) %>%
-  pivot_longer(cols = contains("prec"), names_to = "prec", values_to = "valor") %>%
-  mutate(prec = str_replace_all(prec, "prec_", "")) %>%
-  separate(prec, c("type", "stat")) %>%
-  pivot_wider(names_from = "stat", values_from = "valor") %>%
-  dplyr::mutate(
-    L = as.character(L),
-    month = ordered(month, levels = c(7:12, 1:6)),
-    month = recode(month, !!!m)
-  ) 
-
-# Climatologia dos modelos por lead time ---------------------------------------
-ggplot(plot_data, aes(x = month, y = avg, group = type)) +
-  geom_ribbon(aes(ymin = avg + sd, 
-                  ymax = avg - sd,
-                  fill = type), 
-              alpha = 0.3) +
-  geom_line(aes(colour = type), size = 1) +
-  facet_grid(vars(L), vars(model)) + #,scales = "free", independent = "y"
-  scale_x_discrete(labels = ~.x %>% str_sub(1, 1)) +
-  theme_bw() +
-  theme(
-    strip.background = element_blank(),
-    strip.placement = "outside",
-    legend.position = "top",
-    legend.direction = "horizontal"
-  )
-  
-# Climatologia dos modelos com lead times no mesmo plot-------------------------
-ggplot(filter(plot_data, type == "model") %>%
-         select(-type), 
-       aes(x = month, y = avg, group = L)) +
-  # geom_ribbon(aes(ymin = avg + sd, 
-  #                 ymax = avg - sd,
-  #                 fill = type), 
-  #             alpha = 0.3) +
-  geom_line(aes(colour = L)) +
-  facet_wrap(vars(model)) + #,scales = "free", independent = "y"
-  scale_x_discrete(labels = ~.x %>% str_sub(1, 1)) +
-  theme_bw() +
-  theme(
-    strip.background = element_blank(),
-    strip.placement = "outside",
-    legend.position = "top",
-    legend.direction = "horizontal"
-  ) +
-  geom_line(
-    data = filter(plot_data, type == "obs"),
-    aes(x = month, y = avg)
-  )
+plot_clim[[1]]
+plot_clim[[2]]
 
 
 

@@ -35,7 +35,7 @@ remotes::install_github("rspatial/raster")
 ```{r}
 pcks <- c("tidyverse", "data.table", "metR", "raster", "terra", "qs", "readr", 
           "here", "checkmate", "fs", "glue", "purrr", "stringr", "tictoc",
-          "lubridate")
+          "lubridate", "ggpubr", "ggExtra", "viridis", "see", "ggh4x")
 easypackages::libraries(c("tidyverse"))
 #fs::dir_ls(here("R"), glob = "*.R") %>%
 #  fs::path_file()
@@ -120,7 +120,9 @@ packageVersion("qs")
 
 8. `climatology-cru-nmme.R` 
 
-  - calcula estatísticas básicas climatológicas mensais entre as previsões e observações para os diferentes tempos de antecedência;
+  - depende do script `plot-clim-models-funs.R` que contém funções para visualização da Climatologia dos modelos do NMME em função dos leads times, em comparação as observações do CRU.
+  
+  - saída são 2 gráficos: um com painés bivariados (leat time, modelo);
 
 
 9. `view-eval-cru-nmme.R`:

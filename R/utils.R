@@ -70,30 +70,4 @@ top6 <- function(){
   
 
 
-# Funcao para calculo da climatologia dos modelos por lead time, bacia e mes ----
-clim_stats <- function(data_models = nmme_cru_basin_data,
-                       var_name = "prec",
-                       funs_l = list(
-                         avg = mean,
-                         med = median,
-                         sd = sd,
-                         mad = mad
-                       )) {
-  dplyr::mutate(data_models,
-    data = map(
-      data,
-      ~ .x %>%
-        dplyr::select(-S) %>%
-        dplyr::mutate(L = factor(trunc(L))) %>%
-        dplyr::group_by(codONS, L, month = month(date)) %>%
-        dplyr::summarise(
-          dplyr::across(
-            dplyr::contains(var_name),
-            funs_l
-          ),
-          .groups = "drop"
-        )
-    )
-  )
-}
 

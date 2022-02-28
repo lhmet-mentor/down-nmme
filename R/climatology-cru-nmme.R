@@ -17,6 +17,7 @@ easypackages::libraries(pcks)
 # funcoes auxiliares
 source("R/utils.R")
 source("R/data-proc-rds.R")
+source("R/clim-functions.R")
 source("R/plot-clim-models-funs.R")
 
 #------------------------------------------------------------------------------
@@ -35,32 +36,21 @@ top6()
 
 (models_summary <- import_bin_file("output/qs/model_counts.qs"))
 
-#------------------------------------------------------------------------------
+
+
 # dados das previsoes climaticas nmme e CRU------------------------------
-avg_type = "weighted" # melhores resultados
-extension = "qs"
-var_name = "prec"
+nmme_cru_basin_clim <- climatology_nmme_cru("prec", 
+                                            "weighted",
+                                            "qs",
+                                            list(
+                                              avg = mean,
+                                              med = median,
+                                              sd = sd,
+                                              mad = mad
+                                            ))
 
-out_dir <- here(glue::glue("output/{extension}/basin-avgs/{avg_type}"))
-nmme_cru_basin_data <- import_bin_file(
-  here(out_dir, glue::glue("nmme-cru-mly-{avg_type}-avg-basins-ons.{extension}"))
-) %>%
-  dplyr::rename("n_L" = L)
 
 
-nmme_cru_basin_clim <- clim_stats(nmme_cru_basin_data, 
-                                  "prec", 
-                                  funs_l = list(
-                                    avg = mean,
-                                    med = median,
-                                    sd = sd,
-                                    mad = mad
-                                  ))
-
-nmme_cru_basin_clim <- nmme_cru_basin_clim %>%
-  select(model, data) %>%
-  unnest(cols = c(data)) %>%
-  ungroup()
 
 #-------------------------------------------------------------------------------
 # Viz

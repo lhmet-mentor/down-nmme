@@ -82,7 +82,7 @@ plot_clim_grpleads_by_model <- function(.plot_data, .cent, .tit, .subt){
         group_by(month) %>% 
         summarise(across(sym(.cent):ylower, mean)) %>%
         full_join(.,
-                  filter(plot_data, type == "obs") %>% select(model:month),
+                  filter(.plot_data, type == "obs") %>% select(model:month),
                   by = "month"
         ),
       aes(x = month, y = !!sym(.cent)),

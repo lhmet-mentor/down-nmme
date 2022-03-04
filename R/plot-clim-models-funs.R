@@ -31,9 +31,9 @@
       names_to = .var_name,
       values_to = "valor"
     ) %>%
-    dplyr::mutate(!!var_name := stringr::str_replace_all(
+    dplyr::mutate(!!.var_name := stringr::str_replace_all(
       !!sym(.var_name),
-      glue::glue("{var_name}_"),
+      glue::glue("{.var_name}_"),
       ""
     )) %>%
     tidyr::separate(!!sym(.var_name), c("type", "stat")) %>%
@@ -53,7 +53,41 @@
 }
 
 
-
+# Climatologia por lead com modelos no mesmo plot-----------------------
+plot_clim_grpmodels_by_lead <- function(.plot_data, .cent, .tit, .subt){
+  # .plot_data = plot_data; .cent = cent; .tit = titulo; .subt = subtitulo
+  ggplot(filter(.plot_data, type == "model") %>% select(-type), 
+         aes(x = month, y = !!sym(.cent), group = model)) +
+    # geom_ribbon(aes(ymin = avg + sd, 
+    #                 ymax = avg - sd,
+    #                 fill = type), 
+    #             alpha = 0.3) +
+    geom_line(aes(colour = model)) +
+    facet_wrap(vars(L)) + #,scales = "free", independent = "y"
+    scale_x_discrete(labels = ~.x %>% str_sub(1, 1)) +
+    theme_bw() +
+    theme(
+      strip.background = element_blank(),
+      strip.placement = "outside",
+      legend.position = "top",
+      legend.direction = "horizontal"
+    ) +
+    geom_line(
+      # data = filter(plot_data, type == "obs")%>% distinct(month, !!sym(cent)),
+      # PQ OS PERIODOS DE ANOS VARIAM POR MODELO
+      data = filter(.plot_data, type == "obs") %>%
+        group_by(month) %>% 
+        summarise(across(sym(.cent):ylower, mean)) %>%
+        full_join(.,
+                  filter(.plot_data, type == "obs") %>% select(model:month),
+                  by = "month"
+        ),
+      aes(x = month, y = !!sym(.cent)),
+      size = 1.1, alpha = 0.9
+    ) + 
+    scale_colour_material_d() +
+    ggtitle(.tit, .subt) + ylab("Prec (mm)")
+}
 
 
 # Climatologia dos modelos com lead times no mesmo plot-----------------------
@@ -156,6 +190,9 @@ ggp_climatologia <- function(monthly_data = nmme_cru_basin_clim,
       plot_data, cent, titulo, subtitulo
     ),
     by_grp_leads = plot_clim_grpleads_by_model(
+      plot_data, cent, titulo, subtitulo
+    ),
+    by_grp_models = plot_clim_grpmodels_by_lead(
       plot_data, cent, titulo, subtitulo
     )
   )

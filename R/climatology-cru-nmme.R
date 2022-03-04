@@ -57,13 +57,14 @@ nmme_cru_basin_clim <- climatology_nmme_cru("prec",
 
 plot_clim <- ggp_climatologia(monthly_data = nmme_cru_basin_clim,
                               var_name = "prec",
-                              ibasin = 6,
+                              ibasin = 270,
                               var_stat = c("avg", "sd")
                               #var_stat = c("med", "mad")
                               )
 
 plot_clim[[1]]
 plot_clim[[2]]
+plot_clim[[3]]
 
 
 

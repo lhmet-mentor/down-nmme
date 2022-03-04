@@ -122,7 +122,13 @@ packageVersion("qs")
 
   - depende do script `plot-clim-models-funs.R` que contém funções para visualização da Climatologia dos modelos do NMME em função dos leads times, em comparação as observações do CRU.
   
-  - saída são 2 gráficos: um com painés bivariados (leat time, modelo);
+  - saída são 3 gráficos: 
+      
+      - Climatologia por modelo e lead time;
+      
+      - Climatologia por modelo com lead times agrupados;
+      
+      - Climatologia por lead time com modelos agrupados;
 
 
 9. `view-eval-cru-nmme.R`:

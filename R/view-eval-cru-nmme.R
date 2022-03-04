@@ -46,6 +46,7 @@ nmme_cru_basin_data <- import_bin_file(
 ) %>%
   dplyr::rename("n_L" = L)
 
+# primeiro modelo
 nmme_cru_basin_data[["data"]][[1]] %>%
   select(-S) %>%
   dplyr::mutate(L = factor(trunc(L))) %>%
@@ -80,7 +81,11 @@ subtitulo <- paste0("Bacia Hidrográfica: ", stn_name(code = ibasin))
 d <- dplyr::filter(nmme_cru_basin_data, model == imodel)[["data"]][[1]] %>%
   # filter(year(Sr) %in% 2001) %>%
   dplyr::filter(codONS == ibasin) %>%
-  dplyr::mutate(L = factor(trunc(L)), S = NULL) %>%
+  dplyr::mutate(L = factor(trunc(L)), 
+                L = ordered(L, levels = sort(unique(L))),
+                month = as.integer(lubridate::month(date)),
+                month = ordered(month, levels = sort(unique(month))),
+                S = NULL) %>%
   tidyr::pivot_wider(
     names_from = "member",
     values_from = "prec_model",
@@ -88,15 +93,14 @@ d <- dplyr::filter(nmme_cru_basin_data, model == imodel)[["data"]][[1]] %>%
   ) %>%
   # ensemble mean and median
   group_by(L, month = as.integer(lubridate::month(date))) %>%
-  
-  
   tidyr::pivot_longer(contains("prec"), names_to = "source", values_to = "value") %>%
   dplyr::mutate(
-    source = factor(source),
-    L = ordered(L, levels = sort(unique(L))),
-    month = as.integer(month(date)),
-    month = ordered(month, levels = sort(unique(month)))
-  ) 
+    source = factor(source)
+    #L = ordered(L, levels = sort(unique(L))),
+    #month = as.integer(month(date)),
+    #month = ordered(month, levels = sort(unique(month)))
+  ) %>%
+  ungroup()
 
 
 data_plot <- d %>%
@@ -104,8 +108,7 @@ data_plot <- d %>%
 
 cli <- filter(data_plot, source == "prec_obs") %>%
   dplyr::group_by(L, month) %>%
-  dplyr::summarise(climatology = mean(value)) %>%
-  dplyr::ungroup()
+  dplyr::summarise(climatology = mean(value), .groups = "drop") 
 
 p <- data_plot %>%
   dplyr::filter(source != "prec_obs") %>%

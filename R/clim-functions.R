@@ -27,6 +27,13 @@ clim_stats <- function(data_models = nmme_cru_basin_data,
   clim_data
 }
 
+.filename_basin_data <- function(avgtype, extensao){
+  in_dir <- here(glue::glue("output/{extensao}/basin-avgs/{avgtype}"))
+  input_file <- here(in_dir, 
+                     glue::glue("nmme-cru-mly-{avgtype}-avg-basins-ons.{extensao}")
+  )
+  input_file
+}
 
 
 climatology_nmme_cru <- function(var_name = "prec",
@@ -38,14 +45,12 @@ climatology_nmme_cru <- function(var_name = "prec",
                                    sd = sd,
                                    mad = mad
                                  )) {
-  in_dir <- here(glue::glue("output/{extension}/basin-avgs/{avg_type}"))
+  
   out_dir <- here(glue::glue("output/{extension}/basin-avgs/{avg_type}/climatology"))
-  input_file <- here(in_dir, 
-                     glue::glue("nmme-cru-mly-{avg_type}-avg-basins-ons.{extension}")
-                     )
   out_clim_file <- here(
     glue::glue(out_dir, "/nmme_cru_basin_clim.{extension}")
   )
+  
   # se arquivo existir retornar dados lidos
   if (checkmate::test_file_exists(out_clim_file)) {
     return(import_bin_file(out_clim_file))
@@ -55,8 +60,12 @@ climatology_nmme_cru <- function(var_name = "prec",
     fs::dir_create(out_dir)
   }
   # read data
+  input_file <- .filename_basin_data(avg_type, extension)
   nmme_cru_basin_data <- import_bin_file(input_file) %>%
     dplyr::rename("n_L" = L)
+  
+  
+  
 
   # climatology statistics
   nmme_cru_basin_clim <- clim_stats(nmme_cru_basin_data, 

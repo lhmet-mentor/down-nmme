@@ -17,7 +17,6 @@ source("R/data-proc-rds.R")
 
 
 
-
 # Metadata - codigos bacias e nomes -----------------------------------------
 # data_link <- "https://www.dropbox.com/s/d40adhw66uwueet/VazoesNaturaisONS_D_87UHEsDirceuAssis_2018.dat?dl=1"
 # qnat_meta <- extract_metadata(file = data_link, informative = TRUE)
@@ -40,10 +39,9 @@ top6()
 avg_type <- "weighted" # melhores resultados
 extension <- "qs"
 
-out_dir <- here(glue::glue("output/{extension}/basin-avgs/{avg_type}"))
 nmme_cru_basin_data <- import_bin_file(
-  here(out_dir, glue::glue("nmme-cru-mly-{avg_type}-avg-basins-ons.{extension}"))
-) %>%
+  .filename_basin_data(avg_type, extension)
+  ) %>%
   dplyr::rename("n_L" = L)
 
 # primeiro modelo

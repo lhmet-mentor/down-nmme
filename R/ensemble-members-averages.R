@@ -11,7 +11,7 @@ source(here("R", "data-proc-rds.R"))
 ##------------------------------------------------------------------------------
 
 
-path_rds_files <- here("output", "rds")
+#path_rds_files <- here("output", "rds")
 path_qs_files <- here("output", "qs")
 
 model_counts <- readr::read_rds(here(path_rds_files, "model_counts.RDS"))

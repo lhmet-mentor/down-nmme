@@ -14,7 +14,7 @@ source(here("R", "data-proc-rds.R"))
 #path_rds_files <- here("output", "rds")
 path_qs_files <- here("output", "qs")
 
-model_counts <- readr::read_rds(here(path_rds_files, "model_counts.RDS"))
+model_counts <- import_bin_file(here::here(path_qs_files, "model_counts.qs"))
 models <- model_counts$modelo
 
 # files_bin <- dir_ls(

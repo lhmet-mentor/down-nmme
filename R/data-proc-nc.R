@@ -48,7 +48,7 @@ year_from_ncfile <- function(nc_files){
 
 # numero de membros e tempos de antecedencia dos modelo ------------------------
 .n_dim_nc <- function(nc_file, dim_name = "M"){
-  # nc_file = .nc_files[1]; dim_name = c("L", "M")
+  # nc_file = nc_files[1]; dim_name = c("L", "M")
   dim_name <- toupper(dim_name)
   checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
   nc_info <- GlanceNetCDF(nc_file)

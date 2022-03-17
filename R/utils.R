@@ -70,4 +70,10 @@ top6 <- function(){
   
 
 
-
+.filename_basin_data <- function(avgtype, extensao){
+  in_dir <- here(glue::glue("output/{extensao}/basin-avgs/{avgtype}"))
+  input_file <- here(in_dir, 
+                     glue::glue("nmme-cru-mly-{avgtype}-avg-basins-ons.{extensao}")
+  )
+  input_file
+}

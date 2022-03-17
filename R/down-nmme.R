@@ -31,7 +31,7 @@ down_nmme <- function(ano = 1981, modelo = "CanCM4i", variavel = "prec"){
     # variavel
     ".{variavel}/",
     # Forecast Start Time (forecast_reference_time)
-    "S/%280000%201%20Jan%20{YYYY}%29%280000%2030%20Dec%20{YYYY}",
+    "S/%280000%201%20Jan%20{ano}%29%280000%2030%20Dec%20{ano}",
     # sub dominio
     "%29RANGEEDGES/X/%2830W%29%2885W%29RANGEEDGES/Y/%2860S%29%2815N%29RANGEEDGES/",
     # nome dop arq default

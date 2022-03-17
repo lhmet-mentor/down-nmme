@@ -139,8 +139,7 @@ packageVersion("qs")
   - calcula a correlação entre prev e obs para os diferentes tempos de antecedências por meses e apresenta visualização para algumas Bacias Hidrográficas;
   
 
-
-
+  - CRPSS, diagrama de confiabilidade, PIT p-value, PBIAS, RMSE, KGE
 
 
 

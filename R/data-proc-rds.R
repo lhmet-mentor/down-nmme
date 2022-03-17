@@ -132,16 +132,26 @@ ensemble_model_refrcst <- function(imodel,
                                    stat = "mean",
                                    output_format = "qs"
 ){
-  # imodel = "GFDL-SPEAR"; path_files = path_qs_files
+  # imodel = "CanCM4i"; path_files = path_qs_files
   # model_name_rds(model_files_rds, vname = "prec")  
   checkmate::assert_choice(output_format, c("RDS", "rds", "qs"))
   
   cat(imodel, "\n")
   
+  digitos <- '{1,2}'
   model_files <- dir_ls(
     path_files, 
-    regexp = glue::glue('{imodel}_lt[0-9]\\.[0-9]')
+    regexp = glue::glue('{imodel}_lt[0-9]{digitos}\\.[0-9]')
+    #regexp = glue::glue('{imodel}')
   )
+  # para ordenar arquivos por lead time
+  o <- model_files %>%
+    fs::path_file() %>%
+    stringr::str_extract('[0-9]{1,2}\\.[0-9]') %>%
+    readr::parse_number() %>%
+    order()
+  model_files <- model_files[o]
+  
   #bin_file_ext <- fs::path_ext(model_files) %>% unique()
   
   ens_model_refcst <- ensemble_refcst_files(files = model_files, 

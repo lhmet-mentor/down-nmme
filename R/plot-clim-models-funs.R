@@ -39,7 +39,7 @@
     tidyr::separate(!!sym(.var_name), c("type", "stat")) %>%
     tidyr::pivot_wider(names_from = "stat", values_from = "valor") %>%
     dplyr::mutate(
-      L = as.character(L),
+      #L = as.character(L),
       # para centralizar em dez e jan (ano hidrologico)
       month = ordered(month, levels = c(7:12, 1:6)),
       month = dplyr::recode(month, !!!m)
@@ -165,8 +165,9 @@ plot_clim_by_models_lead <- function(.plot_data, .cent, .tit, .subt) {
 ggp_climatologia <- function(monthly_data = nmme_cru_basin_clim,
                              var_name = "prec",
                              ibasin = 6,
-                             # var_stat <- c("avg", "sd")
-                             var_stat = c("med", "mad")) {
+                             var_stat = c("avg", "sd")
+                             #var_stat = c("med", "mad")
+                             ) {
   
   
   # para labels no x com a 1a letra do mes

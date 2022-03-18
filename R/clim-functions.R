@@ -13,7 +13,11 @@ clim_stats <- function(data_models = nmme_cru_basin_data,
       data,
       ~ .x %>%
         dplyr::select(-S) %>%
-        dplyr::mutate(L = factor(trunc(L))) %>%
+        dplyr::mutate(L = factor(trunc(L), 
+                                 levels = 0:11,
+                                 ordered = TRUE
+                                 )
+                      ) %>%
         dplyr::group_by(codONS, L, month = month(date)) %>%
         dplyr::summarise(
           dplyr::across(
@@ -33,6 +37,7 @@ clim_stats <- function(data_models = nmme_cru_basin_data,
 climatology_nmme_cru <- function(var_name = "prec",
                                  avg_type = "weighted",
                                  extension = "qs",
+                                 overwrite = FALSE,
                                  funs_list = list(
                                    avg = mean,
                                    med = median,
@@ -46,7 +51,7 @@ climatology_nmme_cru <- function(var_name = "prec",
   )
   
   # se arquivo existir retornar dados lidos
-  if (checkmate::test_file_exists(out_clim_file)) {
+  if (checkmate::test_file_exists(out_clim_file) && (!overwrite)) {
     return(import_bin_file(out_clim_file))
   }
   # se nao existir arquivo criar diretorio para salvar climatologia

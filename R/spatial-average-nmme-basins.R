@@ -19,12 +19,14 @@ pols_inc_sp <- readr::read_rds(path_pols_bhs) %>%
 #plot(pols_inc_sp)
 
 ## dados ensemble -------------------------------------------------------------
+stat = "identity"
+ext = "qs"
 
 sp_avg_nmme_basin(
   path_ensemb_files = here("output", ext),
   suffix_ensemb_files = glue::glue("ensemble.*{stat}.{ext}"),
   pols = pols_inc_sp,
-  stat = c('mean', 'median', 'identity'),
+  stat = 'identity',
   ext = "qs"
 )
  

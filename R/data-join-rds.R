@@ -36,7 +36,9 @@ join_files_model_nmme <- function(model_dir, .ext = c("qs", "RDS")){
 # join bin files of basin averages of a model by S and L ------------------
 
 
-join_nmme_basin_avg_files <- function(sp_average = "weighted", ext = "qs"){
+join_nmme_basin_avg_files <- function(sp_average = "weighted", 
+                                      ext = "qs",
+                                      overwrite = FALSE){
   
   # diretorio das medias nas areas das bacias da variavel de interesse
   # diretorios separados por modelo
@@ -64,6 +66,20 @@ join_nmme_basin_avg_files <- function(sp_average = "weighted", ext = "qs"){
     export_bin_file(basin_avg_nmme, joined_basin_avgs)
     
   } else {
+    # se o arquivo existe
+    # mas pode-se sobrescrever
+    if(overwrite){
+      tictoc::tic()
+      basin_avg_nmme <- map_df(nmme_models_d, join_files_model_nmme, .ext = ext)
+      tictoc::toc()
+      # 5 min elapsed
+      basin_avg_nmme <- basin_avg_nmme %>%
+        group_by(model) %>%
+        nest()
+      
+      export_bin_file(basin_avg_nmme, joined_basin_avgs)
+    }
+    
     basin_avg_nmme <- import_bin_file(joined_basin_avgs)
   }
   

@@ -57,7 +57,7 @@ ungroup(models_span)
 # 9 NCAR-CESM1   1980-01-01 2010-12-01
 # 10 NCEP-CFSv2   1982-01-01 2010-12-01
 
-read_rds("output/rds/model_counts.RDS")
+read_rds(here("output/qs/model_counts.qs"))
 # A tibble: 10 × 5
 # modelo       start   end  freq check_span
 # <chr>        <int> <int> <int>      <dbl>

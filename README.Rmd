@@ -105,17 +105,16 @@ packageVersion("qs")
 
 6. `spatial-average-obs-basins.R`:
 
-  - depende do script `data-proc-basin.R` que contém as funções para obter a média 
-  na área bacias hidrográficas para os dados do CRU. 
+  - depende do script `data-proc-basin.R` que contém as funções para obter a média na área bacias hidrográficas para os dados do CRU. 
   
-  - arquivos de saída em `output/rds/basin/avgs/{sp_average}` no formato RDS no padrão `cru-prec-basins-{sp_average}-avg.RDS` (cada arquivo em torno de 3.6 MB)
+  - arquivos de saída em `output/{ext}/basin/avgs/{sp_average}` no formato RDS no padrão `cru-prec-basins-{sp_average}-avg.{ext}` (cada arquivo em torno de 3.6 MB), onde `ext = 'qs' ou 'RDS'` e `sp_average =  'weighted' ou 'arithmetic'`.
 
 
 7. `join-prec-cru-nmme.R`: combina os dados observados e previsões dos membros dos modelos. 
 
   - depende do script `tidy-basin_data.R` que arruma os dados das previsões dos membros dos modelos no formato *tidy* para combiná-los com as observações do CRU. 
 
-  - arquivo de saída em `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-{sp_average}-avg-basins-ons.qs`, onde `ext = 'qs' ou 'RDS'` e `sp_average =  'weighted' ou 'arithmetic'`.
+  - arquivo de saída em `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-{sp_average}-avg-basins-ons.qs`
   
 
 8. `climatology-cru-nmme.R` 

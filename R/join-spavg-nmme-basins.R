@@ -12,7 +12,8 @@ source(here("R/data-proc-rds.R"))
 
 prec_nmme_basin_avg <- join_nmme_basin_avg_files(
   sp_average = "weighted",
-  ext = "qs"
+  ext = "qs",
+  overwrite = TRUE #! para juntar dados reprocessados de lead > 10.5
 )
 
 prec_nmme_basin_avg[["data"]][[1]]
@@ -57,20 +58,8 @@ ungroup(models_span)
 # 9 NCAR-CESM1   1980-01-01 2010-12-01
 # 10 NCEP-CFSv2   1982-01-01 2010-12-01
 
-read_rds(here("output/qs/model_counts.qs"))
-# A tibble: 10 × 5
-# modelo       start   end  freq check_span
-# <chr>        <int> <int> <int>      <dbl>
-# 1 CanCM4i       1981  2018    38         38
-# 2 CanSIPS-IC3   1980  2020    41         41
-# 3 CanSIPSv2     1981  2018    38         38
-# 4 CMC1-CanCM3   1981  2010    30         30
-# 5 CMC2-CanCM4   1981  2010    30         30
-# 6 GEM-NEMO      1981  2018    38         38
-# 7 GFDL-SPEAR    1991  2020    30         30
-# 8 NASA-GEOSS2S  1981  2017    37         37
-# 9 NCAR-CESM1    1980  2010    31         31
-# 10 NCEP-CFSv2    1982  2010    29         29
+import_bin_file(here("output/qs/model_counts.qs"))
+
 
 
 

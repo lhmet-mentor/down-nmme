@@ -59,9 +59,19 @@ ungroup(models_span)
 # 10 NCEP-CFSv2   1982-01-01 2010-12-01
 
 import_bin_file(here("output/qs/model_counts.qs"))
-
-
-
+# A tibble: 10 x 10
+# modelo       start   end  freq check_span     M     L     S     X     Y
+# <chr>        <int> <int> <int>      <dbl> <int> <int> <int> <int> <int>
+#  1 CanCM4i       1981  2018    38         38    10    12    12    56    76
+#  2 CanSIPS-IC3   1980  2020    41         41    20    12    12    56    76
+#  3 CanSIPSv2     1981  2018    38         38    20    12    12    56    76
+#  4 CMC1-CanCM3   1981  2010    30         30    10    12    12    56    76
+#  5 CMC2-CanCM4   1981  2010    30         30    10    12    12    56    76
+#  6 GEM-NEMO      1981  2018    38         38    10    12    12    56    76
+#  7 GFDL-SPEAR    1991  2020    30         30    15    12    12    56    76
+#  8 NASA-GEOSS2S  1981  2017    37         37     4     9    12    56    76
+#  9 NCAR-CESM1    1980  2010    31         31    10    12    12    56    76
+# 10 NCEP-CFSv2    1982  2010    29         29    24    10    12    56    76
 
 
 

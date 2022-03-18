@@ -20,7 +20,6 @@ nmme_cru_basin_data <- join_cru_nmme_basin_data(
 )
 #11.528 sec elapsed
 nmme_cru_basin_data[["data"]][[1]]
-
 (models_summary <- import_bin_file("output/qs/model_counts.qs"))
 top6()
 

@@ -42,6 +42,7 @@ top6()
 nmme_cru_basin_clim <- climatology_nmme_cru("prec", 
                                             "weighted",
                                             "qs",
+                                            overwrite = TRUE,
                                             list(
                                               avg = mean,
                                               med = median,
@@ -57,13 +58,13 @@ nmme_cru_basin_clim <- climatology_nmme_cru("prec",
 
 plot_clim <- ggp_climatologia(monthly_data = nmme_cru_basin_clim,
                               var_name = "prec",
-                              ibasin = 270,
+                              ibasin = 6,
                               var_stat = c("avg", "sd")
                               #var_stat = c("med", "mad")
                               )
 
-plot_clim[[1]]
-plot_clim[[2]]
+# plot_clim[[1]]
+# plot_clim[[2]]
 plot_clim[[3]]
 
 

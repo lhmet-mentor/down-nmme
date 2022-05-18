@@ -6,6 +6,10 @@ pcks <- c(
 
 easypackages::libraries(pcks)
 
+## Refs
+# https://github.com/SantanderMetGroup/loadeR/wiki
+
+
 
 # devtools::install_github("lhmet-ped/HEobs")
 

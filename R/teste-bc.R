@@ -10,7 +10,7 @@ easypackages::libraries(pcks)
 # devtools::install_github("lhmet-ped/HEobs")
 
 #------------------------------------------------------------------------------
-# funcoes auziliares
+# funcoes auxiliares
 source("R/utils.R")
 source("R/data-proc-rds.R")
 
@@ -39,76 +39,26 @@ avg_type <- "weighted" # melhores resultados
 extension <- "qs"
 var_name <- "prec"
 
-nmme_cru_basin_data <- import_bin_file(
-  .filename_basin_data(avg_type, extension)
+nmme_cru_basin_data_models <- import_bin_file(
+  .filename_basin_data(avg_type, extension, "-ens-smry")
 ) %>%
   dplyr::rename("n_L" = L)
 
-# media dos membros para o primeiro modelo
-# m1 <- nmme_cru_basin_data[["data"]][[1]] %>%
-#   select(-S) %>%
-#   dplyr::mutate(L = factor(trunc(L))) %>%
-#   #group_by(codONS, L, month = month(date)) %>%
-#   group_by(codONS, L, date) %>%
-#   summarise(across(contains("prec"), 
-#                    list(avg = mean, 
-#                         med = median,
-#                         sd = sd,
-#                         mad = mad
-#                    )),
-#             .groups = "drop"
-#   ) #%>% View()
-# 
-# gc()
-
-
-funs_l <- list(
-  avg = mean,
-  med = median,
-  sd = sd,
-  mad = mad
-)
-
-# media dos membros dos modelos
-# 1 previsao por media do ensemble dos membros
-nmme_cru_basin_data_ens <- 
-  nmme_cru_basin_data %>%
-  ungroup() %>%
-  dplyr::mutate(.,
-              data = map(
-                data,
-                ~ .x %>%
-                  dplyr::select(-S) %>%
-                  dplyr::mutate(L = factor(trunc(L), levels = 0:11, ordered = TRUE)) %>%
-                  dplyr::group_by(codONS, L, date) %>%
-                  dplyr::summarise(
-                    dplyr::across(
-                      dplyr::contains(var_name),
-                      funs_l
-                    ),
-                    .groups = "drop"
-                  )
-              )
-            )
-
 
 # Dados para teste de aplicacao BC---------------------------------------------
+nmme_cru_basin_data_models_flat <- nmme_cru_basin_data_models %>%
+  dplyr::select(model, data) %>%
+  unnest("data")
+
 imodel <- "CanSIPS-IC3"
 ibasin <- 6
 month <- 1
 
-nmme_cru_basin_data_ens <- nmme_cru_basin_data_ens %>%
-  dplyr::select(model, data) %>%
-  unnest()
-
-
-dados_pp <- nmme_cru_basin_data_ens %>%
-  filter(codONS == ibasin, model == imodel, L == 1, month(date) == month) %>%
+dados_pp <- nmme_cru_basin_data_models_flat %>%
+  dplyr::filter(codONS == ibasin, model == imodel, L == 1, month(date) == month) %>%
   dplyr::select(date, contains("avg"))
 
 
-# dados_pp <- nmme_cru_basin_data_ens %>%
-#   filter(codONS == 6, model == imodel, L == 1, month == 1) %>%
-#   select(contains("avg"))
+tail(dados_pp)
 
-dados_pp
+

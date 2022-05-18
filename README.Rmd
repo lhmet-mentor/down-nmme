@@ -117,7 +117,15 @@ packageVersion("qs")
   - arquivo de saída em `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-{sp_average}-avg-basins-ons.qs`
   
 
-8. `climatology-cru-nmme.R` 
+8. `aggregate-members.R`: 
+
+  - depende do script `aggregate-nmme.R` que contém funções para agregar os membros dos modelos do NMME;
+
+  - depende do script `utils.R` que contém as funções auxiliares para obter nomes dos postos e tabela com código e nome das '28' maiores hidrelétricas e dos 6 maiores aproveitamentos hidrelétricos do SIN.
+  
+
+
+9. `climatology-cru-nmme.R` 
 
   - depende do script `plot-clim-models-funs.R` que contém funções para visualização da Climatologia dos modelos do NMME em função dos leads times, em comparação as observações do CRU.
   
@@ -130,9 +138,11 @@ packageVersion("qs")
       - Climatologia por lead time com modelos agrupados;
 
 
+ 
+
 9. `view-eval-cru-nmme.R`:
 
-  - depende do script `utils.R` que contém as funções auxiliares para obter nomes dos postos e tabela com código e nome das '28' maiores hidrelétricas e dos 6 maiores aproveitamentos hidrelétricos do SIN. 
+  - depende do script `utils.R` 
   
   
   - calcula a correlação entre prev e obs para os diferentes tempos de antecedências por meses e apresenta visualização para algumas Bacias Hidrográficas;

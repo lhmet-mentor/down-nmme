@@ -6,7 +6,7 @@
 pcks <- c(
   "tidyverse", "here", "HEobs",
   "checkmate", "lubridate",
-  "tictoc" 
+  "tictoc", "data.table"
   #"openair", "ggpubr", "ggExtra", "viridis", "see", "ggh4x"
 )
 

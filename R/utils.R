@@ -20,7 +20,7 @@ major28 <- function(){
   
   # digitado manualmente a partir de 
   # Tabela 1 do artigo 
-  tribble(
+  tibble::tribble(
     ~codONS,  ~nome,      ~bacia,
     6,       "FURNAS",      "Grande",
     #"MASCARENHAS" (M. MORAES)?
@@ -71,8 +71,8 @@ top6 <- function(){
 
 
 .filename_basin_data <- function(avgtype, extensao, sufixo = ""){
-  in_dir <- here(glue::glue("output/{extensao}/basin-avgs/{avgtype}"))
-  input_file <- here(in_dir, 
+  in_dir <- here::here(glue::glue("output/{extensao}/basin-avgs/{avgtype}"))
+  input_file <- here::here(in_dir, 
                      glue::glue("nmme-cru-mly-{avgtype}-avg-basins-ons{sufixo}.{extensao}")
   )
   input_file

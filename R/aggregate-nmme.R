@@ -4,6 +4,7 @@ aggregate_members_nmme <- function(
   avg_type = "weighted", # melhores resultados
   extension = "qs",
   var_name = "prec",  
+  suffix = "ens-smry",
   funs_list = list(
     avg = mean,
     med = median,
@@ -78,7 +79,7 @@ aggregate_members_nmme <- function(
     stringr::str_split("\\.") %>% 
     unlist() %>%
     nth(1) %>%
-    glue::glue("-ens-smry.{extension}") %>%
+    glue::glue("-{suffix}.{extension}") %>%
     fs::path(fs::path_dir(.filename_basin_data(avg_type, extension)), .)
   
   export_bin_file(ens, out_fname)

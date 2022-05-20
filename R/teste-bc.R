@@ -135,7 +135,8 @@ dados_pp_cv <- map_df(
         # method = "scaling",
         scaling.type = "multiplicative"
       )
-      # inserir outros metodos
+      # inserir outros metodos aqui
+      # ...
     )
    teste
   }
@@ -178,6 +179,7 @@ openair::scatterPlot(.,
                      xlim = c(rng), ylim = rng
 )
 
+# metricas de verificacao
 
 
 

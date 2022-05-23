@@ -24,10 +24,10 @@ source(here("R/aggregate-nmme.R"))
 
 
 
-# aplica funcao para medias dos membros por modelo ----------------------------
+# medias dos membros por modelo ----------------------------
 
 #NAO TESTADA AINDA POR CAUSA DA DEMORA ~18 min para rodar
-aggregate_members_nmme(
+nmme_data_file_name <- aggregate_members_nmme(
   avg_type = "weighted", # melhores resultados
   extension = "qs",
   var_name = "prec", 
@@ -39,9 +39,33 @@ aggregate_members_nmme(
     mad = mad
   )
 )
-  
-# importar arquivo resultante para analise posteriores
+nmme_data_file_name
+
+# 
+# Usa o arquivo gerado na chamada acima
+# para calcular a media do conjunto de modelos
+
+tictoc::tic()
+nmme_ens_file_name <- aggregate_models(
+  var_target = "members_avg",
+  avg_type = "weighted", # melhores resultados
+  extension = "qs",
+  var_name = "prec",
+  funs_list = list(
+    avg = mean,
+    med = median,
+    sd = sd,
+    mad = mad
+  ),
+  prefix = "nmme-mly-ens-mean-1982-2010"
+)
+tictoc::toc()
+#38.782 sec elapsed
+nmme_ens_file_name
 
 
+
+# juncao das medias do modelo com a media ensemble
+(data_pp_file <- join_nmme_model_ensemble(nmme_ens_file_name, nmme_data_file_name))
 
 

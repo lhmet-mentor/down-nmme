@@ -22,68 +22,61 @@ source("R/bc-funs.R")
 # para escolher um posto ONS a partir do codONS
 top6()
 
+# importa dados combinados das medias dos modelos e da media ensemble
+data_join_file <- here("output/qs/basin-avgs/weighted/nmme-mly-models-avgs-ens-mean-1982-2010-prec.qs")
 
-
-# parametros para selcao dos dados das previsoes climaticas nmme e CRU----------
-avg_type <- "weighted" # melhores resultados
-extension <- "qs"
-var_name <- "prec"
-
-# previsoes medias do ensemble (1 prev por modelo)
-nmme_cru_basin_data_models <- import_bin_file(
-  .filename_basin_data(avg_type, extension, "-ens-smry")
-) %>%
-  dplyr::select(model, data) %>%
-  unnest("data")
+# importa dados combinados (ens e medias modelos)
+data_pp <- import_bin_file(data_pp_file)
 
 
 # Dados para teste de aplicacao BC---------------------------------------------
-imodel <- "GFDL-SPEAR"
-ibasin <- 156
-month <- 1
+ imodel <- "NCEP-CFSv2"
+ ibasin <- 156
+ month <- 1
 
-dados_pp <- nmme_cru_basin_data_models %>%
+data_pp_1model <- data_pp %>%
   #dplyr::filter(codONS %in% top6()[[1]], L == 1, month(date) == month) %>%
-  dplyr::filter(month(date) == month) %>%
-  dplyr::filter(codONS == ibasin, model == imodel, L == 1, month(date) == month) %>%
-  dplyr::select(model, codONS, date,
-                # media do ensemble
-                contains("avg"), 
-                # desvio padrao do ensemble (requerido por alguns metodos de PP)
-                contains("model_sd")
-                ) %>%
-  arrange(date) %>%
-  # previsao por ensemble sem correcao (bruta)
-  rename("ens_avg" = prec_model_avg,  
-         "obs" = prec_obs_avg,
-         "ens_sd" = prec_model_sd
-         )
+  dplyr::filter(codONS == ibasin, month(date) == month, model == imodel, L == 1) 
+  
 
-rng <- range(select(dados_pp, obs, ens_avg))
+rng <- range(select(data_pp_1model, model_avg, obs_avg, ens_avg))
 rng <- c(trunc(rng[1]), ceiling(rng[2]))
 
-dados_pp_long <- dados_pp %>%
+data_pp_1model_long <- data_pp_1model %>%
   select(-ens_sd) %>%
   pivot_longer(cols = -c(model:date), names_to = "prec", values_to = "value")
   
-dados_pp_long %>%
+data_pp_1model_long %>%
   ggplot(aes(x = date, y = value, color = prec)) +
   geom_point() + 
   geom_line() +
-  theme_bw()
+  theme_bw() +
+  geom_hline(yintercept = mean(data_pp_1model$obs_avg))
 
-openair::scatterPlot(dados_pp, 
-                     x = "obs", 
+openair::scatterPlot(data_pp_1model, 
+                     x = "obs_avg", 
                      y = "ens_avg", 
                      linear = TRUE, 
                      mod.line = TRUE,
                      #type = c("model", "codONS")
                      pch = 20, 
-                     xlim = c(rng), ylim = rng
+                     xlim = c(rng), 
+                     ylim = rng
+                     
+)
+openair::scatterPlot(data_pp_1model, 
+                     x = "obs_avg", 
+                     y = "model_avg", 
+                     linear = TRUE, 
+                     mod.line = TRUE,
+                     #type = c("model", "codONS")
+                     pch = 20, 
+                     xlim = c(rng), 
+                     ylim = rng
+                     
 )
 
-
-dados_pp_long %>%
+data_pp_1model_long %>%
   ggplot(aes(x = value, color = prec)) +
   geom_density()
 
@@ -106,7 +99,7 @@ library(tidymodels)
 ## como nao temos os dados baixados do periodo de previsao usaremos outra forma
 ## alternativa: validacao cruzada
 
-dados_pp_split <- loo_cv(dados_pp)
+dados_pp_split <- loo_cv(data_pp_1model)
 
 
 dados_pp_cv <- map_df(
@@ -122,16 +115,18 @@ dados_pp_cv <- map_df(
 
     teste <- teste %>%
       mutate(
+      # Mean and Variance Adjustment. Leung et al. 1999. BiasCorrection {CSTools}
       sbc = sbc(
-        var_obs = treino$obs,
-        var_exp = treino$ens_avg,
-        var_cor = ens_avg,
+        var_obs = treino[["obs_avg"]],
+        var_exp = treino[["model_avg"]],
+        var_cor = model_avg,
         na.rm = TRUE
       ),
+      # Scaling. biasCorrection1D {downscaleR}
       bc_scaling = downscaleR:::scaling(
-        o = treino$obs,
-        p = treino$ens_avg,
-        s = ens_avg,
+        o = treino$obs_avg,
+        p = treino$model_avg,
+        s = model_avg,
         # method = "scaling",
         scaling.type = "multiplicative"
       )

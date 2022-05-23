@@ -23,13 +23,15 @@ source(here("R/aggregate-nmme.R"))
 
 
 
+
 # aplica funcao para medias dos membros por modelo ----------------------------
 
 #NAO TESTADA AINDA POR CAUSA DA DEMORA ~18 min para rodar
 aggregate_members_nmme(
   avg_type = "weighted", # melhores resultados
   extension = "qs",
-  var_name = "prec",  
+  var_name = "prec", 
+  suffix = "ens-smry",
   funs_list = list(
     avg = mean,
     med = median,
@@ -39,3 +41,7 @@ aggregate_members_nmme(
 )
   
 # importar arquivo resultante para analise posteriores
+
+
+
+

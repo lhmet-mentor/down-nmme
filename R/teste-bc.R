@@ -3,8 +3,13 @@ pcks <- c(
   "checkmate", "lubridate",
   "tictoc", "openair", "ggpubr", "ggExtra", "viridis", "see", "ggh4x",
   "ensemblepp",
-  "downscaleR"
-)
+  "ensembleBMA",
+  "ensembleMOS",
+  "downscaleR",
+  "tidymodels",
+  "crch",
+  "MBC" # 
+  )
 
 easypackages::libraries(pcks)
 
@@ -23,14 +28,45 @@ source("R/bc-funs.R")
 top6()
 
 # importa dados combinados das medias dos modelos e da media ensemble
-data_join_file <- here("output/qs/basin-avgs/weighted/nmme-mly-models-avgs-ens-mean-1982-2010-prec.qs")
+data_join_file <- here("output/qs/basin-avgs/weighted",
+                       "nmme-mly-models-avgs-ens-mean-1982-2010-prec.qs")
 
 # importa dados combinados (ens e medias modelos)
-data_pp <- import_bin_file(data_pp_file)
+data_pp <- import_bin_file(data_join_file)
+
+
+# verificacao das distribuicoes de prec 
+# (aproximacao gaussiana para chuva mensal)
+
+data_pp %>%
+  filter(L == 1, month(date) == 1, codONS %in% top6()$codONS) %>%
+  ggplot(aes(x = model_avg)) +
+  #ggplot(aes(x = obs_avg)) +
+  geom_histogram(bins = 20) +
+  facet_grid(vars(codONS), vars(model))
+
+
+# dados com os modelos nas colunas para usar com metodos multimodelos
+data_pp_wide <-  data_pp %>%
+  pivot_wider(
+    names_from = "model", 
+    values_from = "model_avg",
+    names_prefix = "model_"
+  ) %>%
+  setNames(., nm = str_replace_all(names(.), "-", "_")) 
+
+library(openair)
+data_pp_wide %>%
+  filter(L == 1, month(date) == 1, codONS == 6) %>%
+  select(-ens_sd) %>%
+  timePlot(., names(.)[-c(1:3)], group = TRUE, key.columns = 4)
+  
+
+
 
 
 # Dados para teste de aplicacao BC---------------------------------------------
- imodel <- "NCEP-CFSv2"
+ imodel <- "CanSIPS-IC3"
  ibasin <- 156
  month <- 1
 
@@ -38,6 +74,8 @@ data_pp_1model <- data_pp %>%
   #dplyr::filter(codONS %in% top6()[[1]], L == 1, month(date) == month) %>%
   dplyr::filter(codONS == ibasin, month(date) == month, model == imodel, L == 1) 
   
+
+
 
 rng <- range(select(data_pp_1model, model_avg, obs_avg, ens_avg))
 rng <- c(trunc(rng[1]), ceiling(rng[2]))
@@ -88,7 +126,7 @@ data_pp_1model_long %>%
 # IDEAL: "treino" seria o periodo das hindcasts (1982-2010)
 #        "teste"  seria o periodo das forecasts (previsões) de 2011-2020 
 
-library(tidymodels)
+
 
 ## separacao dos dados aleatoria
 # dados_pp_split <- initial_split(dados_pp, prop = 0.6) 
@@ -105,7 +143,7 @@ dados_pp_split <- loo_cv(data_pp_1model)
 dados_pp_cv <- map_df(
   1:nrow(dados_pp_split),
   function(ires) {
-    # ires = 1
+    # ires = 9
     # primeira reamostra
     i_resample <- dados_pp_split[["splits"]][[ires]]
     # dados de trinamento da reamostra
@@ -113,8 +151,8 @@ dados_pp_cv <- map_df(
     # dados de teste da reamostra
     teste <- testing(i_resample)
 
-    teste <- teste %>%
-      mutate(
+    teste <- 
+      mutate(teste,
       # Mean and Variance Adjustment. Leung et al. 1999. BiasCorrection {CSTools}
       sbc = sbc(
         var_obs = treino[["obs_avg"]],
@@ -129,9 +167,21 @@ dados_pp_cv <- map_df(
         s = model_avg,
         # method = "scaling",
         scaling.type = "multiplicative"
+      ),
+      mos = MOS(obs = treino$obs_avg,
+                prev = treino$model_avg,
+                prev_new = model_avg
+                ),
+      ngr2 = NGR2(
+        obs = treino$obs_avg,
+        ensmean = treino$ens_avg,
+        enssd = treino$ens_sd,
+        ensmean_new = ens_avg,
+        enssd_new = ens_sd
       )
       # inserir outros metodos aqui
       # ...
+      # MBC
     )
    teste
   }
@@ -146,6 +196,7 @@ dados_pp_cv_long <- dados_pp_cv %>%
   pivot_longer(-(model:date), names_to = "prec", values_to = "value")
 
 dados_pp_cv_long %>%
+  filter(prec %in% c("obs_avg", "mos", "ens_avg", "ngr2")) %>%
   ggplot(aes(x = date, y = value, color = prec)) +
   #geom_col(position = "dodge") + 
   geom_point() +
@@ -155,16 +206,16 @@ dados_pp_cv_long %>%
 
 dados_pp_cv4plot <-  dados_pp_cv %>%
   select(-ens_sd) %>%
-  pivot_longer(cols = -c(model:date, obs),
+  pivot_longer(cols = -c(model:date, obs_avg),
                names_to = "models",
                values_to = "value")
 
-rng <- range(select(dados_pp_cv4plot, obs, value))
+rng <- range(select(dados_pp_cv4plot, obs_avg, value))
 rng <- c(trunc(rng[1]), ceiling(rng[2]))
 
 dados_pp_cv4plot %>%
 openair::scatterPlot(., 
-                     x = "obs", 
+                     x = "obs_avg", 
                      y = "value", 
                      type = "models",
                      linear = TRUE, 
@@ -182,8 +233,6 @@ openair::scatterPlot(.,
 
 
 
-# CSTools
-# BiasCorrection()
 
 
 

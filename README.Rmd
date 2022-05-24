@@ -119,11 +119,18 @@ packageVersion("qs")
 
 8. `aggregate-members.R`: 
 
-  - depende do script `aggregate-nmme.R` que contém funções para agregar os membros dos modelos do NMME;
+  - depende do script `aggregate-nmme.R` que contém funções para:
+    
+    - calcular a média dos modelos do NMME a partir de seus membros; 
+    
+    - calcular a média ensemble dos modelos a partir dos modelos do NMME; 
+    
+    - juntar as médias dos modelos com a média do ensemble
 
   - depende do script `utils.R` que contém as funções auxiliares para obter nomes dos postos e tabela com código e nome das '28' maiores hidrelétricas e dos 6 maiores aproveitamentos hidrelétricos do SIN.
   
-
+  - arquivo de saída em `output/{ext}/basin-avgs/{sp_average}/nmme-mly-models-avgs-ens-mean-1982-2010-prec.qs`.
+  
 
 9. `climatology-cru-nmme.R` 
 

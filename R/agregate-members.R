@@ -27,6 +27,7 @@ source(here("R/aggregate-nmme.R"))
 # medias dos membros por modelo ----------------------------
 
 #NAO TESTADA AINDA POR CAUSA DA DEMORA ~18 min para rodar
+tictoc::tic()
 nmme_data_file_name <- aggregate_members_nmme(
   avg_type = "weighted", # melhores resultados
   extension = "qs",
@@ -40,7 +41,7 @@ nmme_data_file_name <- aggregate_members_nmme(
   )
 )
 nmme_data_file_name
-
+tictoc::toc()
 # 
 # Usa o arquivo gerado na chamada acima
 # para calcular a media do conjunto de modelos

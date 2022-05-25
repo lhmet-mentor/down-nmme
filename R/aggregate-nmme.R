@@ -124,18 +124,20 @@ aggregate_models <- function(var_target = c("members_avg"),
                              prefix = "nmme-mly-ens-mean-1982-2010"
                              ) {
   # previsoes medias do ensemble (1 prev por modelo)
-  nmme_data_file <- .filename_basin_data(avg_type, extension, "-ens-smry")
+  nmme_data_file <- .filename_basin_data(avg_type,
+                                         extension, "-ens-smry"
+                                         )
   checkmate::assert_file_exists(nmme_data_file)
   
   # unnest data from 
   nmme_data <- import_bin_file(nmme_data_file) %>%
     dplyr::select(model, data) %>%
-    unnest("data") 
+    tidyr::unnest("data") 
     
   # renomeando dados
   names(nmme_data)[-1] <- 
-    str_replace(names(nmme_data)[-1], "prec_","") %>%
-    str_replace(., "model", "members")
+    stringr::str_replace(names(nmme_data)[-1], "prec_","") %>%
+    stringr::str_replace(., "model", "members")
   
   # como medias e medianas das obs sao iguais, removemos elas
   nmme_data <- nmme_data %>%
@@ -149,8 +151,8 @@ aggregate_models <- function(var_target = c("members_avg"),
   models_summary <- import_bin_file("output/qs/model_counts.qs")
   # modelos com maior periodo comum (1982-2010)
   models_select <- models_summary %>%
-    filter(start <= 1982 & end >= 2010) %>%
-    pull(modelo)
+    dplyr::filter(start <= 1982 & end >= 2010) %>%
+    dplyr::pull(modelo)
   
   nmme_data <- nmme_data %>%
     dplyr::filter(model %in% models_select) %>%
@@ -164,8 +166,8 @@ aggregate_models <- function(var_target = c("members_avg"),
   #    summarise(start = min(date), end = max(date))
   
   models_avg <- nmme_data %>%
-    group_by(codONS, date, L) %>%
-    dplyr::summarise(across(members_avg, funs_list), 
+    dplyr::group_by(codONS, date, L) %>%
+    dplyr::summarise(dplyr::across(members_avg, funs_list), 
                      .groups = "drop"
     ) %>%
     # renomeia para ens_x
@@ -189,6 +191,10 @@ aggregate_models <- function(var_target = c("members_avg"),
 
 # Juncao dos medias dos modelos com a media ensemble --------------------------
 join_nmme_model_ensemble <- function(nmme_ens_file, nmme_data_file){
+  
+  checkmate::assert_file_exists(nmme_ens_file)
+  checkmate::assert_file_exists(nmme_data_file)
+  
   nmme_ens_data <- import_bin_file(nmme_ens_file)  
   
   nmme_models_data <- import_bin_file(nmme_data_file) %>%
@@ -201,7 +207,7 @@ join_nmme_model_ensemble <- function(nmme_ens_file, nmme_data_file){
  
   
   nmme_join <- nmme_models_data %>%
-    right_join(nmme_ens_data, by = c("codONS", "date", "L")) %>%
+    dplyr::right_join(nmme_ens_data, by = c("codONS", "date", "L")) %>%
     dplyr::select(model:date, contains("avg"), ens_sd)
   
   # nmme_join %>% group_by(model) %>% summarise(Lmax = max(L))

@@ -48,7 +48,7 @@ packageVersion("qs")
 
 1. `down-hindcasts-nmme.R`: script com looping para baixar arquivos NetCDF para um intervalo de anos e uma lista de modelos.
 
-  - depende do script `models-nmme.R` que gera objeto chamado `tabela1` com informações dos modelos, como nomes e períodos. Requer alteracao quando inserir novos modelos.
+  - depende do script `models-nmme.R` que gera objeto chamado `tabela1` com informações dos modelos, como nomes e períodos. Requer alteração quando inserir novos modelos. Tabela gerada manualmente. Atualmente somente o nome dos modelos desta tabela são usados.
   
   - depende do script `down-nmme.R`: função para *download* dos dados por modelo e ano, no formato NetCDF. O domínio espacial dos dados é a América do Sul.
 
@@ -57,9 +57,13 @@ packageVersion("qs")
 
 2. `dados-brutos.R`: 
 
-  - depende do script `data-proc-nc.R` que contém as funções para extrair os dados de todos arquivos NetCDF de um dado modelo, para todos *lead times* (`L` o qual varia de 0.5 a 11.5). 
+  - depende do script `data-proc-nc.R` que contém as funções para:
   
-    - arquivos de entrada em `output/{variavel}/nmme_{variavel}_{modelo}_{ano}.nc`
+    - extrair os dados de todos arquivos NetCDF de um dado modelo, para todos *lead times* (`L` o qual varia de 0.5 a 11.5). 
+    
+    - gerar a tabela `model_counts.{rds, qs}` com o periodo dos modelos e as dimensões dos arquivos.
+  
+  - arquivos de entrada em `output/{variavel}/nmme_{variavel}_{modelo}_{ano}.nc`
   
   - arquivos de saída em `output/{rds,qs}/nmme_{var_name}_{model_id}_lt{lead_time}.{rds, qs}` (arquivo `.qs` com tamanho de ~300 MB contra ~3 GB do `.rds`)
   
@@ -134,6 +138,8 @@ packageVersion("qs")
 
 9. `climatology-cru-nmme.R` 
 
+  - depende do script `clim-functions.R` que contém funções para visualização da Climatologia dos modelos do NMME em função dos leads times, em comparação as observações do CRU.
+  
   - depende do script `plot-clim-models-funs.R` que contém funções para visualização da Climatologia dos modelos do NMME em função dos leads times, em comparação as observações do CRU.
   
   - saída são 3 gráficos: 

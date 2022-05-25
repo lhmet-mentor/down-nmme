@@ -17,8 +17,8 @@ aggregate_members_nmme <- function(
     .filename_basin_data(avg_type, extension)
   ) %>%
     dplyr::select(model, data) %>%
-    ungroup() %>%
-    unnest("data")
+    dplyr::ungroup() %>%
+    tidyr::unnest("data")
   
   # media dos membros dos modelos-------------------------------------------------
   # 1 previsao por media do ensemble dos membros
@@ -129,14 +129,15 @@ aggregate_models <- function(var_target = c("members_avg"),
                                          )
   checkmate::assert_file_exists(nmme_data_file)
   
-  # unnest data from 
-  nmme_data <- import_bin_file(nmme_data_file) %>%
-    dplyr::select(model, data) %>%
-    tidyr::unnest("data") 
+  # read data
+  nmme_data <- import_bin_file(nmme_data_file)
     
-  # renomeando dados
+  
   names(nmme_data)[-1] <- 
+    # tira "prec" do nome das variaveis
     stringr::str_replace(names(nmme_data)[-1], "prec_","") %>%
+    # substitui 'model' por 'members' para deixar claro que sao
+    # estatisticas dos membros
     stringr::str_replace(., "model", "members")
   
   # como medias e medianas das obs sao iguais, removemos elas

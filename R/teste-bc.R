@@ -29,59 +29,78 @@ top6()
 
 # importa dados combinados das medias dos modelos e da media ensemble
 data_join_file <- here("output/qs/basin-avgs/weighted",
-                       "nmme-mly-models-avgs-ens-mean-1982-2010-prec.qs")
+                       "nmme-cru-mly-weighted-avg-basins-ons-ens-members-ens-mean-prec-1982-2010.qs")
 
 # importa dados combinados (ens e medias modelos)
-data_pp <- import_bin_file(data_join_file)
+data_pp <- import_bin_file(data_join_file) 
+unique(data_pp$model)
 
+# data_pp %>%
+#   group_by(model) %>%
+#   tally()
 
 # verificacao das distribuicoes de prec 
 # (aproximacao gaussiana para chuva mensal)
+#bc0p2 <- function(x) (x + (0.01 * mean(x, na.rm = TRUE))^0.2)/0.2
 
 data_pp %>%
-  filter(L == 1, month(date) == 1, codONS %in% top6()$codONS) %>%
+  filter(codONS %in% top6()$codONS, month(date) == 8) %>%
+  #mutate()
+  #ggplot(aes(x = bc0p2(model_avg))) +
   ggplot(aes(x = model_avg)) +
   #ggplot(aes(x = obs_avg)) +
   geom_histogram(bins = 20) +
   facet_grid(vars(codONS), vars(model))
 
 
-# dados com os modelos nas colunas para usar com metodos multimodelos
-data_pp_wide <-  data_pp %>%
-  pivot_wider(
-    names_from = "model", 
-    values_from = "model_avg",
-    names_prefix = "model_"
-  ) %>%
-  setNames(., nm = str_replace_all(names(.), "-", "_")) 
-
-library(openair)
-data_pp_wide %>%
-  filter(L == 1, month(date) == 1, codONS == 6) %>%
-  select(-ens_sd) %>%
-  timePlot(., names(.)[-c(1:3)], group = TRUE, key.columns = 4)
   
+
+# dados com os modelos nas colunas para usar com metodos multimodelos
+# data_pp_wide <-  data_pp %>%
+#   select(-())
+#   mutate(model = str_replace_all(model, "-", "_")) %>%
+#   select(-Sr) %>%
+#   pivot_wider(
+#     names_from = "model", 
+#     values_from = "model_avg"
+#     #names_prefix = ""
+#   ) %>%
+#   tail()
+
+
+  
+
 
 
 
 
 # Dados para teste de aplicacao BC---------------------------------------------
  imodel <- "CanSIPS-IC3"
- ibasin <- 156
+ ibasin <- 6
  month <- 1
 
 data_pp_1model <- data_pp %>%
+  #select(-model_sd) %>%
   #dplyr::filter(codONS %in% top6()[[1]], L == 1, month(date) == month) %>%
   dplyr::filter(codONS == ibasin, month(date) == month, model == imodel, L == 1) 
   
 
+d <- data_pp %>%
+  #select(-model_sd) %>%
+  #dplyr::filter(codONS %in% top6()[[1]], L == 1, month(date) == month) %>%
+  dplyr::filter(codONS == ibasin, month(date) == month, L == 1)
+d %>%
+  ggplot(aes(x = date, y = model_avg, color = model)) + 
+  geom_line() +
+  geom_line(data = distinct(d, date, obs_avg),
+            aes(x = date, y = obs_avg), color = 1)
 
 
 rng <- range(select(data_pp_1model, model_avg, obs_avg, ens_avg))
 rng <- c(trunc(rng[1]), ceiling(rng[2]))
 
 data_pp_1model_long <- data_pp_1model %>%
-  select(-ens_sd) %>%
+  select(-c(ens_sd, model_sd)) %>%
   pivot_longer(cols = -c(model:date), names_to = "prec", values_to = "value")
   
 data_pp_1model_long %>%

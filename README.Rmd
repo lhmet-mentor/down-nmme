@@ -123,20 +123,40 @@ packageVersion("qs")
 
 8. `aggregate-members.R`: 
 
-  - depende do script `aggregate-nmme.R` que contém funções para:
+  - depende do script `aggregate-nmme.R` que tem as funções abaixo:
     
-    - calcular a média dos modelos do NMME a partir de seus membros; 
+    - `aggregate_members_nmme():` para calcular a média dos modelos a partir das previsões dos membros; 
     
-    - calcular a média ensemble dos modelos a partir dos modelos do NMME; 
+      - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-ens-members-prec.qs`
     
-    - juntar as médias dos modelos com a média do ensemble
+    - `spread_members_nmme()`: para distribuir as previsões dos membros de cada modelo através das colunas (arquivo de saída desta função é usado na função `join_nmme_models_members_ensemble()`); 
+    
+      - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-wide-flat.qs`
+    
+    - `aggregate_models()`: calcular a média do conjunto das previsões dos modelos; 
+    
+      - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-ens-models-prec-1982-2010.qs`.
+    
+    - `join_nmme_model_ensemble()`: juntar os arquivos de saída das funções `aggregate_members_nmme()` e `aggregate_models()`;
+    
+      - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-ens-members-ens-mean-prec-1982-2010.qs`.
+    
+    - `join_nmme_models_members_ensemble()`: juntar os arquivos de saída das funções `join_nmme_model_ensemble()` e `spread_members_nmme()` formando o arquivo de dados principal; ou seja com as previsões de cada membro, a média por modelo e a média do conjunto.
 
-  - depende do script `utils.R` que contém as funções auxiliares para obter nomes dos postos e tabela com código e nome das '28' maiores hidrelétricas e dos 6 maiores aproveitamentos hidrelétricos do SIN.
+      - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-ens-members-models-ens-mean-prec-1982-2010.qs`.
   
-  - arquivo de saída em `output/{ext}/basin-avgs/{sp_average}/nmme-mly-models-avgs-ens-mean-1982-2010-prec.qs`.
+  - as funções acima, são rodadas sequencialmente no script `aggregate-members.R`
   
 
-9. `climatology-cru-nmme.R` 
+9. `view-eval-cru-nmme.R`:
+
+
+  - calcula a correlação entre prev e obs para os diferentes tempos de antecedências por meses e apresenta visualização para algumas Bacias Hidrográficas;
+  
+
+  - CRPSS, diagrama de confiabilidade, PIT p-value, PBIAS, RMSE, KGE
+
+10. `climatology-cru-nmme.R` 
 
   - depende do script `clim-functions.R` que contém funções para visualização da Climatologia dos modelos do NMME em função dos leads times, em comparação as observações do CRU.
   
@@ -153,15 +173,7 @@ packageVersion("qs")
 
  
 
-9. `view-eval-cru-nmme.R`:
 
-  - depende do script `utils.R` 
-  
-  
-  - calcula a correlação entre prev e obs para os diferentes tempos de antecedências por meses e apresenta visualização para algumas Bacias Hidrográficas;
-  
-
-  - CRPSS, diagrama de confiabilidade, PIT p-value, PBIAS, RMSE, KGE
 
 
 

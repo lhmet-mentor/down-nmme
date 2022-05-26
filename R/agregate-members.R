@@ -24,7 +24,7 @@ source(here("R/aggregate-nmme.R"))
 
 
 
-# medias dos membros por modelo ----------------------------
+# medias dos membros -----------------------------------------------------------
 
 #NAO TESTADA AINDA POR CAUSA DA DEMORA ~18 min para rodar
 tictoc::tic()
@@ -32,7 +32,7 @@ nmme_data_file_name <- aggregate_members_nmme(
   avg_type = "weighted", # melhores resultados
   extension = "qs",
   var_name = "prec", 
-  suffix = "ens-smry",
+  suffix = "ens-members",
   funs_list = list(
     avg = mean,
     med = median,
@@ -40,11 +40,13 @@ nmme_data_file_name <- aggregate_members_nmme(
     mad = mad
   )
 )
-nmme_data_file_name
+# nmme_data_file_name
+# nmme_data_file_name = '/home/hidrometeorologista/Dropbox/github/my_reps/lhmet/download-hindcast-NMME/output/qs/basin-avgs/weighted/nmme-cru-mly-weighted-avg-basins-ons-ens-members-prec.qs'
 tictoc::toc()
-# 
-# Usa o arquivo gerado na chamada acima
-# para calcular a media do conjunto de modelos
+ 
+
+
+# media do conjunto -----------------------------------------------------------
 
 tictoc::tic()
 nmme_ens_file_name <- aggregate_models(
@@ -58,15 +60,44 @@ nmme_ens_file_name <- aggregate_models(
     sd = sd,
     mad = mad
   ),
-  prefix = "nmme-mly-ens-mean-1982-2010"
+  suffix = "ens-models"
 )
 tictoc::toc()
-#38.782 sec elapsed
+# 45 sec elapsed
 nmme_ens_file_name
+# nmme_ens_file_name = '/home/hidrometeorologista/Dropbox/github/my_reps/lhmet/download-hindcast-NMME/output/qs/basin-avgs/weighted/nmme-cru-mly-weighted-avg-basins-ons-ens-models-prec-1982-2010.qs'
 
 
+# previsoes dos membros --------------------------------------------------------
+tictoc::tic()
+nmme_members_wide_file <- spread_members_nmme(
+  avg_type = "weighted", # melhores resultados
+  extension = "qs",
+  var_name = "prec",  
+  out_file_suffix = "wide-flat"
+)
+tictoc::toc()
+# 977.99 sec elapsed
+#! 16.3 min
 
-# juncao das medias do modelo com a media ensemble
-(data_pp_file <- join_nmme_model_ensemble(nmme_ens_file_name, nmme_data_file_name))
+
+# juncao das medias dos membros com a media ensemble----------------------------
+ens_models_join_file <- join_nmme_model_ensemble(
+  nmme_ens_file = nmme_ens_file_name,
+  nmme_data_file = nmme_data_file_name
+)
+ens_models_join_file
+# ens_models_join_file = '/home/hidrometeorologista/Dropbox/github/my_reps/lhmet/download-hindcast-NMME/output/qs/basin-avgs/weighted/nmme-cru-mly-weighted-avg-basins-ons-ens-members-ens-mean-prec-1982-2010.qs'
+
+
+# juncao dos membros, das medias dos membros e da média ensemble ---------------
+ens_members_models_join_file <- join_nmme_models_members_ensemble(
+  nmme_models_file = ens_models_join_file,
+  nmme_members_file = nmme_members_wide_file,
+  var_name = "prec", 
+  out_file_suffix = "members-models-ens-mean"
+)
+ens_members_models_join_file
+# ens_members_models_join_file = "/home/hidrometeorologista/Dropbox/github/my_reps/lhmet/download-hindcast-NMME/output/qs/basin-avgs/weighted/nmme-cru-mly-weighted-avg-basins-ons-ens-members-models-ens-mean-prec-1982-2010.qs"
 
 

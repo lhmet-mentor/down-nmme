@@ -4,7 +4,7 @@ aggregate_members_nmme <- function(
   avg_type = "weighted", # melhores resultados
   extension = "qs",
   var_name = "prec",  
-  suffix = "ens-smry",
+  suffix = "ens-members",
   funs_list = list(
     avg = mean,
     med = median,
@@ -41,6 +41,8 @@ aggregate_members_nmme <- function(
           )
   ens[, L := factor(trunc(L), levels = 0:11, ordered = TRUE)]
   ens <- tibble::as_tibble(ens)
+  
+  #ens <- ens %>% dplyr::select(-c(prec_obs_med, prec_obs_sd, prec_obs_mad)) 
   
   # media dos membros dos modelos-------------------------------------------------
   # 1 previsao por media do ensemble dos membros
@@ -79,7 +81,7 @@ aggregate_members_nmme <- function(
     stringr::str_split("\\.") %>% 
     unlist() %>%
     nth(1) %>%
-    glue::glue("-{suffix}.{extension}") %>%
+    glue::glue("-{suffix}-{var_name}.{extension}") %>%
     fs::path(fs::path_dir(.filename_basin_data(avg_type, extension)), .)
   
   export_bin_file(ens, out_fname)
@@ -89,11 +91,56 @@ aggregate_members_nmme <- function(
   
 }
 
+# periodo de anos com mais modelos
+best_period <- function(model_info){
+  tab_start <- table(model_info$start)
+  ys <- as.numeric(names(which.max(tab_start)))
+  tab_end <- table(model_info$end)
+  ye <- as.numeric(names(which.max(tab_end)))
+  period_optm <- c(ys, ye)
+  period_optm
+}
+
+
+#------------------------------------------------------------------------------
+#' Filtragem das previsões médias de cada modelo do NMME pelo período ótimo
+#'
+#' @param nmme_model_data dados com as previsões médias dos modelos
+#' @param model_info_file arquivo com informações de período de anos e dimensões
+#' dos arquivos NetCDF.
+#'
+#' @return dados com os modelos que possuam dados para o período ótimo (1982-2010).
+#' @export
+#'
+#' @examples
+filter_data_by_commom_period <- function(nmme_model_data, 
+                                         model_info_file = "output/qs/model_counts.qs"){
+  # filtragem para manter o periodo comum de dados entre os modelo ------------
+  
+  assert_file_exists(model_info_file)
+  models_summary <- import_bin_file(model_info_file)
+  # periodo comum (1982-2010) para filtragem de meses
+  years_sel <- best_period(models_summary)
+  # para incluir CFSv2!
+  years_sel[1] <- years_sel[1] + 1 # 1982
+  # para nome do arquivo de saida
+  years_rng <- paste0(years_sel, collapse = "-")
+  
+  models_select <- models_summary %>%
+    dplyr::filter(start <= years_sel[1] & end >= years_sel[2]) %>%
+    dplyr::pull(modelo)
+  
+  nmme_model_data <- nmme_model_data %>%
+    dplyr::filter(model %in% models_select) %>%
+    dplyr::filter(year(date) >= years_sel[1] & year(date) <= years_sel[2]) # %>% filter(model == "GFDL-SPEAR")  
+  nmme_model_data
+}
+
 
 #------------------------------------------------------------------------------
 #' Média dos previsões do modelos
 #' 
-#' @param var_target variable target to 
+#' @param var_target the target variable to which the member summary statistics will apply.
 #' @param avg_type "weighted" (default) or "arithmetic" (not available).
 #' It defines the path to the file.
 #' @param extension "qs", file extension from file to be imported.
@@ -121,11 +168,12 @@ aggregate_models <- function(var_target = c("members_avg"),
                                sd = sd,
                                mad = mad
                              ),
-                             prefix = "nmme-mly-ens-mean-1982-2010"
+                             suffix = "ens-models"
                              ) {
   # previsoes medias do ensemble (1 prev por modelo)
   nmme_data_file <- .filename_basin_data(avg_type,
-                                         extension, "-ens-smry"
+                                         extension, 
+                                         glue::glue("-ens-members-{var_name}")
                                          )
   checkmate::assert_file_exists(nmme_data_file)
   
@@ -148,27 +196,29 @@ aggregate_models <- function(var_target = c("members_avg"),
   
   #unique(nmme_data$model)
   
-  # filtragem para manter o periodo comum de dados entre os modelo ------------
-  models_summary <- import_bin_file("output/qs/model_counts.qs")
-  # modelos com maior periodo comum (1982-2010)
-  models_select <- models_summary %>%
-    dplyr::filter(start <= 1982 & end >= 2010) %>%
-    dplyr::pull(modelo)
-  
-  nmme_data <- nmme_data %>%
-    dplyr::filter(model %in% models_select) %>%
-    dplyr::filter(year(date) >= 1982 & year(date) <= 2010) # %>% filter(model == "GFDL-SPEAR")
+  nmme_data <- filter_data_by_commom_period(nmme_data)
   
   # unique(nmme_data$model)
+  # models_select
   
   ## check
   # data_select %>%
   #    group_by(model) %>%
   #    summarise(start = min(date), end = max(date))
+
+  # 8 modelos por bacia
+  # nmme_data %>% filter(
+  #                     codONS == 6,
+  #                     L == 1,
+  #                     Sr == as.Date("1981-12-01"),
+  #                     date == as.Date("1982-01-01")
+  #                     )
+  
+  
   
   models_avg <- nmme_data %>%
-    dplyr::group_by(codONS, date, L) %>%
-    dplyr::summarise(dplyr::across(members_avg, funs_list), 
+    dplyr::group_by(codONS, Sr, date, L) %>%
+    dplyr::summarise(dplyr::across(!!sym(var_target), funs_list), 
                      .groups = "drop"
     ) %>%
     # renomeia para ens_x
@@ -178,9 +228,13 @@ aggregate_models <- function(var_target = c("members_avg"),
                        )
   # unique(models_avg$model)
   
-  ens_mean_file <- .filename_basin_data(avg_type, extension) %>%
-    fs::path_dir() %>%
-    fs::path(glue::glue("{prefix}-{var_name}.{extension}"))
+  ens_mean_file <- fs::path_file(.filename_basin_data(avg_type, extension)) %>%
+    stringr::str_split("\\.") %>% 
+    unlist() %>%
+    nth(1) %>%
+    glue::glue("-{suffix}-{var_name}-{years_rng}.{extension}") %>%
+    fs::path(fs::path_dir(.filename_basin_data(avg_type, extension)), .)
+  
   
   export_bin_file(models_avg, file = ens_mean_file)
   message("File saved in: ", "\n", ens_mean_file)
@@ -191,7 +245,10 @@ aggregate_models <- function(var_target = c("members_avg"),
 
 
 # Juncao dos medias dos modelos com a media ensemble --------------------------
-join_nmme_model_ensemble <- function(nmme_ens_file, nmme_data_file){
+join_nmme_model_ensemble <- function(nmme_ens_file, 
+                                     nmme_data_file,
+                                     suffix = "ens-mean",
+                                     var_name = "prec"){
   
   checkmate::assert_file_exists(nmme_ens_file)
   checkmate::assert_file_exists(nmme_data_file)
@@ -199,18 +256,17 @@ join_nmme_model_ensemble <- function(nmme_ens_file, nmme_data_file){
   nmme_ens_data <- import_bin_file(nmme_ens_file)  
   
   nmme_models_data <- import_bin_file(nmme_data_file) %>%
-    dplyr::select(model:data) %>%
-    tidyr::unnest("data") %>%
-    dplyr::select(model:prec_model_avg, prec_obs_avg) %>%
     dplyr::rename_with(~ str_replace(.x, "prec_", ""),
-                       contains("avg")
-    )
+                       contains("prec")
+    ) %>%
+    dplyr::select(-c(obs_med, obs_sd, obs_mad)) 
  
   
   nmme_join <- nmme_models_data %>%
-    dplyr::right_join(nmme_ens_data, by = c("codONS", "date", "L")) %>%
-    dplyr::select(model:date, contains("avg"), ens_sd)
+    dplyr::inner_join(nmme_ens_data, by = c("codONS", "Sr","date", "L")) %>%
+    dplyr::select(model:date, contains("avg"), contains("sd"))
   
+  unique(nmme_join$model)
   # nmme_join %>% group_by(model) %>% summarise(Lmax = max(L))
   # # A tibble: 10 × 2
   # model        Lmax 
@@ -226,17 +282,13 @@ join_nmme_model_ensemble <- function(nmme_ens_file, nmme_data_file){
   # 9 NCAR-CESM1   11   
   # 10 NCEP-CFSv2   9 
   
-  var_name <- fs::path_file(nmme_ens_file) %>% 
-    str_split("-") %>%
-    unlist() %>% 
-    last() %>%
-    str_split("\\.") %>%
-    unlist() %>%
-    dplyr::first()
   
-  nmme_join_file <- nmme_ens_file %>%
-    fs::path_dir() %>%
-    fs::path(glue::glue("nmme-mly-models-avgs-ens-mean-1982-2010-{var_name}.qs"))
+  nmme_ens_file_split <- stringr::str_split(nmme_ens_file, var_name)[[1]]
+  
+  nmme_join_file <- nmme_ens_file_split[1] %>%
+    stringr::str_replace(., "models", "members") %>%
+    glue::glue("{suffix}-{var_name}") %>%
+    paste0(., nmme_ens_file_split[2])
   
   export_bin_file(nmme_join, file = nmme_join_file)
   nmme_join_file

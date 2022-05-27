@@ -177,6 +177,22 @@ best_period <- function(model_info){
 }
 
 
+set_years_period <- function(model_info_file = "output/qs/model_counts.qs"){
+  assert_file_exists(model_info_file)
+  models_summary <- import_bin_file(model_info_file)
+  # periodo comum (1982-2010) para filtragem de meses
+  years_sel <- best_period(models_summary)
+  
+  #*******************************************************************
+  # para incluir CFSv2!
+  years_sel[1] <- years_sel[1] + 1 # 1982
+  #*******************************************************************
+  
+  years_sel
+  
+}
+
+
 
 #' Filtragem das previsões médias de cada modelo do NMME pelo período ótimo
 #'
@@ -189,22 +205,14 @@ best_period <- function(model_info){
 #'
 #' @examples
 filter_data_by_commom_period <- function(nmme_model_data, 
-                                         model_info_file = "output/qs/model_counts.qs"){
+                                         years_sel){
   # nmme_model_data = nmme_data
   # filtragem para manter o periodo comum de dados entre os modelo ------------
-  
-  assert_file_exists(model_info_file)
-  models_summary <- import_bin_file(model_info_file)
-  # periodo comum (1982-2010) para filtragem de meses
-  years_sel <- best_period(models_summary)
-  
-  #*******************************************************************
-  # para incluir CFSv2!
-  years_sel[1] <- years_sel[1] + 1 # 1982
-  #*******************************************************************
+
+  years_sel <- set_years_period(model_info_file = "output/qs/model_counts.qs")
   
   # para nome do arquivo de saida
-  years_rng <- paste0(years_sel, collapse = "-")
+  years_rng <- paste0(years_sel, collapse = "-")  
   
   models_select <- models_summary %>%
     dplyr::filter(start <= years_sel[1] & end >= years_sel[2]) %>%
@@ -277,6 +285,13 @@ aggregate_models <- function(var_target = c("members_avg"),
   #unique(nmme_data$model)
   
   nmme_data <- filter_data_by_commom_period(nmme_data)
+  
+  years_rng <- set_years_period(
+    model_info_file = "output/qs/model_counts.qs"
+    ) %>%
+    paste0(collapse = "-")
+  
+  
   
   # unique(nmme_data$model)
   # models_select

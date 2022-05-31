@@ -1,12 +1,16 @@
 ## Funcao para obter nome das bacias -------------------------------------------
-stn_name <- function(code, meta = qnat_meta){
+stn_name <- function(code, meta){
   # code = prec_nmme_cru_flat$codONS
   # qnat_meta %>%
   #   filter(estacao_codigo == code) %>%
   #   pull(nome_estacao)
   # 
-  codigos <- qnat_meta$estacao_codigo
-  nomes <- qnat_meta$nome_estacao
+  if(missing(meta)){
+    meta <- readr::read_rds(here("input/obs/qnat", "qnat_meta_ons.RDS"))  
+  }
+  
+  codigos <- meta$estacao_codigo
+  nomes <- meta$nome_estacao
   names(nomes) <- codigos
   
   nomes[as.character(code)]
@@ -77,4 +81,13 @@ top6 <- function(){
   )
   input_file
 }
+
+
+# 20 distinctive colours
+# "https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/"
+colors_distintc <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', 
+                     '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', 
+                     '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', 
+                     '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'
+)
 

@@ -10,7 +10,9 @@
   
   # obter stats das obs
   obs_stat <- glue::glue("obs_{.var_stat}")
-  regex_str <- ifelse(length(obs_stat) > 1, paste0(obs_stat, collapse = "|"), obs_stat)
+  regex_str <- ifelse(length(obs_stat) > 1,
+                      paste0(obs_stat, collapse = "|"), 
+                      obs_stat)
   
   vars_obs <- grep(
     regex_str, 

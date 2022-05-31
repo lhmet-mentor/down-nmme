@@ -141,7 +141,7 @@ packageVersion("qs")
     
       - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-ens-members-ens-mean-prec-1982-2010.qs`.
     
-    - `join_nmme_models_members_ensemble()`: juntar os arquivos de saída das funções `join_nmme_model_ensemble()` e `spread_members_nmme()` formando o arquivo de dados principal; ou seja com as previsões de cada membro, a média por modelo e a média do conjunto.
+    - `join_nmme_models_members_ensemble()`: juntar os arquivos de saída das funções `join_nmme_model_ensemble()` e `spread_members_nmme()` formando o arquivo de dados principal; ou seja com as previsões de cada membro, a média por modelo e a média do conjunto. Se `climatology = TRUE` (default) a previsão baseada na cliamtologia é inlcuída também.
 
       - arquivo de saída em  `output/{ext}/basin-avgs/{sp_average}/nmme-cru-mly-weighted-avg-basins-ons-ens-members-models-ens-mean-prec-1982-2010.qs`.
   
@@ -173,7 +173,9 @@ packageVersion("qs")
 
  
 
+XX. Métodos de previsão univariada
 
+https://github.com/AlbertoAlmuinha/neuralprophet
 
 
 

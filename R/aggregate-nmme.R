@@ -410,13 +410,40 @@ join_nmme_model_ensemble <- function(nmme_ens_file,
 }
 
 
+
+
+#' Junção das previsões dos membros, médias por modelo e média ensemble com a
+#' a climatologia da variável
+#' 
+join_ensemble_climatology <- function(
+    data_members, 
+    new_var_name = "climatology"
+){
+  # members_file = here('output/qs/basin-avgs/weighted/nmme-cru-mly-weighted-avg-basins-ons-ens-members-models-ens-mean-prec-1982-2010.qs')
+  cli <- climatology_nmme_cru(overwrite = FALSE) %>%
+    dplyr::select(model:month, contains("obs_avg")) %>%
+    dplyr::rename({{var_name}} := prec_obs_avg)
+  
+  data_members <- #import_bin_file(members_file) %>%
+    data_members %>%
+    dplyr::mutate(month = lubridate::month(date))
+  
+  data_j <- dplyr::inner_join(data_members, cli, 
+                              by = c('model', 'codONS', 'L', 'month')
+                              )
+  data_j %>%
+    dplyr::relocate({{new_var_name}}, .after = 'ens_avg') 
+}
+
+
 #' Juncao das previsões dos modelos e média ensemble com as previsões
 #' de cada membro 
 join_nmme_models_members_ensemble <- function(
     nmme_models_file = ens_models_join_file,
     nmme_members_file = nmme_members_wide_file,
     var_name = "prec",
-    out_file_suffix = "members-models-ens-mean"
+    out_file_suffix = "members-models-ens-mean",
+    climatology = TRUE
 ){
   
   checkmate::assert_file_exists(nmme_models_file)
@@ -433,6 +460,12 @@ join_nmme_models_members_ensemble <- function(
   ) 
   #range(nmme_join$date)
   
+  if(climatology){
+    nmme_join <- join_ensemble_climatology(
+      nmme_join, new_var_name = "climatology"
+      ) 
+  }
+  
   nmme_join_file_split <- stringr::str_split(nmme_models_file, var_name)[[1]]
   
   nmme_join_file <- nmme_join_file_split[1] %>%
@@ -444,14 +477,8 @@ join_nmme_models_members_ensemble <- function(
   checkmate::assert_file_exists(nmme_join_file)
   message("File saved in: ", "\n", nmme_join_file)
   nmme_join_file
- 
+  
 }
-
-
-
-
-
-
 
 
 

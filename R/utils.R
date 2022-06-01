@@ -83,35 +83,7 @@ top6 <- function(){
 }
 
 
-# 20 distinctive colours
-# "https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/"
-colors_distintc <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', 
-                     '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', 
-                     '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', 
-                     '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'
-)
 
-#library(Polychrome)
-## build-in color palette
-#pie(rep(1, n), col = Polychrome::palette36.colors(n = 36))
-# BOA OPCAO
-#pie(rep(1, n), col = Polychrome::glasbey.colors(n = 28))
-
-# library(randomcoloR)
-# n <- 28
-# palette <- distinctColorPalette(n)
-# pie(rep(1, n), col=palette)
-
-
-# library(RColorBrewer)
-# distinct_colors <- function(n = 28) {
-#   qual_col_pals <- brewer.pal.info[brewer.pal.info$category == "qual", ]
-#   col_vector <- unlist(
-#     mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals))
-#   )
-#   cores <- sample(col_vector, n)
-#   pie(rep(1, n), col = cores)
-# }
 
 
 

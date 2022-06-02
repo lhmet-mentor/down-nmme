@@ -67,13 +67,15 @@ variance_inflation <- function(
     obs = treino$obs_avg,
     prev = treino$model_avg,
     ens = treino$ens_avg,
+    ens_sd = treino$ens_sd,
     prev_new = NULL,
     ens_new = NULL
 ){
   
   sigma_ref <- sd(obs, na.rm = TRUE)
   sigma_em <- sd(ens, na.rm = TRUE)
-  sigma_e <- sd(prev, na.rm = TRUE)
+  #sigma_e <- sd(prev, na.rm = TRUE)
+  sigma_e <- mean(ens_sd, na.rm = TRUE)
   
   pho <- cor(obs, ens, use = "complete.obs")
   alpha <- abs(pho) * sigma_ref/sigma_em

@@ -20,7 +20,8 @@ easypackages::libraries(pcks)
 # https://bookdown.org/max/FES/stroke-preprocessing.html
 #  https://github.com/topepo/FES/blob/master/02_Predicting_Risk_of_Ischemic_Stroke/02_02_Preprocessing.R
 # https://github.com/FrancisArgnR/R-FeatureSelection-Packages
-
+# https://cran.r-project.org/web/packages/FeatureTerminatoR/vignettes/feature_terminatoR_howto.html
+# https://www.tmwr.org/pre-proc-table.html
 #------------------------------------------------------------------------------
 # funcoes auxiliares
 source("R/utils.R")
@@ -30,7 +31,20 @@ source(here("R/plot-nmme-members-cru-prec-funs.R"))
 # para escolher um posto ONS a partir do codONS
 top6()
 
-# importa dados combinados das medias dos modelos e da media ensemble-----------
+#-------------------------------------------------------------------------------
+# fncao para retornmar nome dos modelos com as n maiorres correlacoes com obs
+.topn_cor <- function(cor_ord, n) cor_ord %>% slice(-1) %>% head(n) %>% rownames()
+
+# paleta de cores para correlacao
+pal_correlation <- function(n){
+  col2 <- colorRampPalette(c('#67001F', '#B2182B', '#D6604D', '#F4A582',
+                             '#FDDBC7', '#FFFFFF', '#D1E5F0', '#92C5DE',
+                             '#4393C3', '#2166AC', '#053061'))
+  rev(col2(n))  
+}
+
+#-------------------------------------------------------------------------------
+# importa dados combinados das medias dos modelos e da media ensemble
 data_nmme_cru_file <- here("output/qs/basin-avgs/weighted/",
                            "nmme-cru-mly-weighted-avg-basins-ons-ens-members-models-ens-mean-prec-1982-2010.qs")
 data_nmme_cru <- import_bin_file(data_nmme_cru_file)
@@ -118,15 +132,21 @@ data4cor <- data_pp_all %>% select(-c(codONS:month))
 
 correls <-  cor(data4cor, use = "complete.obs")
 cor_obs <- round(as.data.frame(correls)[1], 2)
+
 cor_obs_order <- arrange(cor_obs, desc(abs(obs.mean)))
-cor_obs_order %>% slice(-1) %>% head(10)
+cor_obs_order %>% slice(-1) %>% head(5) 
+
+
 
 # teste de significancia da correlacao
-alpha <- 0.1
+alpha <- 0.11
 res <- corrplot::cor.mtest(
   data4cor,
   conf.level = 1-alpha
 )
+
+cbind(r=cor_obs ,p = round(as.data.frame(res)[1], 2)) %>%
+  arrange(desc(obs.mean)) 
 
 models_nms_rsig <- names(res$p["obs.mean",][res$p["obs.mean",] <= alpha])
 # [1] "obs.mean"           "ens.mean"           "cancm4i_m.3"       
@@ -141,9 +161,9 @@ is_rsig <- colnames(correls) %in% models_nms_rsig
 correls_sig <- correls[is_rsig, is_rsig]
 
 
-col2 <- colorRampPalette(c('#67001F', '#B2182B', '#D6604D', '#F4A582',
-                           '#FDDBC7', '#FFFFFF', '#D1E5F0', '#92C5DE',
-                           '#4393C3', '#2166AC', '#053061'))
+
+
+
 corrplot::corrplot(correls_sig,
                    p.mat = res$p[is_rsig, is_rsig],
                    method = "color", 
@@ -156,7 +176,7 @@ corrplot::corrplot(correls_sig,
                    #order = "hclust",
                    is.corr = FALSE,
                    diag = FALSE,
-                   col = rev(col2(30)), 
+                   col = pal_correlation(30), 
                    number.cex = 0.7,
                    addCoef.col = 'black'
 )
@@ -164,7 +184,7 @@ corrplot::corrplot(correls_sig,
 
 #plot_correlation(data4cor)
 
-my_alpha <- 0.1
+my_alpha <- 0.11 # 0.10 
 models_nms_rsig <- names(res$p["obs.mean",][res$p["obs.mean",] <= my_alpha])
 
 
@@ -194,14 +214,19 @@ data_pp_bests_long <- data_pp_bests %>%
 data_pp_bests_long %>%
   ggplot(aes(x = date, y = value, color = factor(previsao))) +
   #geom_point() +
-  geom_line() +
+  geom_line(alpha = 0.5) +
   theme_bw() +
   scale_colour_material_d() +
+  gghighlight::gghighlight(
+    previsao %in% .topn_cor(cor_obs_order, 5),
+    label_key = previsao, use_direct_label = FALSE
+  ) +
   geom_hline(yintercept = mean(data_pp_bests$obs.mean), linetype = 2) +
   geom_line(data = select(data_pp_bests, date, obs.mean),
             aes(x = date, y = obs.mean), 
             colour = 1, size = 2
             ) 
+  
 
 openair::scatterPlot(data_pp_bests_long, 
                      x = "obs.mean", 
@@ -217,3 +242,7 @@ openair::scatterPlot(data_pp_bests_long,
 
 
 # remover colinearidade
+library(tidymodels)
+data_pp_bests %>%
+  select(all_of(models_nms_rsig)) %>%
+  

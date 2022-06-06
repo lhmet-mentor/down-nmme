@@ -14,8 +14,13 @@ pcks <- c(
 
 easypackages::libraries(pcks)
 
-#https://www.machinelearningplus.com/machine-learning/feature-selection/
-  
+## Referencias ------------------------------------------------------------------
+# https://www.machinelearningplus.com/machine-learning/feature-selection/
+# https://towardsdatascience.com/effective-feature-selection-recursive-feature-elimination-using-r-148ff998e4f7
+# https://bookdown.org/max/FES/stroke-preprocessing.html
+#  https://github.com/topepo/FES/blob/master/02_Predicting_Risk_of_Ischemic_Stroke/02_02_Preprocessing.R
+# https://github.com/FrancisArgnR/R-FeatureSelection-Packages
+
 #------------------------------------------------------------------------------
 # funcoes auxiliares
 source("R/utils.R")
@@ -52,6 +57,7 @@ data_nmme_cru <- data_nmme_cru %>%
 
 #------------------------------------------------------------------------------
 # Dados de todas previsoes nas colunas
+
 #imodel = "cansips_ic3" # 20 membros
 #imodel = "gfdl_spear" # 15 membros, 1991-2009
 #imodel = "cancm4i" # 10 membros
@@ -60,7 +66,8 @@ ibasin = 6
 imonth = 1
 lead_time = 1
 
-function()
+# Funcao para espalhar TODAS (membros, media ensemble, media modelo) previsoes
+# nas colunas
 
 data_pp_wide <- data_nmme_cru %>% 
   select(-obs.mean, -climatology) %>%
@@ -105,15 +112,16 @@ data_pp_all <- data_pp_all %>%
 
 
 #-------------------------------------------------------------------------------
-
+# Selecao das previsoes com r significativa ao n.s 90%
 data4cor <- data_pp_all %>% select(-c(codONS:month)) 
 #plot_correlation(data4cor)
 
 correls <-  cor(data4cor, use = "complete.obs")
 cor_obs <- round(as.data.frame(correls)[1], 2)
 cor_obs_order <- arrange(cor_obs, desc(abs(obs.mean)))
-cor_obs_order %>% slice(-1) %>% head(20)
+cor_obs_order %>% slice(-1) %>% head(10)
 
+# teste de significancia da correlacao
 alpha <- 0.1
 res <- corrplot::cor.mtest(
   data4cor,
@@ -179,15 +187,21 @@ rng <- c(trunc(rng[1]), ceiling(rng[2]))
 
 
 data_pp_bests_long <- data_pp_bests %>%
-  pivot_longer(cols = -c(codONS:obs.mean), names_to = "previsao", values_to = "value")
+  pivot_longer(cols = -c(codONS:obs.mean),
+               names_to = "previsao", 
+               values_to = "value")
 
 data_pp_bests_long %>%
   ggplot(aes(x = date, y = value, color = factor(previsao))) +
-  geom_point() +
+  #geom_point() +
   geom_line() +
   theme_bw() +
-  scale_fill_material_d() +
-  geom_hline(yintercept = mean(data_pp_bests_long$obs.mean))
+  scale_colour_material_d() +
+  geom_hline(yintercept = mean(data_pp_bests$obs.mean), linetype = 2) +
+  geom_line(data = select(data_pp_bests, date, obs.mean),
+            aes(x = date, y = obs.mean), 
+            colour = 1, size = 2
+            ) 
 
 openair::scatterPlot(data_pp_bests_long, 
                      x = "obs.mean", 

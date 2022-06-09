@@ -481,6 +481,147 @@ join_nmme_models_members_ensemble <- function(
 }
 
 
+#-------------------------------------------------------------------------------
+# Funcoes para arrumar os dados no formato para modelagem estatistica e 
+# posprocessamento.
 
-
+# nomes dos modelos limpos para usar nas colunas-------------------------------
+.clean_names_nmme <- function(clim_prevs){
+  model_nms <- unique(clim_prevs$model)
+  models_nms_clean <- data.frame(matrix(NA, ncol = length(model_nms))) %>%
+    set_names(tolower(model_nms)) %>%
+    janitor::clean_names() %>%
+    names()
   
+  level_key <- setNames(models_nms_clean, model_nms)
+  
+  # nomes com ponto para juntar com nomes dos modelos para deixar dados em formato
+  # amplo.
+  clim_prevs <- clim_prevs %>%
+    dplyr::mutate(model = recode(model, !!!level_key)) %>%
+    dplyr::rename_with(~ str_replace_all(.x, "_", "\\.")) %>%
+    dplyr::rename_with(~ str_replace_all(.x, "member|model", "m"), -model) %>%
+    dplyr::rename_with(~ str_replace_all(.x, "avg", "mean"))  
+  
+  clim_prevs
+  
+  # names(clim_prevs)
+  # [1] "model"       "codONS"      "Sr"          "L"          
+  # [5] "date"        "m.mean"      "obs.mean"    "ens.mean"   
+  # [9] "climatology" "m.sd"        "ens.sd"      "m.1"        
+  # [13] "m.2"         "m.3"         "m.4"         "m.5"        
+  # [17] "m.6"         "m.7"         "m.8"         "m.9"        
+  # [21] "m.10"        "m.11"        "m.12"        "m.13"       
+  # [25] "m.14"        "m.15"        "m.16"        "m.17"       
+  # [29] "m.18"        "m.19"        "m.20"        "m.21"       
+  # [33] "m.22"        "m.23"        "m.24"        "month"
+}
+
+# verificar nomes das variaveis nos dados
+.check_names_nmme_data <- function(data_names){
+  checkmate::assert_character(data_names)
+  checkmate::assert_names(data_names,
+                          identical.to = c(
+                            "model", "codONS", "Sr", "L", "date", "model_avg", "obs_avg",
+                            "ens_avg", "climatology", "model_sd", "ens_sd", "member_1", "member_2",
+                            "member_3", "member_4", "member_5", "member_6", "member_7", "member_8",
+                            "member_9", "member_10", "member_11", "member_12", "member_13",
+                            "member_14", "member_15", "member_16", "member_17", "member_18",
+                            "member_19", "member_20", "member_21", "member_22", "member_23",
+                            "member_24", "month"
+                          )
+  )  
+}
+
+# espalhar previsoes dos membros, medias modelos e medias ensemble nas colunas
+.spread_fcsts_nmme <- function(.nmme_data, 
+                               .ibasin,
+                               .imonth,
+                               .lead_time,
+                               .model_exclude = 'gfdl_spear'){
+  data_pp_wide <- .nmme_data %>%
+    select(-obs.mean, -climatology) %>%
+    dplyr::filter(model != .model_exclude) %>%
+    dplyr::filter(
+      codONS == .ibasin,
+      month(date) %in% .imonth,
+      # model %in% imodel,
+      L %in% .lead_time
+    ) %>% # pull(month) %>% unique()
+    tidyr::pivot_longer(-c(model:date, month),
+                        names_to = "previsao",
+                        values_to = "valor"
+    ) %>%
+    tidyr::unite("forecast", c("model", "previsao")) %>%
+    tidyr::pivot_wider(names_from = "forecast", values_from = "valor") %>%
+    janitor::remove_empty(which = "cols")
+  
+  obs_per_basins <- .nmme_data %>%
+    dplyr::filter(model != .model_exclude) %>%
+    dplyr::filter(
+      codONS == .ibasin,
+      month(date) %in% .imonth,
+      # model %in% imodel,
+      L %in% .lead_time
+    ) %>%
+    dplyr::select(codONS, date, obs.mean) %>%
+    dplyr::distinct(codONS, date, obs.mean)
+  
+  
+  data_pp_all <- inner_join(data_pp_wide, 
+                            obs_per_basins, 
+                            by = c("codONS", "date")
+                            ) %>%
+    dplyr::relocate(obs.mean, .after = month)
+  # names(data_pp_all)
+  
+  # remove variaveis redundantes
+  data_pp_all <- data_pp_all %>%
+    dplyr::rename(
+      "ens.mean" = cancm4i_ens.mean,
+      "ens.sd" = cancm4i_ens.sd
+    ) %>%
+    dplyr::select(-contains("_ens.mean"), -contains("_ens.sd")) 
+  
+}
+
+
+#' Spread all NMME's forecasts along columns 
+#'
+#' Tidy data forecasts for a given basin, month and lead time. This is applied 
+#' before build a statistical model to pos-process the forecasts. 
+#'
+#' @param data_file file of processed data
+#' @param ibasin ONS basin code
+#' @param imonth month of interest
+#' @param lead_time lead time(s)
+#' @param model_exclude model to exclude from because the diferent span of models.
+#' Default is 'gfdl_spear'.
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+spread_all_nmme <- function(nmme_data,
+                           ibasin,
+                           imonth,
+                           lead_time,
+                           model_exclude = "gfdl_spear") {
+  # data_file = "/home/hidrometeorologista/Dropbox/github/my_reps/lhmet/download-hindcast-NMME/output/qs/basin-avgs/weighted/nmme-cru-mly-weighted-avg-basins-ons-ens-members-models-ens-mean-prec-1982-2010.qs"
+  # ibasin = 6;   imonth = 1;  lead_time = 1:2; model_exclude = "gfdl_spear"
+  
+  #nmme_data <- import_bin_file(data_file)
+  # range(nmme_data$date)
+  .check_names_nmme_data(names(nmme_data))
+  
+  # limpeza de nomes das vars
+  nmme_data <- .clean_names_nmme(nmme_data)
+  
+  .spread_fcsts_nmme(nmme_data, 
+                     .ibasin = ibasin,
+                     .imonth = imonth,
+                     .lead_time = lead_time,
+                     .model_exclude = model_exclude
+                     )
+  
+}

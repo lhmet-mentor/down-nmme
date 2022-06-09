@@ -22,18 +22,28 @@ easypackages::libraries(pcks)
 # https://github.com/FrancisArgnR/R-FeatureSelection-Packages
 # https://cran.r-project.org/web/packages/FeatureTerminatoR/vignettes/feature_terminatoR_howto.html
 # https://www.tmwr.org/pre-proc-table.html
+# https://www.lobdata.com.br/2020/10/13/effective-approach-to-analyze-correlation-coefficients/
 #------------------------------------------------------------------------------
 # funcoes auxiliares
-source("R/utils.R")
-source("R/data-proc-rds.R")
+source(here("R/utils.R"))
+source(here("R/data-proc-rds.R"))
+source(here("R/aggregate-nmme.R"))
 source(here("R/plot-nmme-members-cru-prec-funs.R"))
+
 
 # para escolher um posto ONS a partir do codONS
 top6()
 
 #-------------------------------------------------------------------------------
 # fncao para retornmar nome dos modelos com as n maiorres correlacoes com obs
-.topn_cor <- function(cor_ord, n) cor_ord %>% slice(-1) %>% head(n) %>% rownames()
+.topn_cor <- function(cor_mat, target = "obs.mean", n, names = FALSE) {
+  # cor_mat = correls; target = "obs.mean"; n = 5
+  cor_obs <- round(as.data.frame(cor_mat)[target], 2)
+  cor_obs_order <- arrange(cor_obs, desc(abs(obs.mean)))
+  res <- cor_obs_order %>% slice(-1) %>% head(n) 
+  if(names) return(rownames(res))
+  res
+}
 
 # paleta de cores para correlacao
 pal_correlation <- function(n){
@@ -50,103 +60,37 @@ data_nmme_cru_file <- here("output/qs/basin-avgs/weighted/",
 data_nmme_cru <- import_bin_file(data_nmme_cru_file)
 range(data_nmme_cru$date)
 
-# nomes dos modelos limpos para usar nas colunas-------------------------------
-model_nms <- unique(data_nmme_cru$model)
-models_nms_clean <- data.frame(matrix(NA, ncol = length(model_nms))) %>%
-  set_names(tolower(model_nms)) %>%
-  janitor::clean_names() %>%
-  names()
-
-level_key <- setNames(models_nms_clean, model_nms)
-
-# nomes com ponto para juntar com nomes dos modelos para deixar dados em formato
-# amplo.
-data_nmme_cru <- data_nmme_cru %>%
-  dplyr::mutate(model = recode(model, !!!level_key)) %>%
-  dplyr::rename_with(~ str_replace_all(.x, "_", "\\.")) %>%
-  dplyr::rename_with(~ str_replace_all(.x, "member|model", "m"), -model) %>%
-  dplyr::rename_with(~ str_replace_all(.x, "avg", "mean"))
-
-
 
 #------------------------------------------------------------------------------
 # Dados de todas previsoes nas colunas
-
-#imodel = "cansips_ic3" # 20 membros
-#imodel = "gfdl_spear" # 15 membros, 1991-2009
-#imodel = "cancm4i" # 10 membros
-#imodel = c("cansips_ic3", "cancm4i")
-ibasin = 6
-imonth = 1
-lead_time = 1
-
-# Funcao para espalhar TODAS (membros, media ensemble, media modelo) previsoes
-# nas colunas
-
-data_pp_wide <- data_nmme_cru %>% 
-  select(-obs.mean, -climatology) %>%
-  dplyr::filter(model != "gfdl_spear") %>%
-  dplyr::filter(codONS == ibasin, 
-                month(date) == imonth, 
-                #model %in% imodel, 
-                L == lead_time
-  ) %>% #pull(month) %>% unique()
-  tidyr::pivot_longer(-c(model:date, month), 
-               names_to = "previsao", 
-               values_to = "valor"
-               )  %>%
-  tidyr::unite("forecast", c("model", "previsao")) %>%
-  tidyr::pivot_wider(names_from = "forecast", values_from = "valor") %>%
-  janitor::remove_empty(which = "cols") 
-  
-obs_per_basins <- data_nmme_cru %>% 
-  dplyr::filter(model != "gfdl_spear") %>%
-  dplyr::filter(codONS == ibasin, 
-                month(date) == imonth, 
-                #model %in% imodel, 
-                L == lead_time
-  ) %>%
-  dplyr::select(codONS, date, obs.mean) %>%
-  dplyr::distinct(codONS, date, obs.mean)
-
-
-data_pp_all <- inner_join(data_pp_wide, obs_per_basins) %>%
-  dplyr::relocate(obs.mean, .after = month)
-names(data_pp_all)
-
-data_pp_all
-#select(data_pp_all, contains("ens.mean"))
-#select(data_pp_all, contains("ens.sd"))
-
-# remove variaveis redundantes 
-data_pp_all <- data_pp_all %>%
-  dplyr::rename("ens.mean" = cancm4i_ens.mean, 
-         "ens.sd" = cancm4i_ens.sd) %>%
-  dplyr::select(-contains("_ens.mean"), -contains("_ens.sd"))
+data_pp <- spread_all_nmme(data_nmme_cru, 
+                           ibasin = 6, 
+                           imonth = 1, 
+                           lead_time = 1, 
+                           model_exclude = "gfdl_spear"
+                           )
 
 
 #-------------------------------------------------------------------------------
-# Selecao das previsoes com r significativa ao n.s 90%
-data4cor <- data_pp_all %>% select(-c(codONS:month)) 
+# Selecao das previsoes com r significativa ao n.c 90%
+data4cor <- data_pp %>% select(-c(codONS:month)) 
 #plot_correlation(data4cor)
 
 correls <-  cor(data4cor, use = "complete.obs")
-cor_obs <- round(as.data.frame(correls)[1], 2)
-
-cor_obs_order <- arrange(cor_obs, desc(abs(obs.mean)))
-cor_obs_order %>% slice(-1) %>% head(5) 
+.topn_cor(correls, n = 5)
+.topn_cor(correls, n = 5, names = TRUE)
 
 
 
 # teste de significancia da correlacao
-alpha <- 0.11
+alpha <- 0.11 # baixado para incluir membro com maior correl!
 res <- corrplot::cor.mtest(
   data4cor,
   conf.level = 1-alpha
 )
 
-cbind(r=cor_obs ,p = round(as.data.frame(res)[1], 2)) %>%
-  arrange(desc(obs.mean)) 
+# cbind(r=cor_obs ,p = round(as.data.frame(res)[1], 2)) %>%
+#   arrange(p.obs.mean)
 
 models_nms_rsig <- names(res$p["obs.mean",][res$p["obs.mean",] <= alpha])
 # [1] "obs.mean"           "ens.mean"           "cancm4i_m.3"       
@@ -157,11 +101,7 @@ models_nms_rsig <- names(res$p["obs.mean",][res$p["obs.mean",] <= alpha])
 # [16] "ncep_cfsv2_m.3"     "ncep_cfsv2_m.5"     "ncep_cfsv2_m.13"  
 
 is_rsig <- colnames(correls) %in% models_nms_rsig
-
 correls_sig <- correls[is_rsig, is_rsig]
-
-
-
 
 
 corrplot::corrplot(correls_sig,
@@ -184,32 +124,28 @@ corrplot::corrplot(correls_sig,
 
 #plot_correlation(data4cor)
 
-my_alpha <- 0.11 # 0.10 
-models_nms_rsig <- names(res$p["obs.mean",][res$p["obs.mean",] <= my_alpha])
+#------------------------------------------------------------------------------
+# dados com correl significativa
+data_pp_bests <- data_pp %>%  select(date, all_of(models_nms_rsig)) 
 
+# data_pp_bests %>%
+#   timePlot(., 
+#            models_nms_rsig, 
+#          group = TRUE, 
+#          key.columns = 5,
+#          ylab = "Prec"
+#          ) 
 
-data_pp_bests <- data_pp_all %>%
-  #select(codONS:month, all_of(models_nms_rsig)) %>%
-  select(codONS:month, all_of(models_nms_rsig)) 
-
-
-data_pp_bests %>%
-  timePlot(., 
-           models_nms_rsig, 
-         group = TRUE, 
-         key.columns = 5,
-         ylab = "Prec"
-         ) 
-
-rng <- data_pp_bests %>%
-  range(na.rm = TRUE)
-rng <- c(trunc(rng[1]), ceiling(rng[2]))
-
-
+# visualizacao das series
 data_pp_bests_long <- data_pp_bests %>%
-  pivot_longer(cols = -c(codONS:obs.mean),
+  pivot_longer(cols = -c(date:obs.mean),
                names_to = "previsao", 
                values_to = "value")
+
+# data_pp_bests_long %>%
+# mutate(
+#   sex = fct_reorder(previsao, value, .fun = ~, na.rm = TRUE)
+# )
 
 data_pp_bests_long %>%
   ggplot(aes(x = date, y = value, color = factor(previsao))) +
@@ -217,16 +153,23 @@ data_pp_bests_long %>%
   geom_line(alpha = 0.5) +
   theme_bw() +
   scale_colour_material_d() +
-  gghighlight::gghighlight(
-    previsao %in% .topn_cor(cor_obs_order, 5),
-    label_key = previsao, use_direct_label = FALSE
-  ) +
+  # gghighlight::gghighlight(
+  #   previsao %in% .topn_cor(cor_obs_order, 5),
+  #   label_key = previsao, use_direct_label = FALSE
+  # ) +
   geom_hline(yintercept = mean(data_pp_bests$obs.mean), linetype = 2) +
   geom_line(data = select(data_pp_bests, date, obs.mean),
             aes(x = date, y = obs.mean), 
             colour = 1, size = 2
-            ) 
-  
+  ) 
+
+# unique(data_pp_bests_long$previsao) %>% length()
+# 21 previsoes
+# dispersao
+rng <- data_pp_bests %>%
+  select(where(is.numeric)) %>%
+  range(na.rm = TRUE)
+rng <- c(trunc(rng[1]), ceiling(rng[2]))
 
 openair::scatterPlot(data_pp_bests_long, 
                      x = "obs.mean", 
@@ -241,8 +184,137 @@ openair::scatterPlot(data_pp_bests_long,
 )
 
 
-# remover colinearidade
-library(tidymodels)
-data_pp_bests %>%
-  select(all_of(models_nms_rsig)) %>%
   
+
+
+#DataExplorer::plot_histogram(data_pp_bests[,-1], geom_histogram_args = list(bins = 15))
+#DataExplorer::plot_qq(data_pp_bests[,-1], by = "obs.mean")
+
+# remover colinearidade--------------------------------------------------------
+library(tidymodels)
+
+X <- data_pp_bests %>%
+  select(all_of(models_nms_rsig)) %>%
+  drop_na()
+
+# X <- data_pp %>%
+#   select(-(codONS:month)) %>% 
+#   drop_na()
+
+
+sort(round(abs(cor(X))[-1,1], 2)) #%>% length()
+
+rec <- recipe(obs.mean ~ ., data = X) 
+  
+corr_filter <- rec %>%
+  step_corr(all_numeric_predictors(), threshold = .9)
+filter_obj <- prep(corr_filter, training = X)  
+#summary(filter_obj)
+# variaveis removidas
+tidy(filter_obj, number = 1)
+# so para ver os dados filtrados
+bake(filter_obj, new_data = NULL) %>% names()
+
+
+
+# # A tibble: 4 × 2
+# terms            id        
+# <chr>            <chr>     
+#   1 cansips_ic3_m.13 corr_aoUDh
+# 2 cancm4i_m.3      corr_aoUDh
+# 3 cancm4i_m.5      corr_aoUDh
+# 4 cansipsv2_m.6    corr_aoUDh
+
+
+ggplot(data = X, aes(x = obs.mean)) + 
+  geom_histogram(bins = 8, col= "white") 
+
+
+#-------------------------------------------------------------------------------
+
+furnas11 <- data_pp_bests %>%
+  select(date, all_of(models_nms_rsig)) %>%
+  drop_na() 
+
+# furnas11 %>% View()
+# furnas11 %>% select(ncep_cfsv2_m.5, ncep_cfsv2_m.13) %>% View()
+
+#furnas11_split <- initial_split(furnas11, prop = 0.8)
+#furnas11_split <- initial_time_split(furnas11, prop = 0.8) # BEST
+furnas11_split <- initial_time_split(furnas11, prop = 0.68)
+
+furnas11_train <- training(furnas11_split)
+furnas11_test  <-  testing(furnas11_split)
+
+
+furnas11_rec <- recipe(obs.mean ~ ., data = select(furnas11_train, -date))  %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_corr(all_numeric_predictors(), threshold = .9) %>% #BEST
+  #step_corr(all_numeric_predictors(), threshold = .7) %>% 
+  step_YeoJohnson(all_numeric_predictors()) 
+
+lm_model <- linear_reg() %>% set_engine("lm")
+
+lm_wflow <- workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(furnas11_rec)
+
+
+
+# resultados
+model_res <- lm_fit %>%
+  tune::extract_fit_engine() 
+
+model_res %>% tidy()
+model_res %>% glance()
+
+
+# previsao
+#predict(lm_fit, new_data = furnas11_test)
+
+
+
+
+prevs_test <- furnas11_test %>% 
+  select(date, obs.mean) %>% 
+  bind_cols(predict(lm_fit, furnas11_test)) %>% 
+  # Add 95% prediction intervals to the results:
+  bind_cols(predict(lm_fit, furnas11_test, type = "pred_int")) %>%
+  mutate(id = "test")
+
+
+prevs_train <- furnas11_train %>% 
+  select(date, obs.mean) %>% 
+  bind_cols(predict(lm_fit, furnas11_train)) %>% 
+  # Add 95% prediction intervals to the results:
+  bind_cols(predict(lm_fit, furnas11_train, type = "pred_int")) %>%
+  mutate(id = "train")
+
+plot_data <- bind_rows(prevs_train, prevs_test)  %>% 
+  janitor::clean_names() %>%
+  mutate(id = ordered(id, levels = c("train", "test")))
+  
+timePlot(plot_data, c("obs_mean", "pred"), 
+         group = TRUE,
+         ref.x = list(v = min(plot_data$date[plot_data$id == "test"]), 
+                      lty = 1, lwd = 2)
+        )
+
+
+
+final_lm_res <- last_fit(lm_wflow, furnas11_split)
+fitted_lm_wflow <- extract_workflow(final_lm_res)
+
+collect_metrics(final_lm_res)
+collect_predictions(final_lm_res) #%>% slice(1:5)
+
+#-------------------------------------------------------------------------------
+# resample
+
+# furnas11_split <- initial_split(furnas11, prop = 0.8)
+# furnas11_train <- training(furnas11_split)
+# furnas11_test  <-  testing(furnas11_split)
+# 
+# folds <- vfold_cv(furnas11_train, v = 3)
+# lm_fit_rs <- lm_wflow %>%
+# fit_resamples(folds)

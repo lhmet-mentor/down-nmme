@@ -541,7 +541,7 @@ join_nmme_models_members_ensemble <- function(
                                .model_exclude = 'gfdl_spear'){
   data_pp_wide <- .nmme_data %>%
     select(-obs.mean, -climatology) %>%
-    dplyr::filter(model != .model_exclude) %>%
+    dplyr::filter(!model %in% .model_exclude) %>%
     dplyr::filter(
       codONS == .ibasin,
       month(date) %in% .imonth,
@@ -557,7 +557,7 @@ join_nmme_models_members_ensemble <- function(
     janitor::remove_empty(which = "cols")
   
   obs_per_basins <- .nmme_data %>%
-    dplyr::filter(model != .model_exclude) %>%
+    dplyr::filter(!model %in% .model_exclude) %>%
     dplyr::filter(
       codONS == .ibasin,
       month(date) %in% .imonth,

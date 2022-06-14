@@ -2,14 +2,14 @@ pcks <- c(
   "tidyverse", "here", "HEobs",
   "checkmate", "lubridate",
   "tictoc", "openair", "ggpubr", "ggExtra", "viridis", "see", "ggh4x",
-  "ensemblepp",
-  "ensembleBMA",
-  "ensembleMOS",
-  "downscaleR",
-  "tidymodels",
-  "crch",
-  "MBC",
-  "DataExplorer" 
+  # "ensemblepp",
+  # "ensembleBMA",
+  # "ensembleMOS",
+  # "downscaleR",
+  # "crch",
+  # "MBC",
+  "DataExplorer",
+  "tidymodels"
 )
 
 easypackages::libraries(pcks)
@@ -34,24 +34,7 @@ source(here("R/plot-nmme-members-cru-prec-funs.R"))
 # para escolher um posto ONS a partir do codONS
 top6()
 
-#-------------------------------------------------------------------------------
-# fncao para retornmar nome dos modelos com as n maiorres correlacoes com obs
-.topn_cor <- function(cor_mat, target = "obs.mean", n, names = FALSE) {
-  # cor_mat = correls; target = "obs.mean"; n = 5
-  cor_obs <- round(as.data.frame(cor_mat)[target], 2)
-  cor_obs_order <- arrange(cor_obs, desc(abs(obs.mean)))
-  res <- cor_obs_order %>% slice(-1) %>% head(n) 
-  if(names) return(rownames(res))
-  res
-}
 
-# paleta de cores para correlacao
-pal_correlation <- function(n){
-  col2 <- colorRampPalette(c('#67001F', '#B2182B', '#D6604D', '#F4A582',
-                             '#FDDBC7', '#FFFFFF', '#D1E5F0', '#92C5DE',
-                             '#4393C3', '#2166AC', '#053061'))
-  rev(col2(n))  
-}
 
 #-------------------------------------------------------------------------------
 # importa dados combinados das medias dos modelos e da media ensemble
@@ -63,70 +46,25 @@ range(data_nmme_cru$date)
 
 #------------------------------------------------------------------------------
 # Dados de todas previsoes nas colunas
-data_pp <- spread_all_nmme(data_nmme_cru, 
-                           ibasin = 6, 
-                           imonth = 1, 
-                           lead_time = 1, 
-                           model_exclude = "gfdl_spear"
-                           )
+furnas11 <- spread_all_nmme(data_nmme_cru,
+                            ibasin = 6,
+                            imonth = 1,
+                            lead_time = 1,
+                            model_exclude = "gfdl_spear"
+) %>%
+  relocate(date) %>%
+  select(-(codONS:month)) %>% 
+  drop_na()
 
-
-#-------------------------------------------------------------------------------
-# Selecao das previsoes com r significativa ao n.c 90%
-data4cor <- data_pp %>% select(-c(codONS:month)) 
-#plot_correlation(data4cor)
-
-correls <-  cor(data4cor, use = "complete.obs")
-.topn_cor(correls, n = 5)
-.topn_cor(correls, n = 5, names = TRUE)
-
-
-
-# teste de significancia da correlacao
-alpha <- 0.11 # baixado para incluir membro com maior correl!
-res <- corrplot::cor.mtest(
-  data4cor,
-  conf.level = 1-alpha
-)
-
-# cbind(r=cor_obs ,p = round(as.data.frame(res)[1], 2)) %>%
-#   arrange(p.obs.mean)
-
-models_nms_rsig <- names(res$p["obs.mean",][res$p["obs.mean",] <= alpha])
-# [1] "obs.mean"           "ens.mean"           "cancm4i_m.3"       
-# [4] "cansips_ic3_m.13"   "cansips_ic3_m.20"   "cansipsv2_m.6"     
-# [7] "cansipsv2_m.13"     "cmc1_cancm3_m.9"    "cmc2_cancm4_m.mean"
-# [10] "cmc2_cancm4_m.1"    "cmc2_cancm4_m.10"   "gem_nemo_m.sd"     
-# [13] "gem_nemo_m.6"       "nasa_geoss2s_m.sd"  "nasa_geoss2s_m.4"  
-# [16] "ncep_cfsv2_m.3"     "ncep_cfsv2_m.5"     "ncep_cfsv2_m.13"  
-
-is_rsig <- colnames(correls) %in% models_nms_rsig
-correls_sig <- correls[is_rsig, is_rsig]
-
-
-corrplot::corrplot(correls_sig,
-                   p.mat = res$p[is_rsig, is_rsig],
-                   method = "color", 
-                   type = "upper",
-                   #sig.level = c(.001, 0.01, alpha),
-                   sig.level = c(.001, 0.01, 0.05),
-                   pch.cex = 1.2,
-                   insig = "label_sig",
-                   pch.col = "green",
-                   #order = "hclust",
-                   is.corr = FALSE,
-                   diag = FALSE,
-                   col = pal_correlation(30), 
-                   number.cex = 0.7,
-                   addCoef.col = 'black'
-)
-#GGally::ggpairs(data4cor) + theme_bw()
-
-#plot_correlation(data4cor)
 
 #------------------------------------------------------------------------------
 # dados com correl significativa
-data_pp_bests <- data_pp %>%  select(date, all_of(models_nms_rsig)) 
+
+tab_r_p <- filter_by_pval_corr(furnas11[,-1], alpha = 0.11, plot = FALSE)
+#filter_by_pval_corr(data_pp, alpha = 0.11, plot = TRUE)
+
+models_nms_rsig <- tab_r_p$member
+data_pp_bests <- furnas11 %>%  select(date, obs.mean, all_of(models_nms_rsig)) 
 
 # data_pp_bests %>%
 #   timePlot(., 
@@ -190,67 +128,46 @@ openair::scatterPlot(data_pp_bests_long,
 #DataExplorer::plot_histogram(data_pp_bests[,-1], geom_histogram_args = list(bins = 15))
 #DataExplorer::plot_qq(data_pp_bests[,-1], by = "obs.mean")
 
+
+
+
 # remover colinearidade--------------------------------------------------------
-library(tidymodels)
-
-X <- data_pp_bests %>%
-  select(all_of(models_nms_rsig)) %>%
-  drop_na()
-
-# X <- data_pp %>%
-#   select(-(codONS:month)) %>% 
-#   drop_na()
-
-
-sort(round(abs(cor(X))[-1,1], 2)) #%>% length()
-
+X <- furnas11[,-1]
 rec <- recipe(obs.mean ~ ., data = X) 
-  
 corr_filter <- rec %>%
-  step_corr(all_numeric_predictors(), threshold = .9)
+  step_corr(all_numeric_predictors(), threshold = .35)
 filter_obj <- prep(corr_filter, training = X)  
 #summary(filter_obj)
+
 # variaveis removidas
-tidy(filter_obj, number = 1)
-# so para ver os dados filtrados
-bake(filter_obj, new_data = NULL) %>% names()
+tidy(filter_obj, number = 1) %>% pull(terms)
+# variaveis mantidas
+uncorrelated <- bake(filter_obj, new_data = NULL) %>%
+  select(-obs.mean) %>%
+  names()
+uncorrelated
 
+library(corrplot)
+tmwr_cols <- colorRampPalette(c("#91CBD765", "#CA225E"))
+bake(filter_obj, new_data = NULL) %>% 
+  relocate(obs.mean) %>%
+  cor() %>% 
+  corrplot(col = tmwr_cols(30), tl.col = "black", method = "ellipse")
 
+# avaliar efeito num modelo linear ---------------------------------------------
 
-# # A tibble: 4 × 2
-# terms            id        
-# <chr>            <chr>     
-#   1 cansips_ic3_m.13 corr_aoUDh
-# 2 cancm4i_m.3      corr_aoUDh
-# 3 cancm4i_m.5      corr_aoUDh
-# 4 cansipsv2_m.6    corr_aoUDh
+set.seed(1)
 
-
-ggplot(data = X, aes(x = obs.mean)) + 
-  geom_histogram(bins = 8, col= "white") 
-
-
-#-------------------------------------------------------------------------------
-
-furnas11 <- data_pp_bests %>%
-  select(date, all_of(models_nms_rsig)) %>%
-  drop_na() 
-
-# furnas11 %>% View()
-# furnas11 %>% select(ncep_cfsv2_m.5, ncep_cfsv2_m.13) %>% View()
-
-#furnas11_split <- initial_split(furnas11, prop = 0.8)
-#furnas11_split <- initial_time_split(furnas11, prop = 0.8) # BEST
-furnas11_split <- initial_time_split(furnas11, prop = 0.68)
-
+#furnas11_split <- initial_split(data_pp_bests, prop = 0.7) # BEST
+furnas11_split <- initial_split(furnas11, prop = 0.8) 
 furnas11_train <- training(furnas11_split)
 furnas11_test  <-  testing(furnas11_split)
 
-
-furnas11_rec <- recipe(obs.mean ~ ., data = select(furnas11_train, -date))  %>%
+furnas11_rec <- recipe(obs.mean ~ ., 
+                       data = select(furnas11_train, -date)
+                       )  %>%
   step_normalize(all_numeric_predictors()) %>%
-  step_corr(all_numeric_predictors(), threshold = .9) %>% #BEST
-  #step_corr(all_numeric_predictors(), threshold = .7) %>% 
+  step_corr(all_numeric_predictors(), threshold = .35) %>%
   step_YeoJohnson(all_numeric_predictors()) 
 
 lm_model <- linear_reg() %>% set_engine("lm")
@@ -259,7 +176,7 @@ lm_wflow <- workflow() %>%
   add_model(lm_model) %>% 
   add_recipe(furnas11_rec)
 
-
+lm_fit <- fit(lm_wflow, furnas11_train)
 
 # resultados
 model_res <- lm_fit %>%
@@ -268,12 +185,8 @@ model_res <- lm_fit %>%
 model_res %>% tidy()
 model_res %>% glance()
 
-
 # previsao
 #predict(lm_fit, new_data = furnas11_test)
-
-
-
 
 prevs_test <- furnas11_test %>% 
   select(date, obs.mean) %>% 
@@ -293,28 +206,20 @@ prevs_train <- furnas11_train %>%
 plot_data <- bind_rows(prevs_train, prevs_test)  %>% 
   janitor::clean_names() %>%
   mutate(id = ordered(id, levels = c("train", "test")))
-  
+
+
+scatterPlot(plot_data, x = "obs_mean", y = "pred", 
+            type = "id", linear = TRUE, mod.line = TRUE)
+
+
 timePlot(plot_data, c("obs_mean", "pred"), 
          group = TRUE,
          ref.x = list(v = min(plot_data$date[plot_data$id == "test"]), 
                       lty = 1, lwd = 2)
-        )
-
-
+)
 
 final_lm_res <- last_fit(lm_wflow, furnas11_split)
 fitted_lm_wflow <- extract_workflow(final_lm_res)
-
 collect_metrics(final_lm_res)
-collect_predictions(final_lm_res) #%>% slice(1:5)
+collect_predictions(final_lm_res)
 
-#-------------------------------------------------------------------------------
-# resample
-
-# furnas11_split <- initial_split(furnas11, prop = 0.8)
-# furnas11_train <- training(furnas11_split)
-# furnas11_test  <-  testing(furnas11_split)
-# 
-# folds <- vfold_cv(furnas11_train, v = 3)
-# lm_fit_rs <- lm_wflow %>%
-# fit_resamples(folds)

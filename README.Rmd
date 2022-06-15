@@ -69,14 +69,6 @@ packageVersion("qs")
 - - - 
 
 
-3. `ensemble-members-averages.R`:
-
-
-  - depende do script `data-proc-rds.R` que contém as funções para obter a média 
-  ou a mediana (para cada ponto, por data de inicialização e lead time) de todos 
-  membros de um dado modelo.
-  
-  - arquivos de saída em `output/{rds,qs}/ensemble-{model_id}-{stat}.{RDS,qs}` (cada arquivo ~290 MB)
 
   
 

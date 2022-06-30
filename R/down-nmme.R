@@ -20,7 +20,8 @@ download_file_safe <- purrr::safely(download.file)
 #' @examples
 down_nmme <- function(ano = 1981, 
                       modelo = "CanCM4i", 
-                      variavel = "prec", tipo = "hindcast"){
+                      variavel = "prec", 
+                      tipo = "hindcast"){
   tipo <- toupper(tipo)
   # ano = 1980;  modelo = "NASA-GEOSS2S"; variavel = "prec"
   # ano = 1992;  modelo = "GFDL-SPEAR"; variavel = "prec"

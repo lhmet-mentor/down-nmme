@@ -1,12 +1,18 @@
-pcks <- c("terra", "tidync", "tidyverse", "fs", "tictoc", "data.table",
+pcks <- c("terra", 
+          "tidync", 
+          "tidyverse", 
+          "fs", 
+          "tictoc", 
+          "data.table",
           "here")
 
 easypackages::libraries(pcks)
-options(timeout = 150)
+#options(timeout = 150)
 
 #------------------------------------------------------------------------------
 # scripts
 source(here("R/models-nmme.R"))
+#names_vars_models()
 source(here("R/down-nmme.R"))
 
 

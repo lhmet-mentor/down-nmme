@@ -1,106 +1,74 @@
 ## aperfeicoamentos futuros
 library(data.table)
+pcks <- c("data.table", "dplyr", "tidyverse", "stringr")
+easypackages::libraries(pcks)
 
-# anos <- 1980:2018
-# variaveis <- c("prec", "tmax", "tmin", "t2mmax", "t2mmin", "tsmx", "tsmn", "tref")
+# tabela com nome das variáveis em cada modelo
+# informações obtidas manualmente no site ...
 
-#tabela_control <- expand.grid(variaveis, modelos, anos) %>%
-#  as.data.frame() %>%
-#  setNames(c("var", "modelo", "ano")) %>%
-#  as_tibble() %>%
-#  mutate_all(.funs = as.character) %>%
-#  arrange(modelo, var)
+names_vars_models <- function(){
+  
+  variables_1 <- c( "tmax", "tmin", "prec")
+  variables_2 <-c("t2mmax","t2mmin", "prec")
+  variables_3 <- c("t_ref_max", "t_ref_min", "prec")
+  variables_4 <- c("tsmx", "tsmn", "prec")
+  models_1 <- c("CanCM4i","CanSIPSv2", "CMC1-CanCM3","CMC2-CanCM4", "GEM-NEMO", "CanSIPS-IC3")
+  models_2 <- c("NASA-GEOSS2S","NASA-GMAO-062012")
+  # os modelos 2 possuem os dados de temperatura em Celcius
+  models_3 <- c("GFDL-SPEAR","GFDL-CM2p1-aer04", "GFDL-CM2p5-FLOR-A06", "GFDL-CM2p5-FLOR-B01")
+  models_4 <- c("NCAR-CESM1")
+  
+  table_control <- expand.grid(models_1, variables_1) %>% 
+    rbind(expand.grid(models_2,variables_2))%>% 
+    rbind(expand.grid(models_3, variables_3)) %>% 
+    rbind(expand.grid(models_4, variables_4)) %>% 
+    setNames(c("model", "variable")) %>%
+    as_tibble() %>%   
+    mutate_all(.funs = as.character) %>%  
+    arrange(model, variable)
+  
+  table_control <- table_control %>%
+    mutate(id = ifelse(str_detect(variable, "x"), 
+                       "tmax",
+                       ifelse(str_detect(variable, "n"), "tmin", "prec"))
+    ) %>% 
+    pivot_wider(names_from = 'id', values_from = variable)
+  table_control
+}
 
-## montar tabela de ano inicial e final de cada modelo
-tabela1 <- data.table(modelo = c("CanCM4i", 
-                                 "CanSIPSv2", 
-                                 "CMC1-CanCM3",
-                                "CMC2-CanCM4", 
-                                "GEM-NEMO", 
-                                "NASA-GEOSS2S",
-                                "NCAR-CESM1", 
-                                "NCEP-CFSv2", 
-                                "CanSIPS-IC3", 
-                                "GFDL-SPEAR"),
-                      
-                     centro = c("Canadian Meteorological Centre (CMC) – Canada",
-                                "Canadian Meteorological Centre (CMC) – Canada",
-                                "Canadian Meteorological Centre (CMC) – Canada",
-                                "Canadian Meteorological Centre (CMC) – Canada",
-                                "Recherche en Prévision Numérique (RPN)",
-                                "National Aeronautics and Space Administration (NASA) – United States",
-                                "National Center for Atmospheric Research (NCAR)",
-                                "National Centers for Environmental Prediction (NOAA/NCEP) – United States",
-                                "Canadian Meteorological Centre (CMC) – Canada",
-                                "Geophysical Fluid Dynamics Laboratory (NOAA)"
-                     ),
-                     periodo = c("1981-2018", 
-                                 "1981-2018", 
-                                 "1981-2010",  
-                                 "1981-2010", 
-                                 "1981-2018", 
-                                 "1981-2017",   
-                                 "1980-2010", 
-                                 "1982-2010", 
-                                 "1980-2020",
-                                 "1991-2020"
-                                 ),
-                     n_membros = c(10, 
-                                   20, 
-                                   10,
-                                   10, 
-                                   10, 
-                                   4,
-                                   10, 
-                                   24, 
-                                   20,
-                                   15),
-                     lead = c("0.5-11.5", 
-                              "0.5-11.5", 
-                              "0.5-11.5",
-                              "0.5-11.5", 
-                              "0.5-11.5", 
-                              "0.5-8.5",
-                              "0.5-11.5", 
-                              "0.5-9.5", 
-                              "0.5-11.5",
-                              "0.5-11.5"
-                              ),
-                     referencia = c("Kirtman et al. (2014)",
-                                    "Kirtman et al. (2014)",
-                                    "Merryfield et al. (2013)",
-                                    "Merryfield et al. (2013)",
-                                    "Kirtman et al. (2014)",
-                                    "Vernieres et al. (2012)",
-                                    "Lawrence et al. (2012)",
-                                    "Saha et al. (2014)",
-                                    "Kirtman et al. (2014)", # verificar
-                                    "Delworth et al. (2020)"
-                                    )
-                     # variaveis = c("Precipitation (prec; mm/day), Maximum Temperature (tmax; K), Minimum Temperature (tmin; K)",
-                     #               "",
-                     #               "",
-                     #               "",
-                     #               "",
-                     #               "Precipitation (prec; mm/day), Maximum Temperature (t2mmax; K), Minimum Temperature (t2mmin; K)",
-                     #               "Precipitation (prec; mm/day), Daily minimum of average 2-m temperature (tsmx; K), Daily maximum of average 2-m temperature (tsmn; K)",
-                     #               "Precipitation (prec; mm/day), Reference Temperature (tref; K)"
-                     # )
 
-)
-tabela1
-
-# write.table(tabela1, file = "/home/andreza/Desktop/test-down-NMME/output/tabela1.csv",
-#             row.names = FALSE, sep = ";"
-#             )
-
-## verificacao
-#files_nc <- dir_ls(here("output/prec"), glob = "*.nc")
-
-#range(rast(files_nc[1])[])
-#range(rast(files_nc[2])[])
-#nrow((ht_nc <- tidync::hyper_tibble(files_nc[1])))
-#table((ht_nc$S))
-#nrow((metr_nc <- metR::ReadNetCDF(files_nc[1])))
-#table((metr_nc$S))
-#summary(tidync::hyper_tibble(files_nc[2]))
+tab_mod_anos_vname_type <- function(){
+  
+  vnames <- c("tmax", "tmin")
+  models <- names_vars_models()$model
+  
+  # tabela com a combinacao de anos e modelos para tipo hindcast
+  #periodo hindcast
+  start_y_hindcast <- 1980
+  end_y_hindcast <- 2020
+  tab_mod_anos_vname_hindcast <-
+    expand.grid(models, start_y_hindcast:end_y_hindcast , vnames, "HINDCAST") %>%
+    as_tibble() %>%
+    mutate(across(.fns = as.character)) %>%
+    rename("model" = "Var1", "year" = "Var2", "variable" = "Var3", "type" = "Var4") %>%
+    arrange(model) %>%
+    relocate(year, model, variable, type)
+  
+  # tabela com a combinacao de anos e modelos para tipo forecast
+  #periodo forecast
+  start_y_forecast <- 2016
+  end_y_forecast <- 2022
+  tab_mod_anos_vname_forecast <-
+    expand.grid(models, start_y_forecast:end_y_forecast , vnames, "FORECAST") %>%
+    as_tibble() %>%
+    mutate(across(.fns = as.character)) %>%
+    rename("model" = "Var1", "year" = "Var2", "variable" = "Var3", "type" = "Var4") %>%
+    arrange(model) %>%
+    relocate(year, model, variable, type)
+  
+  tab_mod_anos_vname_type <-
+    full_join(tab_mod_anos_vname_hindcast, tab_mod_anos_vname_forecast) %>% 
+    arrange(model, variable)
+  
+  tab_mod_anos_vname_type
+}

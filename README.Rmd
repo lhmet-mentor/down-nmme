@@ -11,12 +11,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-# download-hindcast-NMME
+# down-nmme
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-O objetivo do download-hindcast-NMME é baixar os dados das previsões climática do NMME. 
+O objetivo do down-nmme é baixar os dados das previsões climática do NMME. 
 
 
 

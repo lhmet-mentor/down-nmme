@@ -44,7 +44,8 @@ down_nmme <- function(ano = 1981,
   
   prefix <- paste0("nmme_", variavel, "_", modelo, "_", ano) 
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
-  dest_file <- here::here("output", variavel, file) 
+  #dest_file <- here::here("output", variavel, file)
+  dest_file <- here::here("output", "ncdf", file) 
   
   Sys.sleep(1)
   

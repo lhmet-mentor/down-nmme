@@ -1,13 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# download-hindcast-NMME
+# down-nmme
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-O objetivo do download-hindcast-NMME é baixar os dados das previsões
-climática do NMME.
+O objetivo do down-nmme é baixar os dados das previsões climáticas
+(retrospectivas) do NMME.
 
 # Dependências
 
@@ -47,17 +47,17 @@ packageVersion("qs")
 1.  `down-hindcasts-nmme.R`: script com looping para baixar arquivos
     NetCDF para um intervalo de anos e uma lista de modelos.
 
--   depende do script `models-nmme.R` que gera objeto chamado `tabela1`
-    com informações dos modelos, como nomes e períodos. Requer alteração
-    quando inserir novos modelos. Tabela gerada manualmente. Atualmente
-    somente o nome dos modelos desta tabela são usados.
+-   depende do script `models-nmme.R` que gera objeto chamado
+    `models_info` com informações dos modelos, como nomes e períodos.
+    Requer alteração quando inserir novos modelos. Tabela gerada
+    manualmente. Atualmente somente o nome dos modelos desta tabela são
+    usados.
 
 -   depende do script `down-nmme.R`: função para *download* dos dados
     por modelo e ano, no formato NetCDF. O domínio espacial dos dados é
     a América do Sul.
 
--   arquivos de saída em
-    `output/{variavel}/nmme_{variavel}_{modelo}_{ano}.nc`
+-   arquivos de saída em `output/ncdf/nmme_{variavel}_{modelo}_{ano}.nc`
 
 2.  `dados-brutos.R`:
 
@@ -70,7 +70,7 @@ packageVersion("qs")
         modelos e as dimensões dos arquivos.
 
 -   arquivos de entrada em
-    `output/{variavel}/nmme_{variavel}_{modelo}_{ano}.nc`
+    `output/ncdf/nmme_{variavel}_{modelo}_{ano}.nc`
 
 -   arquivos de saída em
     `output/{rds,qs}/nmme_{var_name}_{model_id}_lt{lead_time}.{rds, qs}`

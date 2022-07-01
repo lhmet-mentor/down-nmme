@@ -90,3 +90,11 @@ tab_mod_year_type <- function(){
   }
   tab_mod_year_type
 }
+
+# criando uma tabela com as informacoes necessarias para realizacao do download
+tab_mod_year_vname_type <- full_join(tab_mod_year_type(), select(names_vars_models(),-(prec))) %>% 
+  pivot_longer(cols = c(tmax, tmin), names_to = "variable", values_to = "vname") %>%
+  select(model, year, type, variable) %>%
+  arrange(model, year) %>%
+  relocate(year, model, variable, type)
+

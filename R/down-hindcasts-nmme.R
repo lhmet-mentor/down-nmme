@@ -17,28 +17,10 @@ source(here("R/down-nmme.R"))
 
 
 #------------------------------------------------------------------------------
-# periodo
-start_y <- 1980
-end_y <- 2020
-
-# modelos
-#modelos <- tabela1$modelo
-modelos <- tail(tabela1$modelo, 2)
-
-# tabela com a combinacao de anos e modelos
-tab_mod_anos <- expand.grid(modelos, start_y:end_y) %>%
-  as_tibble() %>%
-  mutate(across(.fns = as.character)) %>%
-  rename("modelo" = "Var1", "ano" = "Var2") %>%
-  arrange(modelo)
-
-# lista para looping multivariado
-modelos_l <- as.list(tab_mod_anos$modelo)
-anos_l <- as.list(tab_mod_anos$ano)
-
-
-# looping para baixar NetCDF para o intervalo de anos e modelos
-tic()
-baixados_prec <- map2(modelos_l, anos_l, ~down_nmme(modelo = .x, ano = .y))
-toc()
-
+# lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
+args_l <- c(tab_mod_year_vname_type[])
+baixados_temp <- purrr::pmap(args_l,
+                             function(year, model, variable, type) {
+                               down_nmme_by_ymv(year, model, variable, type)
+                             }
+)

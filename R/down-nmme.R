@@ -68,6 +68,16 @@ down_nmme_by_ymv <- function(year = "1980",
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
   dest_file <- here::here(out_dir, file)
   
+  # se nao sobrescreve arquivo previos
+  if(!overwrite){
+    # caso exista arquivo baixado previamente
+    if(fs::file_exists(dest_file)){
+      # retorna o arquivo existente e nao fará download
+      return(dest_file)
+    }
+  }
+  
+  
   Sys.sleep(1)
   
   data_link_year <- glue::glue(data_link)

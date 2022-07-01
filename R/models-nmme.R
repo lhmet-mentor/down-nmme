@@ -18,7 +18,7 @@ names_vars_models <- function(){
   models_3 <- c("GFDL-SPEAR","GFDL-CM2p1-aer04", "GFDL-CM2p5-FLOR-A06", "GFDL-CM2p5-FLOR-B01")
   models_4 <- c("NCAR-CESM1")
   
-  table_control <- expand.grid(models_1, variables_1) %>% 
+  names_vars_models<- expand.grid(models_1, variables_1) %>% 
     rbind(expand.grid(models_2,variables_2))%>% 
     rbind(expand.grid(models_3, variables_3)) %>% 
     rbind(expand.grid(models_4, variables_4)) %>% 
@@ -27,48 +27,66 @@ names_vars_models <- function(){
     mutate_all(.funs = as.character) %>%  
     arrange(model, variable)
   
-  table_control <- table_control %>%
+    names_vars_models <-   names_vars_models %>%
     mutate(id = ifelse(str_detect(variable, "x"), 
                        "tmax",
                        ifelse(str_detect(variable, "n"), "tmin", "prec"))
     ) %>% 
     pivot_wider(names_from = 'id', values_from = variable)
-  table_control
+    names_vars_models
 }
 
-
-tab_mod_anos_vname_type <- function(){
+#criando uma tabela com os modelos e seus respectivos períodos e tipos
+#informaçẽos obtidas manualmente no site
+type_period_models <- function(){
+  type_period_models <- tribble(
+    ~model,           ~type,              ~start,    ~end,
+    "CanCM4i",        "FORECAST",            2016,     2021,
+    "CanCM4i",        "HINDCAST",            1981,     2018,
+    "Cansips",        "FORECAST",            2015,     2019,
+    "CanSIPS-IC3",    "FORECAST",            2021,     2022,
+    "CanSIPS-IC3",    "HINDCAST",            1980,     2020,
+    "CanSIPSv2",      "FORECAST",            2016,     2021,
+    "CanSIPSv2",      "HINDCAST",            1981,     2018,
+    "CMC1-CanCM3",    "FORECAST",            2011,     2019,
+    "CMC1-CanCM3",    "HINDCAST",            1981,     2010,
+    "CMC2-CanCM4",    "FORECAST",            2011,     2019,
+    "CMC2-CanCM4",    "HINDCAST",            1981,     2010,
+    "GEM-NEMO",       "FORECAST",            2016,     2021,   
+    "GEM-NEMO",       "HINDCAST",            1981,     2018,
+    "GFDL-SPEAR",     "FORECAST",            2020,     2022,
+    "GFDL-SPEAR",     "HINDCAST",            1991,     2020,
+    "NASA-GEOSS2S",   "FORECAST",            2017,     2022, 
+    "NASA-GEOSS2S",   "HINDCAST",            1981,     2017,
+    "NCAR-CESM1",     "FORECAST",            2016,     2017,
+    "NCAR-CESM1",     "HINDCAST",            1980,     2010,
+    "GFDL-CM2p1-aer04", "MONTHLY",           1982,     2021,
+    "GFDL-CM2p5-FLOR-A06", "MONTHLY",        1980,     2021,
+    "GFDL-CM2p5-FLOR-B01", "MONTHLY",        1980,     2021,
+    "NASA-GMAO-062012", "MONTHLY",           1981,     2018
+    
+  )
   
-  vnames <- c("tmax", "tmin")
-  models <- names_vars_models()$model
-  
-  # tabela com a combinacao de anos e modelos para tipo hindcast
-  #periodo hindcast
-  start_y_hindcast <- 1980
-  end_y_hindcast <- 2020
-  tab_mod_anos_vname_hindcast <-
-    expand.grid(models, start_y_hindcast:end_y_hindcast , vnames, "HINDCAST") %>%
-    as_tibble() %>%
-    mutate(across(.fns = as.character)) %>%
-    rename("model" = "Var1", "year" = "Var2", "variable" = "Var3", "type" = "Var4") %>%
-    arrange(model) %>%
-    relocate(year, model, variable, type)
-  
-  # tabela com a combinacao de anos e modelos para tipo forecast
-  #periodo forecast
-  start_y_forecast <- 2016
-  end_y_forecast <- 2022
-  tab_mod_anos_vname_forecast <-
-    expand.grid(models, start_y_forecast:end_y_forecast , vnames, "FORECAST") %>%
-    as_tibble() %>%
-    mutate(across(.fns = as.character)) %>%
-    rename("model" = "Var1", "year" = "Var2", "variable" = "Var3", "type" = "Var4") %>%
-    arrange(model) %>%
-    relocate(year, model, variable, type)
-  
-  tab_mod_anos_vname_type <-
-    full_join(tab_mod_anos_vname_hindcast, tab_mod_anos_vname_forecast) %>% 
-    arrange(model, variable)
-  
-  tab_mod_anos_vname_type
+  type_period_models <- as_tibble(type_period_models) %>% 
+    mutate_all(.funs = as.character)
+  type_period_models
+}
+# criando uma tabela com o modelo e seus respectivos tipos e anos
+tab_mod_year_type <- function(){
+  tab_mod_year_type <- expand_grid(
+    model = type_period_models()$model[1], 
+    type = type_period_models()$type[1],
+    year = seq(from = type_period_models()$start[1], to = type_period_models()$end[1])
+  ) 
+  for(i in 2:length(type_period_models()$model)){
+    tab_mod_year_type <- tab_mod_year_type%>% 
+      rbind(
+        expand_grid(
+          model = type_period_models()$model[i], 
+          type = type_period_models()$type[i],
+          year = seq(from = type_period_models()$start[i], to = type_period_models()$end[i])
+        ) 
+      )
+  }
+  tab_mod_year_type
 }

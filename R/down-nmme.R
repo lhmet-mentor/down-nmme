@@ -37,7 +37,7 @@ down_nmme_by_ymv <- function(year = "1980",
   
   year <- as.character(year)
   
-  variable_model <- .pick_varname(model, variable) 
+  variable_model <- .pick_varname(model, variable)
   
   type_link <- ifelse(type == "MONTHLY", "MONTHLY", paste0("{type}","/.MONTHLY")) %>%
     glue::glue(.)
@@ -58,9 +58,15 @@ down_nmme_by_ymv <- function(year = "1980",
     "data.nc"
   )
   
+  out_dir <- here("output", variable)
+  
+  if(as.logical(!fs::dir_exists(out_dir))){
+    fs::dir_create(out_dir)
+  }
+  
   prefix <- paste0("nmme_",  variable, "_", model, "_", year) 
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
-  dest_file <- here::here("output",  variable, file) 
+  dest_file <- here::here(out_dir, file)
   
   Sys.sleep(1)
   
@@ -79,9 +85,8 @@ down_nmme_by_ymv <- function(year = "1980",
   }   
   
   # se deu tudo certo ...
-  if(file.exists(dest_file)){
-    return(dest_file)
-  }
+  checkmate::assert_file_exists(dest_file)
+  dest_file
   
 }
 

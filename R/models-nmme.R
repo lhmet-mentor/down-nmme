@@ -99,15 +99,14 @@ tab_mod_year_type <- function() {
 # criando uma tabela com as informacoes necessarias para realizacao do download
 tab_mod_year_vname_type <- dplyr::full_join(
   tab_mod_year_type(),
-  dplyr::select(
-    names_vars_models(),
-    -(prec)
-  )
+  names_vars_models(),
+  by = "model"
 ) %>%
-  tidyr::pivot_longer(cols = c(tmax, tmin), 
-                      names_to = "variable",
-                      values_to = "vname"
-                      ) %>%
+  tidyr::pivot_longer(
+    cols = c(tmax, tmin),
+    names_to = "vname_ref", # nomes padronizados de tmax e tmin p/ chamada de download
+    values_to = "vname_real" # nomes de tmax e tmin usados em cada modelo
+  ) %>%
   dplyr::select(model, year, type, variable) %>%
   dplyr::arrange(model, year) %>%
   dplyr::relocate(year, model, variable, type)

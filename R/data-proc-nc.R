@@ -51,7 +51,7 @@ year_from_ncfile <- function(nc_files){
   # nc_file = nc_files[1]; dim_name = c("L", "M")
   dim_name <- toupper(dim_name)
   checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
-  nc_info <- GlanceNetCDF(nc_file)
+  nc_info <- metR::GlanceNetCDF(nc_file)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
   dim_info[dim_name]
 }

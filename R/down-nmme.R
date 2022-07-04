@@ -31,9 +31,12 @@ down_nmme_by_ymv <- function(year = "1980",
                              type = c("HINDCAST", "FORECAST", "MONTHLY"),
                              overwrite = FALSE
 ){
+  
+  # al <- as.list(args_l)
+  # year = pluck(al, "year")[1];  model = pluck(al, "model")[1]; variable = pluck(al, "vname_ref")[1]; type = pluck(al, "type")[1]; overwrite = FALSE
   type <- toupper(type)
   # year = 2000;  model = "NASA-GEOSS2S"; variable = "tmax"; type = "HINDCAST"
-  # year = 1990;  model = "CanCM4i"; variable = "tmin"; type = "HINDCAST"
+  
   
   year <- as.character(year)
   
@@ -83,7 +86,7 @@ down_nmme_by_ymv <- function(year = "1980",
   data_link_year <- glue::glue(data_link)
   
   #path_file(data_link_year)
-  message("Baixando arquivo: ", dest_file)
+  message("Baixando arquivo: ", "\n", fs::path_rel(dest_file))
   
   res <- download_file_safe(data_link_year, destfile = dest_file, mode = "wb")
   

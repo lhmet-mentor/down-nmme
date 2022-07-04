@@ -8,6 +8,7 @@ easypackages::libraries(pcks)
 
 names_vars_models <- function(){
   
+  # separando grupo de models por nome das teperaturas
   variables_1 <- c( "tmax", "tmin", "prec")
   variables_2 <-c("t2mmax","t2mmin", "prec")
   variables_3 <- c("t_ref_max", "t_ref_min", "prec")

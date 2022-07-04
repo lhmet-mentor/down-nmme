@@ -46,7 +46,8 @@ type_period_models <- function() {
     ~model, ~type, ~start, ~end,
     "CanCM4i", "FORECAST", 2016, 2021,
     "CanCM4i", "HINDCAST", 1981, 2018,
-    "Cansips", "FORECAST", 2015, 2019,
+    #"Cansips", "FORECAST", 2015, 2019, # foi substituido pelo CanSIPSv2
+    #                                     previsoes so ate 2019
     "CanSIPS-IC3", "FORECAST", 2021, 2022,
     "CanSIPS-IC3", "HINDCAST", 1980, 2020,
     "CanSIPSv2", "FORECAST", 2016, 2021,
@@ -73,22 +74,23 @@ type_period_models <- function() {
     dplyr::mutate(across(.funs = as.character))
   type_period_models
 }
-# criando uma tabela com o modelo e seus respectivos tipos e anos
-tab_mod_year_type <- function() {
+# criando uma tabela com o modelo e seus respectivos tipos de previsao e anos
+tab_mod_year_type <- function(models_period = type_period_models()) {
+
   tab_mod_year_type <- expand_grid(
-    model = type_period_models()$model[1],
-    type = type_period_models()$type[1],
-    year = seq(from = type_period_models()$start[1], 
-               to = type_period_models()$end[1])
+    model = models_period$model[1],
+    type = models_period$type[1],
+    year = seq(from = models_period$start[1], 
+               to = models_period$end[1])
   )
-  for (i in 2:length(type_period_models()$model)) {
+  for (i in 2:length(models_period$model)) {
     tab_mod_year_type <- tab_mod_year_type %>%
       rbind(
         expand_grid(
-          model = type_period_models()$model[i],
-          type = type_period_models()$type[i],
-          year = seq(from = type_period_models()$start[i], 
-                     to = type_period_models()$end[i]
+          model = models_period$model[i],
+          type = models_period$type[i],
+          year = seq(from = models_period$start[i], 
+                     to = models_period$end[i]
                      )
         )
       )
@@ -103,10 +105,10 @@ tab_mod_year_vname_type <- dplyr::full_join(
   by = "model"
 ) %>%
   tidyr::pivot_longer(
-    cols = c(tmax, tmin),
+    cols = -(model:year),
     names_to = "vname_ref", # nomes padronizados de tmax e tmin p/ chamada de download
     values_to = "vname_real" # nomes de tmax e tmin usados em cada modelo
   ) %>%
-  dplyr::select(model, year, type, variable) %>%
+  dplyr::select(model, year, type, vname_ref) %>%
   dplyr::arrange(model, year) %>%
-  dplyr::relocate(year, model, variable, type)
+  dplyr::relocate(year, model, vname_ref, type)

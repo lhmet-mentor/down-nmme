@@ -20,7 +20,7 @@ source(here("R/down-nmme.R"))
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
 args_l <- c(tab_mod_year_vname_type[])
 baixados_temp <- purrr::pmap(args_l,
-                             function(year, model, variable, type) {
-                               down_nmme_by_ymv(year, model, variable, type)
+                             function(year, model, vname_ref, type) {
+                               down_nmme_by_ymv(year, model, vname_ref, type)
                              }
 )

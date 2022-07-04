@@ -4,7 +4,9 @@ pcks <- c("terra",
           "fs", 
           "tictoc", 
           "data.table",
-          "here")
+          "here",
+          "metR"
+          )
 
 easypackages::libraries(pcks)
 #options(timeout = 150)

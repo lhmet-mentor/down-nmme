@@ -61,7 +61,9 @@ down_nmme_by_ymv <- function(year = "1980",
     "data.nc"
   )
   
-  out_dir <- here("output", variable)
+  #out_dir <- here("output", variable)
+  out_dir <- here("output", "ncdf")
+  
   
   if(as.logical(!fs::dir_exists(out_dir))){
     fs::dir_create(out_dir)
@@ -90,8 +92,7 @@ down_nmme_by_ymv <- function(year = "1980",
   
   res <- download_file_safe(data_link_year, destfile = dest_file, mode = "wb")
   
-  
-  
+
   if(!is.null(res$error)){ # arquivo para ano nao encontrado
     warning("Nao foi possivel baixar o arquivo: \n", data_link_year)
     return(NULL)

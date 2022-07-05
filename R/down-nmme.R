@@ -33,7 +33,7 @@ down_nmme_by_ymv <- function(year = "1980",
 ){
   
   # al <- as.list(args_l)
-  # year = pluck(al, "year")[1];  model = pluck(al, "model")[1]; variable = pluck(al, "vname_ref")[1]; type = pluck(al, "type")[1]; overwrite = FALSE
+  # year = pluck(al, "year")[2];  model = pluck(al, "model")[2]; variable = pluck(al, "vname_ref")[2]; type = pluck(al, "type")[2]; overwrite = FALSE
   type <- toupper(type)
   # year = 2000;  model = "NASA-GEOSS2S"; variable = "tmax"; type = "HINDCAST"
   

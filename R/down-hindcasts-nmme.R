@@ -7,7 +7,7 @@ pcks <- c("terra",
           "here")
 
 easypackages::libraries(pcks)
-#options(timeout = 150)
+options(timeout = 150)
 
 #------------------------------------------------------------------------------
 # scripts

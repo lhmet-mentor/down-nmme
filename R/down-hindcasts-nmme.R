@@ -4,7 +4,9 @@ pcks <- c("terra",
           "fs", 
           "tictoc", 
           "data.table",
-          "here")
+          "here",
+          "metR"
+          )
 
 easypackages::libraries(pcks)
 options(timeout = 150)
@@ -18,7 +20,9 @@ source(here("R/down-nmme.R"))
 
 #------------------------------------------------------------------------------
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
-args_l <- c(tab_mod_year_vname_type[])
+args_l <- tab_mod_year_vname_type %>%
+  dplyr::filter(type == "FORECAST", vname_ref == "prec")
+
 baixados_temp <- purrr::pmap(args_l,
                              function(year, model, vname_ref, type) {
                                down_nmme_by_ymv(year, model, vname_ref, type)

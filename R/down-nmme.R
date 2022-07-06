@@ -61,8 +61,8 @@ down_nmme_by_ymv <- function(year = "1980",
     "data.nc"
   )
   
-  out_dir <- here("output", variable)
-  #out_dir <- here("output", "ncdf")
+  #out_dir <- here("output", variable)
+  out_dir <- here("output", "ncdf")
   
   
   if(as.logical(!fs::dir_exists(out_dir))){

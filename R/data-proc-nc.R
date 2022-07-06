@@ -64,14 +64,14 @@ year_from_ncfile <- function(nc_files){
 .sample_model_nc_file <- function(.nc_files, .model, .var_name = "prec", .n = 1){
   # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .var_name = "prec"
   model_names_nmme <- unique(model_name(.nc_files, vname = .var_name))
-  assert_subset(.model, model_names_nmme)
+  checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     
   files_samp <- grep(model_regex, .nc_files, value = TRUE) %>%
     unique() %>%
     split(., model_name(., vname = .var_name)) %>%
-    map(., ~.x %>% sample(., size = .n)) %>%
+    purrr::map(., ~.x %>% sample(., size = .n)) %>%
     unlist()
     
   files_samp

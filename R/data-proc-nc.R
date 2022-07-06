@@ -32,9 +32,13 @@ unzip_ncs <- function(vname = "prec", ex_dir = "output"){
 #' sample_files <- nc_files[sample(1:length(nc_files), 10)]
 #' model_name(sample_files, "prec")
 model_name <- function(nc_files, vname){
+  # vname = "prec"
   fs::path_file(nc_files) %>%
     stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
-    stringr::str_replace_all(pattern = "_[0-9]{4}\\.nc", "")
+    stringr::str_replace_all(pattern = "_[0-9]{4}", "") %>%
+    stringr::str_replace_all(pattern = "\\.nc", "") %>%
+    stringr::str_replace_all(pattern = "forecast", "") %>%
+    stringr::str_replace_all(pattern = "_", "")
 }
 
 # Obtem ano do arquivo nc a partir do nome do arquivo

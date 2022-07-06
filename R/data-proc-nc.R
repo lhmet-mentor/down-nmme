@@ -89,17 +89,17 @@ as.integer()
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
 .sample_model_nc_file <- function(.nc_files, 
                                   .model, 
-                                  .var_name = unique(.pick_var_name(.nc_files)), 
+                                  .vname = unique(.pick_var_name(.nc_files)), 
                                   .n = 1){
-  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .var_name = "prec"
-  model_names_nmme <- unique(model_name(.nc_files, vname = .var_name))
+  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .vname = "prec"
+  model_names_nmme <- unique(model_name(.nc_files, vname = .vname))
   checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     
   files_samp <- grep(model_regex, .nc_files, value = TRUE) %>%
     unique() %>%
-    split(., model_name(., vname = .var_name)) %>%
+    split(., model_name(., vname = .vname)) %>%
     map(., ~.x %>% sample(., size = .n)) %>%
     unlist()
     
@@ -112,10 +112,10 @@ as.integer()
 # Contagem de arquivos por modelo e ano ----------------------------------------
 nc_files_by_model_year <- function(nc_files, 
                                    out_ext = c("RDS", "qs"), 
-                                   var_name = "prec"){
+                                   vname = .pick_var_name(nc_files)){
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
-                         modelo = model_name(nc_files, vname = var_name),
+                         modelo = model_name(nc_files, vname = vname),
                          ano = year_from_ncfile(nc_files)
   ) %>%
     dplyr::group_by(modelo) %>%
@@ -128,7 +128,7 @@ nc_files_by_model_year <- function(nc_files,
   files_samp <- .sample_model_nc_file(
     nc_files,
     model_counts$modelo, 
-    .var_name = var_name,
+    .vname = vname,
     .n = 1
   )
   

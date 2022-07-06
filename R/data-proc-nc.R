@@ -70,11 +70,13 @@ as.integer()
 
 
 # numero de membros e tempos de antecedencia dos modelo ------------------------
-.n_dim_nc <- function(nc_file, dim_name = "M"){
-  # nc_file = nc_files[1]; dim_name = c("L", "M")
+.n_dim_nc <- function(nc_files, dim_name = "M", vname = .pick_var_name(nc_files)){
+  #nc_file = nc_files[1]; dim_name = c("L", "M")
   dim_name <- toupper(dim_name)
   checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
-  nc_info <- metR::GlanceNetCDF(nc_file)
+  dir <- paste0(here::here(), glue::glue("/output/{vname}"))
+  setwd(dir) 
+  nc_info <- metR::GlanceNetCDF(nc_files)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
   dim_info[dim_name]
 }

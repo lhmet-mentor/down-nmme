@@ -3,7 +3,7 @@ easypackages::libraries(pcks)
 
 ## Funções para processamento dos dados netcdf------------------------------
 source(here("R/data-proc-nc.R"))
-source(here("R/data-proc-rds.R"))
+source(here("../proc-NMME/R/data-proc-rds.R"))
 
 ## util somente no caso de obter os dados do google drive ----------------------
 # source(here("R", "unzip-nc.R"))

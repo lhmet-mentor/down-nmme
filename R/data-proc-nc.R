@@ -60,11 +60,12 @@ model_name <- function(nc_files, vname = .pick_var_name(nc_files),
 }
 
 # Obtem ano do arquivo nc a partir do nome do arquivo
-year_from_ncfile <- function(nc_files){
-  fs::path_file(nc_files) %>%
-    str_extract_all("[0-9]{4}") %>%
-    unlist() %>%
-    as.integer()
+year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
+fs::path_file(nc_files) %>%
+stringr::str_replace_all(pattern = glue::glue("{model}"), "") %>%
+str_extract_all("[0-9]{4}") %>%
+unlist() %>%
+as.integer()
 }
 
 

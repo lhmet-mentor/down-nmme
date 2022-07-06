@@ -30,8 +30,9 @@ args_l <- tab_mod_year_vname_type %>%
 
 baixados_temp <- purrr::pmap(as.list(args_l),
                              function(year, model, vname_ref, type) {
-                               down_nmme_by_ymv(year, model, vname_ref, type)
+                               down_nmme_by_ymv(year, model, vname_ref, type, overwrite = TRUE)
                              }
 )
 
-export_bin_file(baixados_temp, here("output/"))
+baixados_temp
+export_bin_file(unlist(baixados_temp), here("output/qs/lista-prec-forecast"))

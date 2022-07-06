@@ -51,9 +51,11 @@ unzip_ncs <- function(vname = "prec", ex_dir = "output"){
 #' @examples 
 #' sample_files <- nc_files[sample(1:length(nc_files), 10)]
 #' model_name(sample_files, "prec")
-model_name <- function(nc_files, vname){
+model_name <- function(nc_files, vname = .pick_var_name(nc_files),
+                       type =.pick_type(nc_files)){
   fs::path_file(nc_files) %>%
     stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
+    stringr::str_replace_all(pattern = glue::glue("_{type}"), "") %>%
     stringr::str_replace_all(pattern = "_[0-9]{4}\\.nc", "")
 }
 

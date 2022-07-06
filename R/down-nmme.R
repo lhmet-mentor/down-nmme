@@ -67,7 +67,7 @@ down_nmme_by_ymv <- function(year = "1980",
     fs::dir_create(out_dir)
   }
   
-  prefix <- paste0("nmme_",  variable, "_", model, "_", year) 
+  prefix <- paste0("nmme_", variable, "_", model, "_", type, "_", year) 
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
   dest_file <- here::here(out_dir, file)
   

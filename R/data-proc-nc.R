@@ -1,6 +1,26 @@
 ## Funções para o processamento dos arquivos NetCDF
 ## 
+.pick_var_name <- function(name){
+  ifelse(
+    stringr::str_detect(name, "tmax"),
+    "tmax",
+    ifelse(stringr::str_detect(name,"tmin"),
+           "tmin",
+           "prec"
+    )    
+  )
+}
 
+.pick_type <- function(type){
+  ifelse(
+    stringr::str_detect(type, "HINDCAST"),
+    "HINDCAST",
+    ifelse(stringr::str_detect(type, "FORECAST"),
+           "FORECAST",
+           "MONTHLY"
+    )    
+  )
+}
 #----------------------------------------------------------------------------
 # Pré-processamento adicional. Os dados que baixei do gdrive são zipados.
 # foram salvos no output.

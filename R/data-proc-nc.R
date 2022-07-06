@@ -79,6 +79,7 @@ as.integer()
   nc_info <- metR::GlanceNetCDF(nc_files)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
   dim_info[dim_name]
+  setwd(here::here())
 }
 
 #.n_dim_nc(nc_file, c("M", "L", "S", "X", "Y"))
@@ -86,10 +87,13 @@ as.integer()
 
 
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
-.sample_model_nc_file <- function(.nc_files, .model, .var_name = "prec", .n = 1){
+.sample_model_nc_file <- function(.nc_files, 
+                                  .model, 
+                                  .var_name = unique(.pick_var_name(.nc_files)), 
+                                  .n = 1){
   # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .var_name = "prec"
   model_names_nmme <- unique(model_name(.nc_files, vname = .var_name))
-  assert_subset(.model, model_names_nmme)
+  checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     

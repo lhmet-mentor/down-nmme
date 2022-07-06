@@ -61,8 +61,8 @@ down_nmme_by_ymv <- function(year = "1980",
     "data.nc"
   )
   
-  #out_dir <- here("output", variable)
-  out_dir <- here("output", "ncdf")
+  out_dir <- here("output", variable)
+  #out_dir <- here("output", "ncdf")
   
   
   if(as.logical(!fs::dir_exists(out_dir))){
@@ -70,6 +70,8 @@ down_nmme_by_ymv <- function(year = "1980",
   }
   
   prefix <- paste0("nmme_",  variable, "_", model, "_", year) 
+  prefix <- ifelse(type == "FORECAST",paste0(prefix, "_", tolower(type)), prefix)
+  
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
   dest_file <- here::here(out_dir, file)
   

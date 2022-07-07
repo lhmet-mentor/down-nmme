@@ -52,7 +52,7 @@ unzip_ncs <- function(vname = "prec", ex_dir = "output"){
 #' sample_files <- nc_files[sample(1:length(nc_files), 10)]
 #' model_name(sample_files, "prec")
 model_name <- function(nc_files, vname = .pick_var_name(nc_files),
-                       type =.pick_type(nc_files)){
+                       type = c("HINDCAST", "FORECAST", "MONTHLY")){
   fs::path_file(nc_files) %>%
     stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
     stringr::str_replace_all(pattern = glue::glue("_{type}"), "") %>%
@@ -89,15 +89,19 @@ as.integer()
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
 .sample_model_nc_file <- function(.nc_files, 
                                   .model, 
+                                  .type = c("HINDCAST", "FORECAST", "MONTHLY"),
                                   .vname = unique(.pick_var_name(.nc_files)), 
                                   .n = 1){
-  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .vname = "prec"
-  model_names_nmme <- unique(model_name(.nc_files, vname = .vname))
+  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .vname = "tmax"; .type = "HINDCAST"
+  .nc_files_type <- stringr::str_subset(.nc_files, pattern = .model) %>%
+    stringr::str_subset(pattern = .type)
+  
+  model_names_nmme <- model_name(.nc_files_type, vname = .vname) %>% unique()
   checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     
-  files_samp <- grep(model_regex, .nc_files, value = TRUE) %>%
+  files_samp <- grep(model_regex, .nc_files_type, value = TRUE) %>%
     unique() %>%
     split(., model_name(., vname = .vname)) %>%
     map(., ~.x %>% sample(., size = .n)) %>%

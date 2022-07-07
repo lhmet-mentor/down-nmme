@@ -109,20 +109,21 @@ as.integer()
 
 
 
-# Contagem de arquivos por modelo e ano ----------------------------------------
+# Contagem de arquivos por modelo, ano e tipo ----------------------------------------
 nc_files_by_model_year <- function(nc_files, 
                                    out_ext = c("RDS", "qs"), 
                                    vname = .pick_var_name(nc_files)){
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
                          modelo = model_name(nc_files, vname = vname),
-                         ano = year_from_ncfile(nc_files)
+                         ano = year_from_ncfile(nc_files),
+                         tipo = .pick_type(nc_files)
   ) %>%
-    dplyr::group_by(modelo) %>%
+    dplyr::group_by(modelo, tipo) %>%
     dplyr::summarise(start = min(ano), end = max(ano), freq = n()) %>%
     dplyr::mutate(
       check_span = end-start+1
-    )
+    ) 
 
   # dimensoes
   files_samp <- .sample_model_nc_file(

@@ -13,6 +13,7 @@ names_vars_models <- function() {
   variables_2 <- c("t2mmax", "t2mmin", "prec")
   variables_3 <- c("t_ref_max", "t_ref_min", "prec")
   variables_4 <- c("tsmx", "tsmn", "prec")
+  variables_5 <- c("prec")
   models_1 <- c("CanCM4i", "CanSIPSv2", "CMC1-CanCM3", "CMC2-CanCM4",
                 "GEM-NEMO", "CanSIPS-IC3")
   models_2 <- c("NASA-GEOSS2S", "NASA-GMAO-062012")
@@ -20,11 +21,13 @@ names_vars_models <- function() {
   models_3 <- c("GFDL-SPEAR", "GFDL-CM2p1-aer04", "GFDL-CM2p5-FLOR-A06", 
                 "GFDL-CM2p5-FLOR-B01")
   models_4 <- c("NCAR-CESM1")
+  models_5 <- c("NCEP-CFSv2")
 
   names_vars_models <- expand.grid(models_1, variables_1) %>%
     rbind(expand.grid(models_2, variables_2)) %>%
     rbind(expand.grid(models_3, variables_3)) %>%
     rbind(expand.grid(models_4, variables_4)) %>%
+    rbind(expand.grid(models_5, variables_5)) %>%
     setNames(c("model", "variable")) %>%
     tibble::as_tibble() %>%
     dplyr::mutate_all(.funs = as.character) %>%
@@ -64,6 +67,8 @@ type_period_models <- function() {
     "NASA-GEOSS2S", "HINDCAST", 1981, 2017,
     "NCAR-CESM1", "FORECAST", 2016, 2017,
     "NCAR-CESM1", "HINDCAST", 1980, 2010,
+    "NCEP-CFSv2", "FORECAST", 2011, 2022,
+    "NCEP-CFSv2", "HINDCAST", 1982, 2010,
     "GFDL-CM2p1-aer04", "MONTHLY", 1982, 2021,
     "GFDL-CM2p5-FLOR-A06", "MONTHLY", 1980, 2021,
     "GFDL-CM2p5-FLOR-B01", "MONTHLY", 1980, 2021,

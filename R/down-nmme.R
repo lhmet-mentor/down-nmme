@@ -42,7 +42,12 @@ down_nmme_by_ymv <- function(year = "1980",
   
   variable_model <- .pick_varname(model, variable)
   
-  type_link <- ifelse(type == "MONTHLY", "MONTHLY", paste0("{type}","/.MONTHLY")) %>%
+  type_link <- ifelse(type == "MONTHLY", "MONTHLY", 
+                      paste0("{type}","/.MONTHLY")) %>%
+    glue::glue(.)
+  
+  type_link <- ifelse(model == "NCEP-CFSv2" & type == "FORECAST",
+    paste0("{type}", "/.EARLY_MONTH_SAMPLES/.MONTHLY"), type_link)%>%
     glue::glue(.)
   
   data_link <- paste0(

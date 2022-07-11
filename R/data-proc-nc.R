@@ -52,7 +52,7 @@ unzip_ncs <- function(vname = "prec", ex_dir = "output"){
 #' sample_files <- nc_files[sample(1:length(nc_files), 10)]
 #' model_name(sample_files, "prec")
 model_name <- function(nc_files, vname = .pick_var_name(nc_files),
-                       type = c("HINDCAST", "FORECAST", "MONTHLY")){
+                       type = .pick_type(nc_files)){
   fs::path_file(nc_files) %>%
     stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
     stringr::str_replace_all(pattern = glue::glue("_{type}"), "") %>%
@@ -78,8 +78,8 @@ as.integer()
   setwd(dir) 
   nc_info <- metR::GlanceNetCDF(nc_files)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
-  dim_info[dim_name]
   setwd(here::here())
+  dim_info[dim_name]
 }
 
 #.n_dim_nc(nc_file, c("M", "L", "S", "X", "Y"))
@@ -88,20 +88,22 @@ as.integer()
 
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
 .sample_model_nc_file <- function(.nc_files, 
-                                  .model, 
-                                  .type = c("HINDCAST", "FORECAST", "MONTHLY"),
+                                  .model = model_name(.nc_files), 
+                                  .type = .pick_type(.nc_files),
                                   .vname = unique(.pick_var_name(.nc_files)), 
-                                  .n = 1){
+                                  .n = 1
+                                         ){
   # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .vname = "tmax"; .type = "HINDCAST"
-  .nc_files_type <- stringr::str_subset(.nc_files, pattern = .model) %>%
-    stringr::str_subset(pattern = .type)
+  .nc_files_type_var <- stringr::str_subset(.nc_files, pattern = .model) %>%
+    stringr::str_subset(pattern = .type) %>%
+    stringr::str_subset(pattern = .vname)
   
-  model_names_nmme <- model_name(.nc_files_type, vname = .vname) %>% unique()
+  model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
   checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     
-  files_samp <- grep(model_regex, .nc_files_type, value = TRUE) %>%
+  files_samp <- grep(model_regex, .nc_files_type_var, value = TRUE) %>%
     unique() %>%
     split(., model_name(., vname = .vname)) %>%
     map(., ~.x %>% sample(., size = .n)) %>%
@@ -116,7 +118,7 @@ as.integer()
 # Contagem de arquivos por modelo, ano e tipo ----------------------------------------
 nc_files_by_model_year <- function(nc_files, 
                                    out_ext = c("RDS", "qs"), 
-                                   vname = .pick_var_name(nc_files)){
+                                   vname =.pick_var_name(nc_files)){
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
                          modelo = model_name(nc_files, vname = vname),
@@ -134,6 +136,7 @@ nc_files_by_model_year <- function(nc_files,
     nc_files,
     model_counts$modelo, 
     .vname = vname,
+    .type = .pick_type(nc_files),
     .n = 1
   )
   
@@ -154,15 +157,12 @@ nc_files_by_model_year <- function(nc_files,
   models_info
 }
 
-
-
-
-
-
 #' Importa os dados de um arquivo netCDF e filtra para o lead time
 #'
 #' @param nc_file character escalar com caminho do arquivo netCDF
 #' @param lead.time escalar numérico 
+
+
 filter_lead_time <- function(nc_file, lead_time = 0.5, var_name = "prec"){
   # nc_file <- nc_files[1]; lead_time = 0.5; var_name = "prec"
   
@@ -176,6 +176,8 @@ filter_lead_time <- function(nc_file, lead_time = 0.5, var_name = "prec"){
   prec_year_mod
 }
 #data_nc  <- filter_lead_time(model_files[1], lead_time = 0.5, var_name = "prec")
+
+
 
 
 # Estou usando funções do pacote data.table

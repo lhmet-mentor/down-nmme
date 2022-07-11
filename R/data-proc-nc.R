@@ -163,17 +163,22 @@ nc_files_by_model_year <- function(nc_files,
 #' @param lead.time escalar numérico 
 
 
-filter_lead_time <- function(nc_file, lead_time = 0.5, var_name = "prec"){
-  # nc_file <- nc_files[1]; lead_time = 0.5; var_name = "prec"
+filter_lead_time <- function(nc_file, lead_time = 0.5, 
+                             var_name = .pick_var_name(nc_file),
+                             type = .pick_type(nc_file)){
+  # nc_file = nc_files[1]; lead_time = 0.5; var_name = "tmax"; type = "FORECAST"
   
   # dados em formato tidy
-  prec_year_mod <- ReadNetCDF(nc_file)
+  dir <- paste0(here::here(), glue::glue("/output/{var_name}"))
+  setwd(dir) 
+  prec_year_mod <- metR::ReadNetCDF(nc_file)
   prec_year_mod <- prec_year_mod[L == lead_time]
-  prec_year_mod <- prec_year_mod[, model := unique(model_name(nc_file, var_name))]
+  #prec_year_mod <- PCICt::as.PCICt(prec_year_mod[L == lead_time], cal = "360_day")
+  prec_year_mod <- prec_year_mod[, model := unique(model_name(nc_file, var_name, type))]
   prec_year_mod <- prec_year_mod[, year := year_from_ncfile(nc_file)]
-  
-  
+  setwd(here::here())
   prec_year_mod
+  #função não está retornando algo
 }
 #data_nc  <- filter_lead_time(model_files[1], lead_time = 0.5, var_name = "prec")
 

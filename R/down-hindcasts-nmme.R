@@ -20,7 +20,7 @@ source(here("R/down-nmme.R"))
 
 #------------------------------------------------------------------------------
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
-args_l <- tab_mod_year_vname_type[c(1594, 1675),] #%>%
+args_l <- tab_mod_year_vname_type[] #%>%
   # dplyr::filter(type == "FORECAST", vname_ref == "prec")
 
 baixados_temp <- purrr::pmap(args_l,

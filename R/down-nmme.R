@@ -37,7 +37,6 @@ down_nmme_by_ymv <- function(year = "1980",
   type <- toupper(type)
   # year = 2000;  model = "NASA-GEOSS2S"; variable = "tmax"; type = "HINDCAST"
   
-  
   year <- as.character(year)
   
   variable_model <- .pick_varname(model, variable)

@@ -21,12 +21,13 @@ source("https://raw.githubusercontent.com/lhmet-mentor/proc-nmme/main/R/data-pro
 
 #------------------------------------------------------------------------------
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
-args_l <- tab_mod_year_vname_type %>%
-  dplyr::filter(type == "FORECAST", vname_ref == "prec") 
 
 #View(args_l)
 #info_nmme <- import_bin_file(here("output/qs/model_counts.qs"))
 #info_nmme
+
+args_l <- tab_mod_year_vname_type[] # %>% dplyr::filter(type == "FORECAST", vname_ref == "prec")
+
 
 baixados_temp <- purrr::pmap(as.list(args_l),
                              function(year, model, vname_ref, type) {

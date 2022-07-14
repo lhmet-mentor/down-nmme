@@ -21,7 +21,7 @@ names_vars_models <- function() {tibble::tribble(
   "NASA-GEOSS2S", "prec", "t2mmax", "t2mmin",
   "NASA-GMAO-062012", "prec", "t2mmax", "t2mmin",
   "NCAR-CESM1", "prec", "tsmax", "tsmin",
-  "NCEP-CFSv2", "prec", "", "" #grandezas físicas não observadas pelo modelo inserir ""
+  "NCEP-CFSv2", "prec", NA_character_, NA_character_ #grandezas físicas não observadas pelo modelo inserir Na_character_
 )
 }
 
@@ -97,7 +97,7 @@ tab_mod_year_vname_type <- dplyr::full_join(
     names_to = "vname_ref", # nomes padronizados de tmax e tmin p/ chamada de download
     values_to = "vname_real" # nomes de tmax e tmin usados em cada modelo
   ) %>%
-  dplyr::filter(vname_real != "") %>% 
+  dplyr::filter(vname_real != is.na(vname_real)) %>% 
   dplyr::select(model, year, type, vname_ref) %>%
   dplyr::arrange(model, year) %>%
   dplyr::relocate(year, model, vname_ref, type)

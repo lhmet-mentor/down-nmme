@@ -6,23 +6,24 @@ easypackages::libraries(pcks)
 # tabela com nome das variáveis em cada modelo
 # informações obtidas manualmente no site ...
 
-names_vars_models <- function() {tibble::tribble(
-  ~model, ~prec, ~tmax, ~tmin,
-  "CanCM4i", "prec", "tmax", "tmin",
-  "CanSIPS-IC3", "prec", "tmax", "tmin",
-  "CanSIPSv2", "prec", "tmax", "tmin",
-  "CMC1-CanCM3", "prec", "tmax", "tmin",
-  "CMC2-CanCM4", "prec", "tmax", "tmin",
-  "GEM-NEMO", "prec", "tmax", "tmin",
-  "GFDL-CM2p1-aer04", "prec", "t_ref_max", "t_ref_min",
-  "GFDL-CM2p5-FLOR-A06", "prec", "t_ref_max", "t_ref_min",
-  "GFDL-CM2p5-FLOR-B01", "prec", "t_ref_max", "t_ref_min",
-  "GFDL-SPEAR",  "prec", "t_ref_max", "t_ref_min",
-  "NASA-GEOSS2S", "prec", "t2mmax", "t2mmin",
-  "NASA-GMAO-062012", "prec", "t2mmax", "t2mmin",
-  "NCAR-CESM1", "prec", "tsmax", "tsmin",
+names_vars_models <- function() {
+  tibble::tribble(
+  ~model,                   ~prec,  ~tmax,         ~tmin,
+  "CanCM4i",               "prec",  "tmax",        "tmin",
+  "CanSIPS-IC3",           "prec",  "tmax",        "tmin",
+  "CanSIPSv2",             "prec",  "tmax",        "tmin",
+  "CMC1-CanCM3",           "prec",  "tmax",        "tmin",
+  "CMC2-CanCM4",           "prec",  "tmax",        "tmin",
+  "GEM-NEMO",              "prec",  "tmax",        "tmin",
+  "GFDL-CM2p1-aer04",      "prec",  "t_ref_max",   "t_ref_min",
+  "GFDL-CM2p5-FLOR-A06",   "prec",  "t_ref_max",   "t_ref_min",
+  "GFDL-CM2p5-FLOR-B01",   "prec",  "t_ref_max",   "t_ref_min",
+  "GFDL-SPEAR",            "prec",  "t_ref_max",   "t_ref_min",
+  "NASA-GEOSS2S",          "prec",  "t2mmax",      "t2mmin",
+  "NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
+  "NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
   # por nao haver tmx e tmin no cfsv2 deixamos NA por enquanto
-  "NCEP-CFSv2", "prec", NA_character_, NA_character_ 
+  "NCEP-CFSv2",            "prec",  NA_character_, NA_character_ 
 )
 }
 

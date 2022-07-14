@@ -35,7 +35,7 @@ down_nmme_by_ymv <- function(year = "1980",
   # al <- as.list(args_l)
   # year = pluck(al, "year")[2];  model = pluck(al, "model")[2]; variable = pluck(al, "vname_ref")[2]; type = pluck(al, "type")[2]; overwrite = FALSE
   type <- toupper(type)
-  # year = 2000;  model = "NASA-GEOSS2S"; variable = "tmax"; type = "HINDCAST"
+  # year = 2000;  model = "NCEP-CFSv2"; variable = "prec"; type = "HINDCAST"
   
   
   year <- as.character(year)
@@ -88,6 +88,7 @@ down_nmme_by_ymv <- function(year = "1980",
   Sys.sleep(1)
   
   data_link_year <- glue::glue(data_link)
+  #"http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.NCEP-CFSv2/.FORECAST/.EARLY_MONTH_SAMPLES/.MONTHLY/.prec/S/%280000%201%20Jan%2012%29%280000%2030%20Dec%2012%29RANGEEDGES/X/%2830W%29%2885W%29RANGEEDGES/Y/%2860S%29%2815N%29RANGEEDGES/data.nc"
   
   #path_file(data_link_year)
   message("Baixando arquivo: ", "\n", fs::path_rel(dest_file))

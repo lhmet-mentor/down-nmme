@@ -68,6 +68,7 @@ type_period_models <- function() {
     "GFDL-CM2p5-FLOR-A06", "MONTHLY", 1980, 2021,
     "GFDL-CM2p5-FLOR-B01", "MONTHLY", 1980, 2021,
     "NASA-GMAO-062012", "MONTHLY", 1981, 2018
+    
   )
 
   type_period_models <- tibble::as_tibble(type_period_models) %>%

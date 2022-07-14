@@ -1,6 +1,26 @@
 ## Funções para o processamento dos arquivos NetCDF
 ## 
+.pick_var_name <- function(name){
+  ifelse(
+    stringr::str_detect(name, "tmax"),
+    "tmax",
+    ifelse(stringr::str_detect(name,"tmin"),
+           "tmin",
+           "prec"
+    )    
+  )
+}
 
+.pick_type <- function(type){
+  ifelse(
+    stringr::str_detect(type, "HINDCAST"),
+    "HINDCAST",
+    ifelse(stringr::str_detect(type, "FORECAST"),
+           "FORECAST",
+           "MONTHLY"
+    )    
+  )
+}
 #----------------------------------------------------------------------------
 # Pré-processamento adicional. Os dados que baixei do gdrive são zipados.
 # foram salvos no output.
@@ -31,6 +51,7 @@ unzip_ncs <- function(vname = "prec", ex_dir = "output"){
 #' @examples 
 #' sample_files <- nc_files[sample(1:length(nc_files), 10)]
 #' model_name(sample_files, "prec")
+<<<<<<< HEAD
 model_name <- function(nc_files, vname){
   # vname = "prec"
   fs::path_file(nc_files) %>%
@@ -39,24 +60,36 @@ model_name <- function(nc_files, vname){
     stringr::str_replace_all(pattern = "\\.nc", "") %>%
     stringr::str_replace_all(pattern = "forecast", "") %>%
     stringr::str_replace_all(pattern = "_", "")
+=======
+model_name <- function(nc_files, vname = .pick_var_name(nc_files),
+                       type = .pick_type(nc_files)){
+  fs::path_file(nc_files) %>%
+    stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
+    stringr::str_replace_all(pattern = glue::glue("_{type}"), "") %>%
+    stringr::str_replace_all(pattern = "_[0-9]{4}\\.nc", "")
+>>>>>>> f2be311f109515a86794df9ebfc7a065791f7632
 }
 
 # Obtem ano do arquivo nc a partir do nome do arquivo
-year_from_ncfile <- function(nc_files){
-  fs::path_file(nc_files) %>%
-    str_extract_all("[0-9]{4}") %>%
-    unlist() %>%
-    as.integer()
+year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
+fs::path_file(nc_files) %>%
+stringr::str_replace_all(pattern = glue::glue("{model}"), "") %>%
+str_extract_all("[0-9]{4}") %>%
+unlist() %>%
+as.integer()
 }
 
 
 # numero de membros e tempos de antecedencia dos modelo ------------------------
-.n_dim_nc <- function(nc_file, dim_name = "M"){
-  # nc_file = nc_files[1]; dim_name = c("L", "M")
+.n_dim_nc <- function(nc_files, dim_name = "M", vname = .pick_var_name(nc_files)){
+  #nc_file = nc_files[1]; dim_name = c("L", "M")
   dim_name <- toupper(dim_name)
   checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
-  nc_info <- metR::GlanceNetCDF(nc_file)
+  dir <- paste0(here::here(), glue::glue("/output/{vname}"))
+  setwd(dir) 
+  nc_info <- metR::GlanceNetCDF(nc_files)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
+  setwd(here::here())
   dim_info[dim_name]
 }
 
@@ -65,17 +98,37 @@ year_from_ncfile <- function(nc_files){
 
 
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
+<<<<<<< HEAD
 .sample_model_nc_file <- function(.nc_files, .model, .var_name = "prec", .n = 1){
   # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .var_name = "prec"
   model_names_nmme <- unique(model_name(.nc_files, vname = .var_name))
+=======
+.sample_model_nc_file <- function(.nc_files, 
+                                  .model = model_name(.nc_files), 
+                                  .type = .pick_type(.nc_files),
+                                  .vname = unique(.pick_var_name(.nc_files)), 
+                                  .n = 1
+                                         ){
+  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .vname = "tmax"; .type = "HINDCAST"
+  .nc_files_type_var <- stringr::str_subset(.nc_files, pattern = .model) %>%
+    stringr::str_subset(pattern = .type) %>%
+    stringr::str_subset(pattern = .vname)
+  
+  model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
+>>>>>>> f2be311f109515a86794df9ebfc7a065791f7632
   checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     
-  files_samp <- grep(model_regex, .nc_files, value = TRUE) %>%
+  files_samp <- grep(model_regex, .nc_files_type_var, value = TRUE) %>%
     unique() %>%
+<<<<<<< HEAD
     split(., model_name(., vname = .var_name)) %>%
     purrr::map(., ~.x %>% sample(., size = .n)) %>%
+=======
+    split(., model_name(., vname = .vname)) %>%
+    map(., ~.x %>% sample(., size = .n)) %>%
+>>>>>>> f2be311f109515a86794df9ebfc7a065791f7632
     unlist()
     
   files_samp
@@ -84,26 +137,28 @@ year_from_ncfile <- function(nc_files){
 
 
 
-# Contagem de arquivos por modelo e ano ----------------------------------------
+# Contagem de arquivos por modelo, ano e tipo ----------------------------------------
 nc_files_by_model_year <- function(nc_files, 
                                    out_ext = c("RDS", "qs"), 
-                                   var_name = "prec"){
+                                   vname =.pick_var_name(nc_files)){
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
-                         modelo = model_name(nc_files, vname = var_name),
-                         ano = year_from_ncfile(nc_files)
+                         modelo = model_name(nc_files, vname = vname),
+                         ano = year_from_ncfile(nc_files),
+                         tipo = .pick_type(nc_files)
   ) %>%
-    dplyr::group_by(modelo) %>%
+    dplyr::group_by(modelo, tipo) %>%
     dplyr::summarise(start = min(ano), end = max(ano), freq = n()) %>%
     dplyr::mutate(
       check_span = end-start+1
-    )
+    ) 
 
   # dimensoes
   files_samp <- .sample_model_nc_file(
     nc_files,
     model_counts$modelo, 
-    .var_name = var_name,
+    .vname = vname,
+    .type = .pick_type(nc_files),
     .n = 1
   )
   
@@ -124,28 +179,32 @@ nc_files_by_model_year <- function(nc_files,
   models_info
 }
 
-
-
-
-
-
 #' Importa os dados de um arquivo netCDF e filtra para o lead time
 #'
 #' @param nc_file character escalar com caminho do arquivo netCDF
 #' @param lead.time escalar numérico 
-filter_lead_time <- function(nc_file, lead_time = 0.5, var_name = "prec"){
-  # nc_file <- nc_files[1]; lead_time = 0.5; var_name = "prec"
+
+
+filter_lead_time <- function(nc_file, lead_time = 0.5, 
+                             var_name = .pick_var_name(nc_file),
+                             type = .pick_type(nc_file)){
+  # nc_file = nc_files[1]; lead_time = 0.5; var_name = "tmax"; type = "FORECAST"
   
   # dados em formato tidy
-  prec_year_mod <- ReadNetCDF(nc_file)
+  dir <- paste0(here::here(), glue::glue("/output/{var_name}"))
+  setwd(dir) 
+  prec_year_mod <- metR::ReadNetCDF(nc_file)
   prec_year_mod <- prec_year_mod[L == lead_time]
-  prec_year_mod <- prec_year_mod[, model := unique(model_name(nc_file, var_name))]
+  #prec_year_mod <- PCICt::as.PCICt(prec_year_mod[L == lead_time], cal = "360_day")
+  prec_year_mod <- prec_year_mod[, model := unique(model_name(nc_file, var_name, type))]
   prec_year_mod <- prec_year_mod[, year := year_from_ncfile(nc_file)]
-  
-  
+  setwd(here::here())
   prec_year_mod
+  #função não está retornando algo
 }
 #data_nc  <- filter_lead_time(model_files[1], lead_time = 0.5, var_name = "prec")
+
+
 
 
 # Estou usando funções do pacote data.table

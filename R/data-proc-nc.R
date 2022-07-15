@@ -51,32 +51,21 @@ unzip_ncs <- function(vname = "prec", ex_dir = "output"){
 #' @examples 
 #' sample_files <- nc_files[sample(1:length(nc_files), 10)]
 #' model_name(sample_files, "prec")
-<<<<<<< HEAD
-model_name <- function(nc_files, vname){
-  # vname = "prec"
-  fs::path_file(nc_files) %>%
-    stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
-    stringr::str_replace_all(pattern = "_[0-9]{4}", "") %>%
-    stringr::str_replace_all(pattern = "\\.nc", "") %>%
-    stringr::str_replace_all(pattern = "forecast", "") %>%
-    stringr::str_replace_all(pattern = "_", "")
-=======
 model_name <- function(nc_files, vname = .pick_var_name(nc_files),
                        type = .pick_type(nc_files)){
   fs::path_file(nc_files) %>%
     stringr::str_replace_all(pattern = glue::glue("nmme_{vname}_"), "") %>%
     stringr::str_replace_all(pattern = glue::glue("_{type}"), "") %>%
     stringr::str_replace_all(pattern = "_[0-9]{4}\\.nc", "")
->>>>>>> f2be311f109515a86794df9ebfc7a065791f7632
 }
 
 # Obtem ano do arquivo nc a partir do nome do arquivo
 year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
-fs::path_file(nc_files) %>%
-stringr::str_replace_all(pattern = glue::glue("{model}"), "") %>%
-str_extract_all("[0-9]{4}") %>%
-unlist() %>%
-as.integer()
+ fs::path_file(nc_files) %>%
+ stringr::str_replace_all(pattern = glue::glue("{model}"), "") %>%
+    stringr::str_extract_all("[0-9]{4}") %>%
+ unlist() %>%
+ as.integer()
 }
 
 
@@ -98,11 +87,6 @@ as.integer()
 
 
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
-<<<<<<< HEAD
-.sample_model_nc_file <- function(.nc_files, .model, .var_name = "prec", .n = 1){
-  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .var_name = "prec"
-  model_names_nmme <- unique(model_name(.nc_files, vname = .var_name))
-=======
 .sample_model_nc_file <- function(.nc_files, 
                                   .model = model_name(.nc_files), 
                                   .type = .pick_type(.nc_files),
@@ -115,20 +99,17 @@ as.integer()
     stringr::str_subset(pattern = .vname)
   
   model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
->>>>>>> f2be311f109515a86794df9ebfc7a065791f7632
+
   checkmate::assert_subset(.model, model_names_nmme)
   
   model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
     
   files_samp <- grep(model_regex, .nc_files_type_var, value = TRUE) %>%
     unique() %>%
-<<<<<<< HEAD
-    split(., model_name(., vname = .var_name)) %>%
-    purrr::map(., ~.x %>% sample(., size = .n)) %>%
-=======
+
     split(., model_name(., vname = .vname)) %>%
     map(., ~.x %>% sample(., size = .n)) %>%
->>>>>>> f2be311f109515a86794df9ebfc7a065791f7632
+
     unlist()
     
   files_samp
@@ -141,6 +122,9 @@ as.integer()
 nc_files_by_model_year <- function(nc_files, 
                                    out_ext = c("RDS", "qs"), 
                                    vname =.pick_var_name(nc_files)){
+  
+  # nc_files <- fs::dir_ls(here::here("output/ncdf"), type = "file", glob = "*.nc"); out_ext = "qs"; vname = "prec"
+  
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
                          modelo = model_name(nc_files, vname = vname),

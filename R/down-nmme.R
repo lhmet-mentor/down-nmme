@@ -45,6 +45,7 @@ down_nmme_by_ymv <- function(year = "1980",
                       paste0("{type}","/.MONTHLY")) %>%
     glue::glue(.)
   
+# Como o link do modelo NCEP-CFSv2 tipo FORECAST é diferente dos demais sobreescreve-se o type_link se necessário 
   type_link <- ifelse(model == "NCEP-CFSv2" & type == "FORECAST",
     paste0("{type}", "/.EARLY_MONTH_SAMPLES/.MONTHLY"), type_link)%>%
     glue::glue(.)

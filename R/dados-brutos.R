@@ -3,7 +3,7 @@ easypackages::libraries(pcks)
 
 ## Funções para processamento dos dados netcdf------------------------------
 source(here("R/data-proc-nc.R"))
-source(here("R/data-proc-rds.R"))
+source(here("../proc-NMME/R/data-proc-rds.R"))
 
 ## util somente no caso de obter os dados do google drive ----------------------
 # source(here("R", "unzip-nc.R"))
@@ -12,7 +12,7 @@ source(here("R/data-proc-rds.R"))
 var_name = "prec"
 
 ## listar todos os arquivos das previsões retrospectivas da precipitação CanCM4i
-nc_dir <- here("output", var_name)
+nc_dir <- here("output", "ncdf")
 
 # count_ncs <- fs::dir_ls(nc_dir) %>%
 #   fs::path_ext() %>%
@@ -26,6 +26,7 @@ nc_dir <- here("output", var_name)
 nc_files <- fs::dir_ls(path = nc_dir, glob = "*.nc")
 
 model_counts <- nc_files_by_model_year(nc_files, "qs", var_name)
+# HINDCASTAS
 # modelo          start   end  freq check_span     M     L     S     X     Y
 # <chr>        <int> <int> <int>      <dbl> <int> <int> <int> <int> <int>
 # 1  CanCM4i       1981  2018    38         38    10    12    12    56    76
@@ -38,6 +39,19 @@ model_counts <- nc_files_by_model_year(nc_files, "qs", var_name)
 # 8  NASA-GEOSS2S  1981  2017    37         37     4     9    12    56    76
 # 9  NCAR-CESM1    1980  2010    31         31    10    12    12    56    76
 # 10 NCEP-CFSv2    1982  2010    29         29    24    10    12    56    76
+
+# FORECASTS
+# modelo       start   end  freq check_span     M     L     S     X     Y
+# <chr>        <int> <int> <int>      <dbl> <int> <int> <int> <int> <int>
+#   1 CanCM4i     2016  2021     6          6    10    12    12    56    76
+# 2 CanSIPS-IC3   2021  2022     2          2    20    12     3    56    76
+# 3 CanSIPSv2     2016  2021     6          6    20    12    12    56    76
+# 4 CMC1-CanCM3   2011  2019     9          9    10    12    12    56    76
+# 5 CMC2-CanCM4   2011  2019     9          9    10    12    12    56    76
+# 6 GEM-NEMO      2016  2021     6          6    10    12    12    56    76
+# 7 GFDL-SPEAR    2020  2022     3          3    30    12    12    56    76
+# 8 NASA-GEOSS2S  2017  2022     6          6    10     9    12    56    76
+# 9 NCAR-CESM1    2016  2017     2          2    10    12     6    56    76
 
 # como o nome dos arquivos especifica o nome dos modelos
 #model_nm <- "CanCM4i"

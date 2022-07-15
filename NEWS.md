@@ -28,6 +28,7 @@ https://ftp.cpc.ncep.noaa.gov/NMME/clim/
 A outro local com as previsões em formato do GRADS. 
 
 https://ftp.cpc.ncep.noaa.gov/International/nmme/
+https://ftp.cpc.ncep.noaa.gov/International/nmme/binary_monthly/
 
 
 

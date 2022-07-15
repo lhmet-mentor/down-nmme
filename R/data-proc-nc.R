@@ -132,7 +132,11 @@ nc_files_by_model_year <- function(nc_files,
                          tipo = .pick_type(nc_files)
   ) %>%
     dplyr::group_by(modelo, tipo) %>%
-    dplyr::summarise(start = min(ano), end = max(ano), freq = n()) %>%
+    dplyr::summarise(start = min(ano), 
+                     end = max(ano),
+                     freq = n(),
+                     .groups = "drop"
+                     ) %>%
     dplyr::mutate(
       check_span = end-start+1
     ) 

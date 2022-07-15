@@ -141,6 +141,7 @@ nc_files_by_model_year <- function(nc_files,
       check_span = end-start+1
     ) 
 
+  # PROBLEMA AQUI
   # dimensoes
   files_samp <- .sample_model_nc_file(
     nc_files,

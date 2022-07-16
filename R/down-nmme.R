@@ -33,9 +33,9 @@ down_nmme_by_ymv <- function(year = "1980",
 ){
   
   # al <- as.list(args_l)
-  # year = pluck(al, "year")[1];  model = pluck(al, "model")[1]; variable = pluck(al, "vname_ref")[1]; type = pluck(al, "type")[1]; overwrite = FALSE
+  # year = pluck(al, "year")[2];  model = pluck(al, "model")[2]; variable = pluck(al, "vname_ref")[2]; type = pluck(al, "type")[2]; overwrite = FALSE
   type <- toupper(type)
-  # year = 2000;  model = "NASA-GEOSS2S"; variable = "tmax"; type = "HINDCAST"
+  # year = 2000;  model = "NCEP-CFSv2"; variable = "prec"; type = "HINDCAST"
   
   year <- as.character(year)
   
@@ -66,13 +66,16 @@ down_nmme_by_ymv <- function(year = "1980",
     "data.nc"
   )
   
-  out_dir <- here("output", variable)
+  #out_dir <- here("output", variable)
+  out_dir <- here("output", "ncdf")
+  
   
   if(as.logical(!fs::dir_exists(out_dir))){
     fs::dir_create(out_dir)
   }
   
   prefix <- paste0("nmme_", variable, "_", model, "_", type, "_", year) 
+
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
   dest_file <- here::here(out_dir, file)
   
@@ -95,8 +98,7 @@ down_nmme_by_ymv <- function(year = "1980",
   
   res <- download_file_safe(data_link_year, destfile = dest_file, mode = "wb")
   
-  
-  
+
   if(!is.null(res$error)){ # arquivo para ano nao encontrado
     warning("Nao foi possivel baixar o arquivo: \n", data_link_year)
     return(NULL)

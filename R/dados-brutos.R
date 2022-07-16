@@ -12,7 +12,7 @@ source(here("../proc-NMME/R/data-proc-rds.R"))
 var_name = "prec"
 
 ## listar todos os arquivos das previsões retrospectivas da precipitação CanCM4i
-nc_dir <- here("output", "ncdf")
+nc_dir <- here::here("output", "ncdf")
 
 # count_ncs <- fs::dir_ls(nc_dir) %>%
 #   fs::path_ext() %>%

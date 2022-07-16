@@ -84,8 +84,31 @@ top6 <- function(){
 
 
 
+#-----------------------------------------------------------------------------
+# Corrigir nome dos arquivos ncdf baixados previamente para o padrao
+# Funcao especifica e nao eh par ser usada fora deste contexto
 
-
-
+.rename_old_ncs <- function(){
+  files_nc <- fs::dir_ls(here::here("output/ncdf"), type = "file", glob = "*.nc")
+  file_names <- fs::path_file(files_nc)
+  is_hc_file <- !stringr::str_detect(file_names, "forecast")
+  hindcasts_files <- file_names[is_hc_file]
+  
+  hindcasts_files_new <- str_split(hindcasts_files, "_") %>% 
+    map_chr(., function(x){
+      # x <- str_split(hindcasts_files, "_")[[1]]
+      paste(c(x[1:3], "HINDCAST", x[-c(1:3)]), collapse = "_")
+    })
+  
+  hindcasts_files_new <- path(fs::path_dir(files_nc)[is_hc_file],
+                              hindcasts_files_new
+                              )
+  hindcasts_files <- path(fs::path_dir(files_nc)[is_hc_file],
+                          hindcasts_files
+  )
+    
+  file.rename(hindcasts_files, hindcasts_files_new)
+  # depois copiei manualmente os dados baixados por Torma para o output/ncdf
+}
 
 

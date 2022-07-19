@@ -11,9 +11,11 @@ names_vars_models <- function() {
   ~model,                   ~prec,  ~tmax,         ~tmin,
   "CanCM4i",               "prec",  "tmax",        "tmin",
   "CanSIPS-IC3",           "prec",  "tmax",        "tmin",
+  "CanSIPS-IC3-GEM5-NEMO", "prec",   "tmax",        "tmin",
   "CanSIPSv2",             "prec",  "tmax",        "tmin",
   "CMC1-CanCM3",           "prec",  "tmax",        "tmin",
   "CMC2-CanCM4",           "prec",  "tmax",        "tmin",
+  "COLA-RSMAS-CCSM4",      "prec",  NA_character_, NA_character_,
   "GEM-NEMO",              "prec",  "tmax",        "tmin",
   "GFDL-CM2p1-aer04",      "prec",  "t_ref_max",   "t_ref_min",
   "GFDL-CM2p5-FLOR-A06",   "prec",  "t_ref_max",   "t_ref_min",
@@ -24,6 +26,7 @@ names_vars_models <- function() {
   "NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
   # por nao haver tmx e tmin no cfsv2 deixamos NA por enquanto
   "NCEP-CFSv2",            "prec",  NA_character_, NA_character_ 
+#>>>>>>> 0c30e633e399178d284bb3ed8e56d2d90ee5c74b
 )
 }
 
@@ -36,12 +39,14 @@ type_period_models <- function() {
     "CanCM4i",            "HINDCAST",  1981,   2018,
     "CanSIPS-IC3",        "FORECAST",  2021,   2022,
     "CanSIPS-IC3",        "HINDCAST",  1980,   2020,
+    "CanSIPS-IC3-GEM5-NEMO","FORECAST",   2021,   2022, 
     "CanSIPSv2",          "FORECAST",  2016,   2021,
     "CanSIPSv2",          "HINDCAST",  1981,   2018,
     "CMC1-CanCM3",        "FORECAST",  2011,   2019,
     "CMC1-CanCM3",        "HINDCAST",  1981,   2010,
     "CMC2-CanCM4",        "FORECAST",  2011,   2019,
     "CMC2-CanCM4",        "HINDCAST",  1981,   2010,
+    "COLA-RSMAS-CCSM4",   "MONTHLY",   1982,   2022,
     "GEM-NEMO",           "FORECAST",  2016,   2021,
     "GEM-NEMO",           "HINDCAST",  1981,   2018,
     "GFDL-CM2p1-aer04",   "MONTHLY",   1982,   2021,

@@ -36,7 +36,7 @@ down_nmme_by_ymv <- function(year = "1980",
   # year = pluck(al, "year")[2];  model = pluck(al, "model")[2]; variable = pluck(al, "vname_ref")[2]; type = pluck(al, "type")[2]; overwrite = FALSE
   type <- toupper(type)
   # year = 2000;  model = "NCEP-CFSv2"; variable = "prec"; type = "HINDCAST"
-  
+  #year = 2021; model = "CanSIPS-IC3-GEM5-NEMO"; variable = "prec"; type = "FORECAST"
   year <- as.character(year)
   
   variable_model <- .pick_varname(model, variable)
@@ -45,14 +45,22 @@ down_nmme_by_ymv <- function(year = "1980",
                       paste0("{type}","/.MONTHLY")) %>%
     glue::glue(.)
   
+# Como o link do modelo NCEP-CFSv2 tipo FORECAST é diferente dos demais sobrescreve o type_link se necessário 
   type_link <- ifelse(model == "NCEP-CFSv2" & type == "FORECAST",
     paste0("{type}", "/.EARLY_MONTH_SAMPLES/.MONTHLY"), type_link)%>%
     glue::glue(.)
+#Como o link do modelo   CanSIPS-IC3-GEM5-NEM0 é diferente dos demaais sobrescreve o type_link se necessário
+  type_link <- ifelse(model == "CanSIPS-IC3-GEM5-NEMO",
+                      paste0("GEM5-NEMO/.", "{type}", "/.MONTHLY"), type_link)%>%
+    glue::glue(.)
+ # No link o nome do modelo "CanSIPS-IC3-GEM5-NEMO" é apenas CanSIPS-IC3
+  model_link <- ifelse(model == "CanSIPS-IC3-GEM5-NEMO", 
+                       "CanSIPS-IC3", model)
   
   data_link <- paste0(
     "http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/",
     # modelo
-    ".{model}/",
+    ".{model_link}/",
     #tipo
     ".{type_link}/",
     # variavel

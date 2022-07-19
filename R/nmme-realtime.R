@@ -72,7 +72,8 @@ nmme_oper_from_cpc <- function(updated_models_only = TRUE, ensmean = FALSE) {
 #'
 #' @examples
 #' models <- nmme_oper_from_cpc()$directory[3:4]
-#' cpc_links_from_model_year_month()
+#' cpc_links_from_model_year_month(models, c("202207", "202206"))
+#' 
 cpc_links_from_model_year_month <- function(
                                             model = tab_models$directory[3:4],
                                             yyyymm = "202207",

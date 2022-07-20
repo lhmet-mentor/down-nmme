@@ -5,10 +5,8 @@ easypackages::libraries(pcks)
 source(here("R/data-proc-nc.R"))
 source(here("../proc-NMME/R/data-proc-rds.R"))
 
-## util somente no caso de obter os dados do google drive ----------------------
-# source(here("R", "unzip-nc.R"))
-# unzip_ncs()
 
+## Processamento para uma variavel e um modelo---------------------------------
 var_name = "prec"
 
 ## listar todos os arquivos das previsões retrospectivas da precipitação CanCM4i
@@ -23,21 +21,15 @@ nc_dir <- here::here("output", "ncdf")
 # Apos incluir CanSIPS-IC3 e GFDL-SPEAR
 # 342
 
-nc_files <- fs::dir_ls(path = nc_dir, glob = "*.nc")
+nc_files <- fs::dir_ls(path = nc_dir, glob = "*prec*.nc", recurse = TRUE)
 
-model_counts <- nc_files_by_model_year(nc_files, "qs", var_name)
+model_counts <- nc_files_by_model_year(nc_files, vname = var_name)
 # HINDCASTAS
 # modelo          start   end  freq check_span     M     L     S     X     Y
 # <chr>        <int> <int> <int>      <dbl> <int> <int> <int> <int> <int>
 # 1  CanCM4i       1981  2018    38         38    10    12    12    56    76
-# 2  CanSIPS-IC3   1980  2020    41         41    20    12    12    56    76
-# 3  CanSIPSv2     1981  2018    38         38    20    12    12    56    76
-# 4  CMC1-CanCM3   1981  2010    30         30    10    12    12    56    76
-# 5  CMC2-CanCM4   1981  2010    30         30    10    12    12    56    76
-# 6  GEM-NEMO      1981  2018    38         38    10    12    12    56    76
 # 7  GFDL-SPEAR    1991  2020    30         30    15    12    12    56    76
 # 8  NASA-GEOSS2S  1981  2017    37         37     4     9    12    56    76
-# 9  NCAR-CESM1    1980  2010    31         31    10    12    12    56    76
 # 10 NCEP-CFSv2    1982  2010    29         29    24    10    12    56    76
 
 # FORECASTS
@@ -55,7 +47,7 @@ model_counts <- nc_files_by_model_year(nc_files, "qs", var_name)
 
 # como o nome dos arquivos especifica o nome dos modelos
 #model_nm <- "CanCM4i"
-(model_nms <- model_counts$modelo)
+(model_nms <- unique(model_counts$modelo))
 #files_model <- nc_files[grep(model_nms, nc_files)]
 
 

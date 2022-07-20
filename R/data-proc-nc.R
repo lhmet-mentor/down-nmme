@@ -70,13 +70,13 @@ year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
 
 
 # numero de membros e tempos de antecedencia dos modelo ------------------------
-.n_dim_nc <- function(nc_files, dim_name = "M", vname = .pick_var_name(nc_files)){
-  #nc_file = nc_files[1]; dim_name = c("L", "M")
+.n_dim_nc <- function(nc_file, dim_name = "M", vname = .pick_var_name(nc_files)){
+  # nc_file = nc_file[1]; dim_name = c("L", "M")
   dim_name <- toupper(dim_name)
   checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
-  dir <- paste0(here::here(), glue::glue("/output/{vname}"))
+  dir <- paste0(here::here(), glue::glue("/output/ncdf/{vname}"))
   setwd(dir) 
-  nc_info <- metR::GlanceNetCDF(nc_files)
+  nc_info <- metR::GlanceNetCDF(nc_file)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
   setwd(here::here())
   dim_info[dim_name]
@@ -88,22 +88,32 @@ year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
 
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
 .sample_model_nc_file <- function(.nc_files, 
-                                  .model = model_name(.nc_files), 
-                                  .type = .pick_type(.nc_files),
+                                  .model = unique(model_name(.nc_files)), 
+                                  .type = unique(.pick_type(.nc_files)),
                                   .vname = unique(.pick_var_name(.nc_files)), 
                                   .n = 1
                                          ){
-  # .nc_files = nc_files; .model = unique(model_counts$modelo)[1:2]; .n = 1; .vname = "prec"; .type = "HINDCAST"
+  # .nc_files = nc_files; .model = unique(model_counts$modelo); .n = 1; .vname = "prec"; .type = c("HINDCAST", "FORECAST", "MONTHLY")
   
   .model_pattern <- ifelse(length(.model) > 1,
                            paste(.model, collapse = "|"), 
                            .model
                            )
+  .type <- ifelse(length(.type) > 1,
+                  paste(.type, collapse = "|"), 
+                  .type
+  )
+  
+  .vname <- ifelse(length(.vname) > 1,
+                    paste(.vname, collapse = "|"), 
+                    .vname
+  )
+    
   .nc_files_type_var <- str_subset(nc_files, .model_pattern) %>%
      stringr::str_subset(pattern = .type) %>%
      stringr::str_subset(pattern = .vname)
 
-  model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
+  #model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
 
   #checkmate::assert_subset(.model, model_names_nmme)
   
@@ -142,7 +152,7 @@ nc_files_by_model_year <- function(nc_files,
       check_span = end-start+1
     ) 
 
-  # PROBLEMA AQUI
+  
   # dimensoes
   files_samp <- .sample_model_nc_file(
     nc_files,

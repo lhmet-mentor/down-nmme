@@ -26,7 +26,6 @@ names_vars_models <- function() {
   "NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
   # por nao haver tmx e tmin no cfsv2 deixamos NA por enquanto
   "NCEP-CFSv2",            "prec",  NA_character_, NA_character_ 
-#>>>>>>> 0c30e633e399178d284bb3ed8e56d2d90ee5c74b
 )
 }
 

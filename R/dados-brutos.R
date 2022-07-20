@@ -66,6 +66,8 @@ model_counts <- nc_files_by_model_year(nc_files, vname = var_name)
 # n_members <- length(nc_info$dims$M$vals)
 
 
+# PAREI AQUI
+
 # looping para processar dados 
 # model_nms <- model_nms[c(2, 7)]
 map(model_nms,

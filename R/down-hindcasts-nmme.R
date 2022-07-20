@@ -21,19 +21,18 @@ source(here("../proc-NMME/R/data-proc-rds.R"))
 
 #------------------------------------------------------------------------------
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
-
-#View(args_l)
-#info_nmme <- import_bin_file(here("output/qs/model_counts.qs"))
-#info_nmme
-
-args_l <- tab_mod_year_vname_type[]  %>% dplyr::filter(type == "FORECAST", vname_ref == "prec")
+#nmme_models_span()
+#nmme_models_span(by_type = TRUE)
 
 
-baixados_temp <- purrr::pmap(as.list(args_l),
+args_l <- tab_mod_year_vname_type(priority = "none")  %>% 
+  dplyr::filter(vname_ref == "tref")
+
+baixados <- purrr::pmap(as.list(args_l),
                              function(year, model, vname_ref, type) {
                                down_nmme_by_ymv(year, model, vname_ref, type, overwrite = TRUE)
                              }
 )
 
-baixados_temp
-export_bin_file(unlist(baixados_temp), here("output/qs/lista-prec-forecast"))
+baixados
+#export_bin_file(unlist(baixados_temp), here("output/qs/lista-prec-forecast"))

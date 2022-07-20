@@ -137,6 +137,51 @@ tab_mod_year_vname_type <- function(vname, priority = "HINDCAST") {
 }
 
 
+#' Time span o NMME's models
+#'
+#' @param by_type logical, if TRUE return time span for HIND and FORECASTS.
+#'
+#' @return tibble with mode, start and end year of time series
+#' @export
+#'
+#' @examples
+#' if(FALSE){
+#'  nmme_models_span()
+#'  nmme_models_span(TRUE)
+#' }
+nmme_models_span <- function(by_type = FALSE){
+  
+  models_span_actual <- tab_mod_year_vname_type() %>% 
+      group_by(model, type) %>%
+      summarise(start = min(year), end = max(year)) %>%
+      ungroup()
+  if(by_type) return(models_span_actual)  
+  
+  models_span_actual <- models_span_actual %>%
+    tidyr::pivot_longer(start:end, names_to = "id", values_to = "year") %>%
+    dplyr::group_by(model) %>%
+    dplyr::summarise(start = min(year), end = max(year))
+  
+  models_span_actual
+    
+}
+
+
+plot_nmme_models_span <- function(data = tab_mod_year_vname_type("prec"),
+                                  .plotly = FALSE){
+  
+  p <- data %>%
+    #mutate(value = 1) %>%
+    ggplot2::ggplot(aes(x = year, y = model, fill = type)) +
+    ggplot2::geom_tile(alpha = 0.7, width = 0.9, height = 0.9) + 
+    ggplot2::theme_bw() +
+    ggplot2::scale_x_continuous(minor_breaks = scales::pretty_breaks(n = 40)) 
+  
+  if(.plotly) p <- plotly::ggplotly(p)
+  p
+    
+}
+ 
 
 
 

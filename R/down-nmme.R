@@ -50,7 +50,7 @@ down_nmme_by_ymv <- function(year = "1980",
     paste0("{type}", "/.EARLY_MONTH_SAMPLES/.MONTHLY"), type_link)%>%
     glue::glue(.)
 #Como o link do modelo   CanSIPS-IC3-GEM5-NEM0 é diferente dos demaais sobrescreve o type_link se necessário
-  type_link <- ifelse(model == "CanSIPS-IC3-GEM5-NEMO",
+  type_link <- ifelse(model == "GEM5-NEMO",
                       paste0("GEM5-NEMO/.", "{type}", "/.MONTHLY"), type_link)%>%
     glue::glue(.)
  # No link o nome do modelo "CanSIPS-IC3-GEM5-NEMO" é apenas CanSIPS-IC3

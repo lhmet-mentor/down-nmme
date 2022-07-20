@@ -85,6 +85,54 @@ top6 <- function(){
 
 
 #-----------------------------------------------------------------------------
+# Renomear arquivos 'nmme_{vname}_{old_model_nm}_{type}_year.nc' para 
+#                   'nmme_{vname}_{new_model_nm}_{type}_year.nc'
+# './output/ncdf/{modelo}'
+## Processamento para uma variavel e um modelo---------------------------------
+source(here::here("R/nmme-realtime.R"))
+# parametros
+
+# modelos operacionais
+#tab_models_op <- nmme_oper_from_cpc()
+#nms_models_op <- tab_models_op$directory
+
+rename_files_nmme <- function(old_model_nm = "COLA-RSMAS-CCSM4",
+                              new_model_nm = "NCAR_CCSM4",
+                              var_name = "prec"){
+  
+  nc_dir <- here::here("output", "ncdf"); 
+  
+  old_files_nc <- fs::dir_ls(here::here("output/ncdf"), 
+                             type = "file", 
+                             glob = "*.nc", 
+                             recurse = TRUE
+  ) %>%
+    grep(pattern = old_model_nm, x = ., value = TRUE) %>%
+    grep(pattern = var_name, x = ., value = TRUE)
+  
+  new_files_nc <- stringr::str_replace_all(old_files_nc, old_model_nm, new_model_nm)  
+  file.rename(old_files_nc, new_files_nc)
+}
+
+# rename_files_nmme()
+
+
+
+
+
+
+# count_ncs <- fs::dir_ls(nc_dir) %>%
+#   fs::path_ext() %>%
+#   table()
+## total de arquivos nc
+# count_ncs
+#  271 
+# Apos incluir CanSIPS-IC3 e GFDL-SPEAR
+# 342
+
+nc_files <- fs::dir_ls(path = nc_dir, glob = "*.nc")
+
+#-----------------------------------------------------------------------------
 # Corrigir nome dos arquivos ncdf baixados previamente para o padrao
 # Funcao especifica e nao eh par ser usada fora deste contexto
 

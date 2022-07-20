@@ -93,23 +93,24 @@ year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
                                   .vname = unique(.pick_var_name(.nc_files)), 
                                   .n = 1
                                          ){
-  # .nc_files = nc_files; .model = model_counts$modelo; .n = 1; .vname = "tmax"; .type = "HINDCAST"
-  .nc_files_type_var <- stringr::str_subset(.nc_files, pattern = .model) %>%
-    stringr::str_subset(pattern = .type) %>%
-    stringr::str_subset(pattern = .vname)
+  # .nc_files = nc_files; .model = unique(model_counts$modelo)[1:2]; .n = 1; .vname = "prec"; .type = "HINDCAST"
   
+  .model_pattern <- ifelse(length(.model) > 1,
+                           paste(.model, collapse = "|"), 
+                           .model
+                           )
+  .nc_files_type_var <- str_subset(nc_files, .model_pattern) %>%
+     stringr::str_subset(pattern = .type) %>%
+     stringr::str_subset(pattern = .vname)
+
   model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
 
-  checkmate::assert_subset(.model, model_names_nmme)
+  #checkmate::assert_subset(.model, model_names_nmme)
   
-  model_regex <- ifelse(length(.model) > 1, paste(.model, collapse = "|"), .model)
-    
-  files_samp <- grep(model_regex, .nc_files_type_var, value = TRUE) %>%
+  files_samp <- .nc_files_type_var %>%
     unique() %>%
-
     split(., model_name(., vname = .vname)) %>%
     map(., ~.x %>% sample(., size = .n)) %>%
-
     unlist()
     
   files_samp
@@ -127,7 +128,7 @@ nc_files_by_model_year <- function(nc_files,
   
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
-                         modelo = model_name(nc_files, vname = vname),
+                         modelo = model_name(nc_files, vname),
                          ano = year_from_ncfile(nc_files),
                          tipo = .pick_type(nc_files)
   ) %>%

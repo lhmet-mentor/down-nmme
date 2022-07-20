@@ -70,15 +70,15 @@ year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
 
 
 # numero de membros e tempos de antecedencia dos modelo ------------------------
-.n_dim_nc <- function(nc_file, dim_name = "M", vname = .pick_var_name(nc_files)){
-  # nc_file = nc_file[1]; dim_name = c("L", "M")
+.n_dim_nc <- function(nc_file, dim_name = "M", vname = .pick_var_name(nc_file)){
+  # nc_file = nc_files[1]; dim_name = c("M", "L", "S", "X", "Y")
   dim_name <- toupper(dim_name)
   checkmate::assert_subset(dim_name, c("M", "L", "S", "X", "Y"))
-  dir <- paste0(here::here(), glue::glue("/output/ncdf/{vname}"))
-  setwd(dir) 
+  #dir <- paste0(here::here(), glue::glue("/output/ncdf/{vname}"))
+  #setwd(dir) 
   nc_info <- metR::GlanceNetCDF(nc_file)
   dim_info <- purrr::map_df(nc_info$dims, function(x) x$len)
-  setwd(here::here())
+  #setwd(here::here())
   dim_info[dim_name]
 }
 
@@ -87,58 +87,64 @@ year_from_ncfile <- function(nc_files, model = model_name(nc_files)){
 
 
 # sorteia arquivo NetCDF para os modelos ---------------------------------------
-.sample_model_nc_file <- function(.nc_files, 
-                                  .model = unique(model_name(.nc_files)), 
-                                  .type = unique(.pick_type(.nc_files)),
-                                  .vname = unique(.pick_var_name(.nc_files)), 
-                                  .n = 1
-                                         ){
-  # .nc_files = nc_files; .model = unique(model_counts$modelo); .n = 1; .vname = "prec"; .type = c("HINDCAST", "FORECAST", "MONTHLY")
-  
-  .model_pattern <- ifelse(length(.model) > 1,
-                           paste(.model, collapse = "|"), 
-                           .model
-                           )
-  .type <- ifelse(length(.type) > 1,
-                  paste(.type, collapse = "|"), 
-                  .type
-  )
-  
-  .vname <- ifelse(length(.vname) > 1,
-                    paste(.vname, collapse = "|"), 
-                    .vname
-  )
-    
-  .nc_files_type_var <- str_subset(nc_files, .model_pattern) %>%
-     stringr::str_subset(pattern = .type) %>%
-     stringr::str_subset(pattern = .vname)
-
-  #model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
-
-  #checkmate::assert_subset(.model, model_names_nmme)
-  
-  files_samp <- .nc_files_type_var %>%
-    unique() %>%
-    split(., model_name(., vname = .vname)) %>%
-    map(., ~.x %>% sample(., size = .n)) %>%
-    unlist()
-    
-  files_samp
-}
+# .sample_model_nc_file <- function(.nc_files, 
+#                                   .model = unique(model_name(.nc_files)), 
+#                                   .type = unique(.pick_type(.nc_files)),
+#                                   .vname = unique(.pick_var_name(.nc_files)), 
+#                                   .n = 1
+#                                          ){
+#   # .nc_files = nc_files; .model = unique(model_counts$modelo); .n = 1; .vname = "prec"; .type = c("HINDCAST", "FORECAST", "MONTHLY")
+#   
+#   .model_pattern <- ifelse(length(.model) > 1,
+#                            paste(.model, collapse = "|"), 
+#                            .model
+#                            )
+#   .type <- ifelse(length(.type) > 1,
+#                   paste(.type, collapse = "|"), 
+#                   .type
+#   )
+#   
+#   .vname <- ifelse(length(.vname) > 1,
+#                     paste(.vname, collapse = "|"), 
+#                     .vname
+#   )
+#     
+#   .nc_files_type_var <- str_subset(nc_files, .model_pattern) %>%
+#      stringr::str_subset(pattern = .type) %>%
+#      stringr::str_subset(pattern = .vname)
+# 
+#   #model_names_nmme <- model_name(.nc_files_type_var, vname = .vname) %>% unique()
+# 
+#   #checkmate::assert_subset(.model, model_names_nmme)
+#   
+#   .nc_files_type_var <- .nc_files_type_var %>%
+#     unique() 
+#   
+#   files_samp <- tibble(
+#                    model = model_name(.nc_files_type_var, vname = .vname),
+#                   type = .pick_type(.nc_files_type_var),
+#                   file = .nc_files_type_var,
+#                   
+#                  ) %>%
+#     dplyr::group_by(model, type) %>% 
+#     dplyr::summarise(file = sample(file, size = 1), .groups = "drop")
+# 
+#   files_samp
+# }
 
 
 
 
 # Contagem de arquivos por modelo, ano e tipo ----------------------------------------
 nc_files_by_model_year <- function(nc_files, 
-                                   out_ext = c("RDS", "qs"), 
+                                   out_ext, #= c("RDS", "qs"), 
                                    vname =.pick_var_name(nc_files)){
   
-  # nc_files <- fs::dir_ls(here::here("output/ncdf"), type = "file", glob = "*.nc"); out_ext = "qs"; vname = "prec"
+  # nc_files <- fs::dir_ls(here::here("output/ncdf"), type = "file", glob = "*.nc", recurse = TRUE); out_ext = "qs"; vname = "prec"
   
   # periodos
   model_counts <- tibble::tibble(file = nc_files, 
-                         modelo = model_name(nc_files, vname),
+                         modelo = model_name(nc_files),
                          ano = year_from_ncfile(nc_files),
                          tipo = .pick_type(nc_files)
   ) %>%
@@ -146,36 +152,35 @@ nc_files_by_model_year <- function(nc_files,
     dplyr::summarise(start = min(ano), 
                      end = max(ano),
                      freq = n(),
+                     file_sample = sample(file,size = 1),
                      .groups = "drop"
                      ) %>%
     dplyr::mutate(
       check_span = end-start+1
     ) 
-
   
-  # dimensoes
-  files_samp <- .sample_model_nc_file(
-    nc_files,
-    model_counts$modelo, 
-    .vname = vname,
-    .type = .pick_type(nc_files),
-    .n = 1
-  )
-  
-  model_dimensions <- map_dfr(files_samp, 
+  model_dimensions <- map_dfr(model_counts$file_sample, 
           .n_dim_nc, 
           dim_name = c("M", "L", "S", "X", "Y"), 
-          .id = "modelo"
+          .id = "file_sample"
           )
   
-  models_info <- dplyr::full_join(model_counts, model_dimensions)
+  models_info <- dplyr::full_join(model_counts, 
+                                  model_dimensions, 
+                                  by = "file_sample"
+                                  ) %>%
+    dplyr::relocate(file_sample, .after = "Y")
   
-  out_file <- glue::glue("output/{out_ext}/model_counts.{out_ext}")
-  export_bin_file(
-    models_info, 
-    here(out_file)
-  )
-  message("data exported to: ", out_file)
+  
+  if(!missing(out_ext)){
+    out_file <- glue::glue("output/{out_ext}/model_counts.{out_ext}")
+    export_bin_file(
+      models_info, 
+      here(out_file)
+    )  
+    message("data exported to: ", out_file)
+  }
+  
   models_info
 }
 
@@ -360,13 +365,14 @@ data_model_lt <- function(
 proc_ncs_by_lt <- function(model = model_nms[1], 
                            lead_time = seq(0.5, 11.5, by = 1),
                            variavel = "prec",
-                           input_d = here("output", "prec"),
-                           output_d = here("output", "rds"),
+                           input_d = here("output", "ncdf"),
+                           output_d = here("output", "qs"),
                            qs = TRUE,
                            overwrite = FALSE){
   
   nc_files <- fs::dir_ls(path = input_d, 
                          regexp = paste0(model, ".*\\.nc"),
+                         recurse = TRUE
   )
   
   map_chr(lead_time, 

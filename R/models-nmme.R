@@ -15,7 +15,7 @@ names_vars_models <- function() {
     "GFDL-SPEAR", "prec", "t_ref_max", "t_ref_min",
     "NASA-GEOSS2S", "prec", "t2mmax", "t2mmin",
     # "NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
-    "COLA-RSMAS-CCSM4", "prec", NA_character_, NA_character_
+    "NCAR-CCSM4", "prec", NA_character_, NA_character_
     # "CanSIPS-IC3",           "prec",  "tmax",        "tmin",
     # para evitar problemas em outras funcoes os nomes dos modelos
     # devem ser únicos
@@ -54,7 +54,7 @@ type_period_models <- function() {
 
     # "NASA-GMAO-062012",   "MONTHLY",   1981,   2018,
 
-    "COLA-RSMAS-CCSM4", "MONTHLY", 1982, 2022, 10
+    "NCAR-CCSM4", "MONTHLY", 1982, 2022, 10
     # "CanSIPS-IC3",        "FORECAST",  2021,   2022,
     # "CanSIPS-IC3",        "HINDCAST",  1980,   2020,
     # "GEM5-NEMO",          "FORECAST",   2021,   2022,

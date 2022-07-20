@@ -17,14 +17,15 @@ download_file_safe <- purrr::safely(download.file)
 #' a America do Sul, incluindo os 12 tempos de antecedencia e os 10
 #' tempos de inicio da previsao.  
 #'
-#' @param ano 
-#' @param modelo 
-#' @param variavel 
+#' @param year ano 
+#' @param modelo codigo do modelo NMME
+#' @param variavel 'prec', 'tmax', 'tmin', ou 'tref'
 #'
 #' @return
 #' @export
 #'
 #' @examples
+#' down_nmme_by_ymv("2017", "NASA-GEOSS2S", "prec", "")
 down_nmme_by_ymv <- function(year = "1980", 
                              model = "CanCM4i", 
                              variable = c("prec", "tmax", "tmin"),
@@ -54,8 +55,10 @@ down_nmme_by_ymv <- function(year = "1980",
                       paste0("GEM5-NEMO/.", "{type}", "/.MONTHLY"), type_link)%>%
     glue::glue(.)
  # No link o nome do modelo "CanSIPS-IC3-GEM5-NEMO" é apenas CanSIPS-IC3
-  model_link <- ifelse(model == "CanSIPS-IC3-GEM5-NEMO", 
+  model_link <- ifelse(model == "GEM5-NEMO", 
                        "CanSIPS-IC3", model)
+  
+  model_link <- ifelse(model == "NCAR-CCSM4", "COLA-RSMAS-CCSM4", model)
   
   data_link <- paste0(
     "http://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/",
@@ -74,15 +77,15 @@ down_nmme_by_ymv <- function(year = "1980",
   )
   
   #out_dir <- here("output", variable)
-  out_dir <- here("output", "ncdf")
+  out_dir <- here("output", "ncdf", model)
   
   
   if(as.logical(!fs::dir_exists(out_dir))){
     fs::dir_create(out_dir)
   }
-  
-  prefix <- paste0("nmme_", variable, "_", model, "_", type, "_", year) 
 
+  # nome do arquivo de destino `{modelo}/nmme_{variavel}_{modelo}_{type}_{ano}.nc`
+  prefix <- paste0("nmme_", variable, "_", model, "_", type, "_", year) 
   file <- stringr::str_replace(fs::path_file(data_link), "data", prefix)
   dest_file <- here::here(out_dir, file)
   

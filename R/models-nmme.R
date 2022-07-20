@@ -113,22 +113,28 @@ tab_mod_year_type <- function(models_period = type_period_models(),
 }
 
 # criando uma tabela com as informacoes necessarias para realizacao do download
-tab_mod_year_vname_type <- dplyr::full_join(
-  tab_mod_year_type(),
-  names_vars_models(),
-  by = "model"
-) %>%
-  tidyr::pivot_longer(
-    cols = -(model:year),
-    names_to = "vname_ref", # nomes padronizados de tmax e tmin p/ chamada de download
-    values_to = "vname_real" # nomes de tmax e tmin usados em cada modelo
+tab_mod_year_vname_type <- function(vname, priority = "HINDCAST") {
+  
+  nmme_info <- dplyr::full_join(
+    tab_mod_year_type(priority_type = priority),
+    names_vars_models(),
+    by = "model"
   ) %>%
-  dplyr::filter(vname_real != is.na(vname_real)) %>% 
-  dplyr::select(model, year, type, vname_ref) %>%
-  dplyr::arrange(model, year) %>%
-  dplyr::relocate(year, model, vname_ref, type)
-
-
+    tidyr::pivot_longer(
+      cols = -(model:year),
+      names_to = "vname_ref", # nomes padronizados de tmax e tmin p/ chamada de download
+      values_to = "vname_real" # nomes de tmax e tmin usados em cada modelo
+    ) %>%
+    dplyr::filter(vname_real != is.na(vname_real)) %>%
+    dplyr::select(model, year, type, vname_ref) %>%
+    dplyr::arrange(model, year) %>%
+    dplyr::relocate(year, model, vname_ref, type)
+  
+  if(!missing(vname)){
+    nmme_info <- dplyr::filter(nmme_info, vname_ref == vname)
+  } 
+  nmme_info
+}
 
 
 

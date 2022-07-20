@@ -17,7 +17,7 @@ source(here("R/models-nmme.R"))
 #names_vars_models()
 source(here("R/down-nmme.R"))
 # para import/export_bin_file()
-source("https://raw.githubusercontent.com/lhmet-mentor/proc-nmme/main/R/data-proc-rds.R")
+source(here("../proc-NMME/R/data-proc-rds.R"))
 
 #------------------------------------------------------------------------------
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao

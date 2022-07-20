@@ -8,57 +8,56 @@ easypackages::libraries(pcks)
 
 names_vars_models <- function() {
   tibble::tribble(
-  ~model,                   ~prec,  ~tmax,         ~tmin,
-  "NCEP-CFSv2",            "prec",  NA_character_, NA_character_,
-  "CanCM4i",               "prec",  "tmax",        "tmin",
-  "GEM5-NEMO",             "prec",  "tmax",        "tmin",
-  "GFDL-SPEAR",            "prec",  "t_ref_max",   "t_ref_min",
-  "NASA-GEOSS2S",          "prec",  "t2mmax",      "t2mmin",
-  #"NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
-  "COLA-RSMAS-CCSM4",      "prec",  NA_character_, NA_character_
-  #"CanSIPS-IC3",           "prec",  "tmax",        "tmin",
-  # para evitar problemas em outras funcoes os nomes dos modelos
-  # devem ser únicos
-  #"CanSIPS-IC3-GEM5-NEMO", "prec",   "tmax",        "tmin",
-  #"CanSIPSv2",             "prec",  "tmax",        "tmin",
-  #"CMC1-CanCM3",           "prec",  "tmax",        "tmin",
-  #"CMC2-CanCM4",           "prec",  "tmax",        "tmin",
-  #"GEM-NEMO",              "prec",  "tmax",        "tmin",
-  #"GFDL-CM2p1-aer04",      "prec",  "t_ref_max",   "t_ref_min",
-  #"GFDL-CM2p5-FLOR-A06",   "prec",  "t_ref_max",   "t_ref_min",
-  #"GFDL-CM2p5-FLOR-B01",   "prec",  "t_ref_max",   "t_ref_min",
-  #"NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
-  # por nao haver tmx e tmin no cfsv2 deixamos NA por enquanto
-  
-)
+    ~model, ~prec, ~tmax, ~tmin,
+    "NCEP-CFSv2", "prec", NA_character_, NA_character_,
+    "CanCM4i", "prec", "tmax", "tmin",
+    "GEM5-NEMO", "prec", "tmax", "tmin",
+    "GFDL-SPEAR", "prec", "t_ref_max", "t_ref_min",
+    "NASA-GEOSS2S", "prec", "t2mmax", "t2mmin",
+    # "NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
+    "COLA-RSMAS-CCSM4", "prec", NA_character_, NA_character_
+    # "CanSIPS-IC3",           "prec",  "tmax",        "tmin",
+    # para evitar problemas em outras funcoes os nomes dos modelos
+    # devem ser únicos
+    # "CanSIPS-IC3-GEM5-NEMO", "prec",   "tmax",        "tmin",
+    # "CanSIPSv2",             "prec",  "tmax",        "tmin",
+    # "CMC1-CanCM3",           "prec",  "tmax",        "tmin",
+    # "CMC2-CanCM4",           "prec",  "tmax",        "tmin",
+    # "GEM-NEMO",              "prec",  "tmax",        "tmin",
+    # "GFDL-CM2p1-aer04",      "prec",  "t_ref_max",   "t_ref_min",
+    # "GFDL-CM2p5-FLOR-A06",   "prec",  "t_ref_max",   "t_ref_min",
+    # "GFDL-CM2p5-FLOR-B01",   "prec",  "t_ref_max",   "t_ref_min",
+    # "NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
+    # por nao haver tmx e tmin no cfsv2 deixamos NA por enquanto
+  )
 }
 
 # criando uma tabela com os modelos e seus respectivos períodos e tipos
 # informaçẽos obtidas manualmente no site
 type_period_models <- function() {
   type_period_models <- tibble::tribble(
-    ~model,               ~type,       ~start, ~end,  nmembers,
-    "NCEP-CFSv2",         "HINDCAST",  1982,   2010,  24,
-    "NCEP-CFSv2",         "FORECAST",  2011,   2022,  32,
-    
-    "CanCM4i",            "HINDCAST",  1981,   2018,  10,
-    "CanCM4i",            "FORECAST",  2016,   2021,  10,
-    
-    "GEM5-NEMO",          "HINDCAST",  1980,   2020,  10,
-    "GEM5-NEMO",          "FORECAST",  2021,   2022,  10,
-    
-    "GFDL-SPEAR",         "HINDCAST",  1991,   2020,  15,
-    "GFDL-SPEAR",         "FORECAST",  2020,   2022,  30,
-    
-    "NASA-GEOSS2S",       "HINDCAST",  1981,   2017,   4,
-    "NASA-GEOSS2S",       "FORECAST",  2017,   2022,  10,
-    
-    #"NASA-GMAO-062012",   "MONTHLY",   1981,   2018,
-    
-    "COLA-RSMAS-CCSM4",   "MONTHLY",   1982,   2022,  10
+    ~model, ~type, ~start, ~end, ~nmembers,
+    "NCEP-CFSv2", "HINDCAST", 1982, 2010, 24,
+    "NCEP-CFSv2", "FORECAST", 2011, 2022, 32,
+
+    "CanCM4i", "HINDCAST", 1981, 2018, 10,
+    "CanCM4i", "FORECAST", 2016, 2021, 10,
+
+    "GEM5-NEMO", "HINDCAST", 1980, 2020, 10,
+    "GEM5-NEMO", "FORECAST", 2021, 2022, 10,
+
+    "GFDL-SPEAR", "HINDCAST", 1991, 2020, 15,
+    "GFDL-SPEAR", "FORECAST", 2020, 2022, 30,
+
+    "NASA-GEOSS2S", "HINDCAST", 1981, 2017, 4,
+    "NASA-GEOSS2S", "FORECAST", 2017, 2022, 10,
+
+    # "NASA-GMAO-062012",   "MONTHLY",   1981,   2018,
+
+    "COLA-RSMAS-CCSM4", "MONTHLY", 1982, 2022, 10
     # "CanSIPS-IC3",        "FORECAST",  2021,   2022,
     # "CanSIPS-IC3",        "HINDCAST",  1980,   2020,
-    # "GEM5-NEMO",          "FORECAST",   2021,   2022, 
+    # "GEM5-NEMO",          "FORECAST",   2021,   2022,
     # "CanSIPSv2",          "FORECAST",  2016,   2021,
     # "CanSIPSv2",          "HINDCAST",  1981,   2018,
     # "CMC1-CanCM3",        "FORECAST",  2011,   2019,
@@ -81,26 +80,42 @@ type_period_models <- function() {
 
 # criando uma tabela com o modelo e seus respectivos tipos de previsao e anos
 tab_mod_year_type <- function(models_period = type_period_models(),
-                              priority_type = "HINDCAST") {
-
-  tab_myt <- type_period_models() %>% 
+                              priority_type = "HINDCAST",
+                              quiet = TRUE) {
+  tab_myt <- type_period_models() %>%
     tidyr::pivot_longer(start:end, names_to = "id", values_to = "year") %>%
     dplyr::group_by(model, type) %>%
     tidyr::expand(year = full_seq(year, 1)) %>%
     dplyr::arrange(model, year) %>%
     dplyr::ungroup()
-  
-  # remover anos duplicados (prioridade para HINDCAST)
-  tab_myt <- tab_myt %>%
+
+
+
+  # anos duplicados
+  dup_myt <- tab_myt %>%
     dplyr::group_by(model, year) %>%
-    dplyr::tally() %>% 
+    dplyr::tally() %>%
     dplyr::filter(n > 1) %>%
     dplyr::left_join(tab_myt, by = c("model", "year")) %>%
     dplyr::select(-n) %>%
-    dplyr::ungroup() %>%
+    dplyr::ungroup()
+
+  if (priority_type == "none") {
+    if (!quiet) {
+      warning("Anos com arquivos duplicados para hindcasts e forecasts.",
+        print(knitr::kable(dup_myt)),
+        call. = FALSE
+      )
+    }
+
+    return(tab_myt)
+  }
+
+  # prioridade para HINDCAST
+  tab_myt <- dup_myt %>%
     dplyr::filter(type != priority_type) %>%
     dplyr::anti_join(tab_myt, ., by = c("model", "type", "year"))
-    
+
   ## check
   #  tab_myt %>% group_by(model, year) %>%  tally() %>% filter(n!=1) %>% nrow()
   # models_span_actual <- tab_myt %>%
@@ -113,10 +128,9 @@ tab_mod_year_type <- function(models_period = type_period_models(),
 }
 
 # criando uma tabela com as informacoes necessarias para realizacao do download
-tab_mod_year_vname_type <- function(vname, priority = "HINDCAST") {
-  
+tab_mod_year_vname_type <- function(vname, priority = "none", quiet = TRUE) {
   nmme_info <- dplyr::full_join(
-    tab_mod_year_type(priority_type = priority),
+    tab_mod_year_type(priority_type = priority, quiet),
     names_vars_models(),
     by = "model"
   ) %>%
@@ -129,10 +143,10 @@ tab_mod_year_vname_type <- function(vname, priority = "HINDCAST") {
     dplyr::select(model, year, type, vname_ref) %>%
     dplyr::arrange(model, year) %>%
     dplyr::relocate(year, model, vname_ref, type)
-  
-  if(!missing(vname)){
+
+  if (!missing(vname)) {
     nmme_info <- dplyr::filter(nmme_info, vname_ref == vname)
-  } 
+  }
   nmme_info
 }
 
@@ -145,45 +159,41 @@ tab_mod_year_vname_type <- function(vname, priority = "HINDCAST") {
 #' @export
 #'
 #' @examples
-#' if(FALSE){
-#'  nmme_models_span()
-#'  nmme_models_span(TRUE)
+#' if (FALSE) {
+#'   nmme_models_span()
+#'   nmme_models_span(TRUE)
 #' }
-nmme_models_span <- function(by_type = FALSE){
-  
-  models_span_actual <- tab_mod_year_vname_type() %>% 
-      group_by(model, type) %>%
-      summarise(start = min(year), end = max(year)) %>%
-      ungroup()
-  if(by_type) return(models_span_actual)  
-  
+nmme_models_span <- function(by_type = FALSE,
+                             priority_type = "none", 
+                             quiet = TRUE) {
+  models_span_actual <- tab_mod_year_vname_type(priority = priority_type, ) %>%
+    group_by(model, type) %>%
+    summarise(start = min(year), end = max(year)) %>%
+    ungroup()
+
+  if (by_type) {
+    return(models_span_actual)
+  }
+
   models_span_actual <- models_span_actual %>%
     tidyr::pivot_longer(start:end, names_to = "id", values_to = "year") %>%
     dplyr::group_by(model) %>%
-    dplyr::summarise(start = min(year), end = max(year))
-  
+    dplyr::summarise(start = min(year), end = max(year)) %>%
+    dplyr::ungroup()
+
   models_span_actual
-    
 }
 
 
 plot_nmme_models_span <- function(data = tab_mod_year_vname_type("prec"),
-                                  .plotly = FALSE){
-  
+                                  .plotly = FALSE) {
   p <- data %>%
-    #mutate(value = 1) %>%
+    # mutate(value = 1) %>%
     ggplot2::ggplot(aes(x = year, y = model, fill = type)) +
-    ggplot2::geom_tile(alpha = 0.7, width = 0.9, height = 0.9) + 
+    ggplot2::geom_tile(alpha = 0.7, width = 0.9, height = 0.9) +
     ggplot2::theme_bw() +
-    ggplot2::scale_x_continuous(minor_breaks = scales::pretty_breaks(n = 40)) 
-  
-  if(.plotly) p <- plotly::ggplotly(p)
+    ggplot2::scale_x_continuous(minor_breaks = scales::pretty_breaks(n = 40))
+
+  if (.plotly) p <- plotly::ggplotly(p)
   p
-    
 }
- 
-
-
-
-
-

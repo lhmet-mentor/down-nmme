@@ -80,27 +80,36 @@ type_period_models <- function() {
 }
 
 # criando uma tabela com o modelo e seus respectivos tipos de previsao e anos
-tab_mod_year_type <- function(models_period = type_period_models()) {
+tab_mod_year_type <- function(models_period = type_period_models(),
+                              priority_type = "HINDCAST") {
 
-  tab_mod_year_type <- expand_grid(
-    model = models_period$model[1],
-    type = models_period$type[1],
-    year = seq(from = models_period$start[1], 
-               to = models_period$end[1])
-  )
-  for (i in 2:length(models_period$model)) {
-    tab_mod_year_type <- tab_mod_year_type %>%
-      rbind(
-        expand_grid(
-          model = models_period$model[i],
-          type = models_period$type[i],
-          year = seq(from = models_period$start[i], 
-                     to = models_period$end[i]
-                     )
-        )
-      )
-  }
-  tab_mod_year_type
+  tab_myt <- type_period_models() %>% 
+    tidyr::pivot_longer(start:end, names_to = "id", values_to = "year") %>%
+    dplyr::group_by(model, type) %>%
+    tidyr::expand(year = full_seq(year, 1)) %>%
+    dplyr::arrange(model, year) %>%
+    dplyr::ungroup()
+  
+  # remover anos duplicados (prioridade para HINDCAST)
+  tab_myt <- tab_myt %>%
+    dplyr::group_by(model, year) %>%
+    dplyr::tally() %>% 
+    dplyr::filter(n > 1) %>%
+    dplyr::left_join(tab_myt, by = c("model", "year")) %>%
+    dplyr::select(-n) %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(type != priority_type) %>%
+    dplyr::anti_join(tab_myt, ., by = c("model", "type", "year"))
+    
+  ## check
+  #  tab_myt %>% group_by(model, year) %>%  tally() %>% filter(n!=1) %>% nrow()
+  # models_span_actual <- tab_myt %>%
+  #   group_by(model, type) %>%
+  #   summarise(start = min(year), end = max(year)) %>%
+  #   ungroup()
+  ## forecasts corrigidas
+  # anti_join(models_period, models_span_actual)
+  tab_myt
 }
 
 # criando uma tabela com as informacoes necessarias para realizacao do download

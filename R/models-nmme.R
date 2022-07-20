@@ -8,14 +8,14 @@ easypackages::libraries(pcks)
 
 names_vars_models <- function() {
   tibble::tribble(
-    ~model, ~prec, ~tmax, ~tmin,
-    "NCEP-CFSv2", "prec", NA_character_, NA_character_,
-    "CanCM4i", "prec", "tmax", "tmin",
-    "GEM5-NEMO", "prec", "tmax", "tmin",
-    "GFDL-SPEAR", "prec", "t_ref_max", "t_ref_min",
-    "NASA-GEOSS2S", "prec", "t2mmax", "t2mmin",
+    ~model, ~prec, ~tmax, ~tmin, ~tref,
+    "NCEP-CFSv2", "prec", NA_character_, NA_character_, "tref",
+    "CanCM4i", "prec", "tmax", "tmin", NA_character_,
+    "GEM5-NEMO", "prec", "tmax", "tmin", NA_character_,
+    "GFDL-SPEAR", "prec", "t_ref_max", "t_ref_min", NA_character_,
+    "NASA-GEOSS2S", "prec", "t2mmax", "t2mmin", NA_character_,
     # "NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
-    "NCAR-CCSM4", "prec", NA_character_, NA_character_
+    "NCAR-CCSM4", "prec", NA_character_, NA_character_, "tref"
     # "CanSIPS-IC3",           "prec",  "tmax",        "tmin",
     # para evitar problemas em outras funcoes os nomes dos modelos
     # devem ser únicos

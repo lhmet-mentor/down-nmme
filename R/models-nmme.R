@@ -9,23 +9,27 @@ easypackages::libraries(pcks)
 names_vars_models <- function() {
   tibble::tribble(
   ~model,                   ~prec,  ~tmax,         ~tmin,
+  "NCEP-CFSv2",            "prec",  NA_character_, NA_character_,
   "CanCM4i",               "prec",  "tmax",        "tmin",
-  "CanSIPS-IC3",           "prec",  "tmax",        "tmin",
-  "CanSIPS-IC3-GEM5-NEMO", "prec",   "tmax",        "tmin",
-  "CanSIPSv2",             "prec",  "tmax",        "tmin",
-  "CMC1-CanCM3",           "prec",  "tmax",        "tmin",
-  "CMC2-CanCM4",           "prec",  "tmax",        "tmin",
-  "COLA-RSMAS-CCSM4",      "prec",  NA_character_, NA_character_,
-  "GEM-NEMO",              "prec",  "tmax",        "tmin",
-  "GFDL-CM2p1-aer04",      "prec",  "t_ref_max",   "t_ref_min",
-  "GFDL-CM2p5-FLOR-A06",   "prec",  "t_ref_max",   "t_ref_min",
-  "GFDL-CM2p5-FLOR-B01",   "prec",  "t_ref_max",   "t_ref_min",
+  "GEM5-NEMO",             "prec",  "tmax",        "tmin",
   "GFDL-SPEAR",            "prec",  "t_ref_max",   "t_ref_min",
   "NASA-GEOSS2S",          "prec",  "t2mmax",      "t2mmin",
-  "NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
-  "NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
+  #"NASA-GMAO-062012",      "prec",  "t2mmax",      "t2mmin",
+  "COLA-RSMAS-CCSM4",      "prec",  NA_character_, NA_character_
+  #"CanSIPS-IC3",           "prec",  "tmax",        "tmin",
+  # para evitar problemas em outras funcoes os nomes dos modelos
+  # devem ser únicos
+  #"CanSIPS-IC3-GEM5-NEMO", "prec",   "tmax",        "tmin",
+  #"CanSIPSv2",             "prec",  "tmax",        "tmin",
+  #"CMC1-CanCM3",           "prec",  "tmax",        "tmin",
+  #"CMC2-CanCM4",           "prec",  "tmax",        "tmin",
+  #"GEM-NEMO",              "prec",  "tmax",        "tmin",
+  #"GFDL-CM2p1-aer04",      "prec",  "t_ref_max",   "t_ref_min",
+  #"GFDL-CM2p5-FLOR-A06",   "prec",  "t_ref_max",   "t_ref_min",
+  #"GFDL-CM2p5-FLOR-B01",   "prec",  "t_ref_max",   "t_ref_min",
+  #"NCAR-CESM1",            "prec",  "tsmax",       "tsmin",
   # por nao haver tmx e tmin no cfsv2 deixamos NA por enquanto
-  "NCEP-CFSv2",            "prec",  NA_character_, NA_character_ 
+  
 )
 }
 
@@ -34,38 +38,47 @@ names_vars_models <- function() {
 type_period_models <- function() {
   type_period_models <- tibble::tribble(
     ~model,               ~type,       ~start, ~end,
+    "NCEP-CFSv2",         "HINDCAST",  1982,   2010,
+    "NCEP-CFSv2",         "FORECAST",  2011,   2022,
+    
     "CanCM4i",            "FORECAST",  2016,   2021,
     "CanCM4i",            "HINDCAST",  1981,   2018,
-    "CanSIPS-IC3",        "FORECAST",  2021,   2022,
-    "CanSIPS-IC3",        "HINDCAST",  1980,   2020,
-    "CanSIPS-IC3-GEM5-NEMO","FORECAST",   2021,   2022, 
-    "CanSIPSv2",          "FORECAST",  2016,   2021,
-    "CanSIPSv2",          "HINDCAST",  1981,   2018,
-    "CMC1-CanCM3",        "FORECAST",  2011,   2019,
-    "CMC1-CanCM3",        "HINDCAST",  1981,   2010,
-    "CMC2-CanCM4",        "FORECAST",  2011,   2019,
-    "CMC2-CanCM4",        "HINDCAST",  1981,   2010,
-    "COLA-RSMAS-CCSM4",   "MONTHLY",   1982,   2022,
-    "GEM-NEMO",           "FORECAST",  2016,   2021,
-    "GEM-NEMO",           "HINDCAST",  1981,   2018,
-    "GFDL-CM2p1-aer04",   "MONTHLY",   1982,   2021,
-    "GFDL-CM2p5-FLOR-A06","MONTHLY",   1980,   2021,
-    "GFDL-CM2p5-FLOR-B01","MONTHLY",   1980,   2021,
+    
+    "GEM5-NEMO",          "HINDCAST",  1980,   2020,
+    "GEM5-NEMO",          "FORECAST",  2021,   2022,
+    
     "GFDL-SPEAR",         "FORECAST",  2020,   2022,
     "GFDL-SPEAR",         "HINDCAST",  1991,   2020,
-    "NASA-GMAO-062012",   "MONTHLY",   1981,   2018,
-    "NASA-GEOSS2S",       "FORECAST",  2017,   2022,
+    
     "NASA-GEOSS2S",       "HINDCAST",  1981,   2017,
-    "NCAR-CESM1",         "FORECAST",  2016,   2017,
-    "NCAR-CESM1",         "HINDCAST",  1980,   2010,
-    "NCEP-CFSv2",         "FORECAST",  2011,   2022,
-    "NCEP-CFSv2",         "HINDCAST",  1982,   2010
+    "NASA-GEOSS2S",       "FORECAST",  2017,   2022,
+    
+    #"NASA-GMAO-062012",   "MONTHLY",   1981,   2018,
+    
+    "COLA-RSMAS-CCSM4",   "MONTHLY",   1982,   2022
+    # "CanSIPS-IC3",        "FORECAST",  2021,   2022,
+    # "CanSIPS-IC3",        "HINDCAST",  1980,   2020,
+    # "GEM5-NEMO",          "FORECAST",   2021,   2022, 
+    # "CanSIPSv2",          "FORECAST",  2016,   2021,
+    # "CanSIPSv2",          "HINDCAST",  1981,   2018,
+    # "CMC1-CanCM3",        "FORECAST",  2011,   2019,
+    # "CMC1-CanCM3",        "HINDCAST",  1981,   2010,
+    # "CMC2-CanCM4",        "FORECAST",  2011,   2019,
+    # "CMC2-CanCM4",        "HINDCAST",  1981,   2010,
+    # "GEM-NEMO",           "FORECAST",  2016,   2021,
+    # "GEM-NEMO",           "HINDCAST",  1981,   2018,
+    # "GFDL-CM2p1-aer04",   "MONTHLY",   1982,   2021,
+    # "GFDL-CM2p5-FLOR-A06","MONTHLY",   1980,   2021,
+    # "GFDL-CM2p5-FLOR-B01","MONTHLY",   1980,   2021,
+    # "NCAR-CESM1",         "FORECAST",  2016,   2017,
+    # "NCAR-CESM1",         "HINDCAST",  1980,   2010
   )
 
   type_period_models <- tibble::as_tibble(type_period_models) %>%
     dplyr::mutate(across(.funs = as.character))
   type_period_models
 }
+
 # criando uma tabela com o modelo e seus respectivos tipos de previsao e anos
 tab_mod_year_type <- function(models_period = type_period_models()) {
 

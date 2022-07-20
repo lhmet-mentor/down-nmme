@@ -71,15 +71,19 @@ nmme_oper_from_cpc <- function(updated_models_only = TRUE, ensmean = FALSE) {
 #' @export
 #'
 #' @examples
-#' models <- nmme_oper_from_cpc()$directory[3:4]
-#' cpc_links_from_model_year_month(models, c("202207", "202206"))
+#' models <- nmme_oper_from_cpc()$directory[2]
+#' cpc_links_from_model_year_month(models, c("202111", "202206"))
 #' 
 cpc_links_from_model_year_month <- function(
                                             model = tab_models$directory[3:4],
                                             yyyymm = "202207",
                                             quiet = FALSE) {
   
-  checkmate::assert_subset(model, nmme_oper_from_cpc()$directory)
+  #checkmate::assert_subset(model, nmme_oper_from_cpc()$directory)
+  checkmate::assert_subset(model, c("CFSv2", "CanCM4i", "GEM5_NEMO",
+                                    "GFDL_SPEAR", "NASA_GEOS5v2", 
+                                    "NCAR_CCSM4"))
+  
   
   # month year to date
   i_ymd <- lubridate::ym(as.character(yyyymm))

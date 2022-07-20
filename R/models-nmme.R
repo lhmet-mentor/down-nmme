@@ -37,25 +37,25 @@ names_vars_models <- function() {
 # informaçẽos obtidas manualmente no site
 type_period_models <- function() {
   type_period_models <- tibble::tribble(
-    ~model,               ~type,       ~start, ~end,
-    "NCEP-CFSv2",         "HINDCAST",  1982,   2010,
-    "NCEP-CFSv2",         "FORECAST",  2011,   2022,
+    ~model,               ~type,       ~start, ~end,  nmembers,
+    "NCEP-CFSv2",         "HINDCAST",  1982,   2010,  24,
+    "NCEP-CFSv2",         "FORECAST",  2011,   2022,  32,
     
-    "CanCM4i",            "FORECAST",  2016,   2021,
-    "CanCM4i",            "HINDCAST",  1981,   2018,
+    "CanCM4i",            "HINDCAST",  1981,   2018,  10,
+    "CanCM4i",            "FORECAST",  2016,   2021,  10,
     
-    "GEM5-NEMO",          "HINDCAST",  1980,   2020,
-    "GEM5-NEMO",          "FORECAST",  2021,   2022,
+    "GEM5-NEMO",          "HINDCAST",  1980,   2020,  10,
+    "GEM5-NEMO",          "FORECAST",  2021,   2022,  10,
     
-    "GFDL-SPEAR",         "FORECAST",  2020,   2022,
-    "GFDL-SPEAR",         "HINDCAST",  1991,   2020,
+    "GFDL-SPEAR",         "HINDCAST",  1991,   2020,  15,
+    "GFDL-SPEAR",         "FORECAST",  2020,   2022,  30,
     
-    "NASA-GEOSS2S",       "HINDCAST",  1981,   2017,
-    "NASA-GEOSS2S",       "FORECAST",  2017,   2022,
+    "NASA-GEOSS2S",       "HINDCAST",  1981,   2017,   4,
+    "NASA-GEOSS2S",       "FORECAST",  2017,   2022,  10,
     
     #"NASA-GMAO-062012",   "MONTHLY",   1981,   2018,
     
-    "COLA-RSMAS-CCSM4",   "MONTHLY",   1982,   2022
+    "COLA-RSMAS-CCSM4",   "MONTHLY",   1982,   2022,  10
     # "CanSIPS-IC3",        "FORECAST",  2021,   2022,
     # "CanSIPS-IC3",        "HINDCAST",  1980,   2020,
     # "GEM5-NEMO",          "FORECAST",   2021,   2022, 

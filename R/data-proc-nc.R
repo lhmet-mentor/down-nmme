@@ -1,15 +1,25 @@
 ## Funções para o processamento dos arquivos NetCDF
 ## 
+
 .pick_var_name <- function(name){
-  ifelse(
-    stringr::str_detect(name, "tmax"),
-    "tmax",
-    ifelse(stringr::str_detect(name,"tmin"),
-           "tmin",
-           "prec"
-    )    
-  )
+  variables <- unique(tab_mod_year_vname_type()$vname_ref)
+  for (i in 1:length(variables)){
+    if(stringr::str_detect(name, variables[i])){
+      varname <- variables[i]
+    }
+  }
+  varname
 }
+# .pick_var_name <- function(name){
+#   ifelse(
+#     stringr::str_detect(name, "tmax"),
+#     "tmax",
+#     ifelse(stringr::str_detect(name,"tmin"),
+#            "tmin",
+#            "prec"
+#     )    
+#   )
+# }
 
 .pick_type <- function(type){
   ifelse(

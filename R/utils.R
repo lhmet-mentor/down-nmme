@@ -117,7 +117,7 @@ rename_files_nmme <- function(old_model_nm = "COLA-RSMAS-CCSM4",
 # rename_files_nmme()
 
 
-
+# função para obter a moda ou as modas
 modes <- function(x) {
   ux <- unique(x)
   tab <- tabulate(match(x, ux))

@@ -118,6 +118,11 @@ rename_files_nmme <- function(old_model_nm = "COLA-RSMAS-CCSM4",
 
 
 
+modes <- function(x) {
+  ux <- unique(x)
+  tab <- tabulate(match(x, ux))
+  ux[tab == max(tab)]
+}
 
 
 

@@ -120,3 +120,41 @@ cpc_links_from_model_year_month <- function(
 
 
 
+
+
+# obter inicio e fim das FORECASTS e HINDCASTS
+
+#http://leg.ufpr.br/~walmes/ensino/web-scraping/tutoriais/R-xml.html
+
+link <- "https://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.CanCM4i/.FORECAST/.MONTHLY/.prec/"
+r <- httr::GET(link, )
+doc <- xml2::read_html(r) 
+
+l <- doc %>%
+  xml_find_all(xpath = "/html/body/form/input[10]") %>% 
+  xml_attrs() %>%
+  unlist()
+l[c("name", "data-default")]
+
+
+ns <- doc %>%
+  xml_find_all(xpath = "/html/body/form/input")
+
+class(ns)
+methods(class = "xml_node")
+
+
+
+iri_info_model <-  map_dfr(xml_attrs(ns), 
+      function(x) {
+        # x <- xml_attrs(ns)[[6]]
+        sel <- names(x)  %in% c("name", "data-default")
+        if(sum(sel) > 1) return(x[sel])
+        NULL
+      }
+  ) 
+  
+
+
+
+

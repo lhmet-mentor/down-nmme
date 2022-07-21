@@ -6,6 +6,16 @@ easypackages::libraries(pcks)
 # tabela com nome das variáveis em cada modelo
 # informações obtidas manualmente no site ...
 
+#' Table of variables of the NMME models
+#'
+#' @return a [tibble][tibble::tibble-package] with variables: `model`, `prec`,
+#' `tmax`, `tmin` e `tref`.
+#' @export
+#'
+#' @examples
+#' if(FALSE) {
+#'  names_vars_models()
+#' }
 names_vars_models <- function() {
   tibble::tribble(
     ~model, ~prec, ~tmax, ~tmin, ~tref,
@@ -128,9 +138,9 @@ tab_mod_year_type <- function(models_period = type_period_models(),
 }
 
 # criando uma tabela com as informacoes necessarias para realizacao do download
-tab_mod_year_vname_type <- function(vname, priority = "none", quiet = TRUE) {
+tab_mod_year_vname_type <- function(vname, priority = "none", .quiet = TRUE) {
   nmme_info <- dplyr::full_join(
-    tab_mod_year_type(priority_type = priority, quiet),
+    tab_mod_year_type(priority_type = priority, quiet = .quiet),
     names_vars_models(),
     by = "model"
   ) %>%
@@ -154,8 +164,9 @@ tab_mod_year_vname_type <- function(vname, priority = "none", quiet = TRUE) {
 #' Time span o NMME's models
 #'
 #' @param by_type logical, if TRUE return time span for HIND and FORECASTS.
-#'
-#' @return tibble with mode, start and end year of time series
+#' @return [tibble][tibble::tibble-package] with `model`, `start` and `end` 
+#' year of models dataset.
+#' 
 #' @export
 #'
 #' @examples
@@ -166,10 +177,12 @@ tab_mod_year_vname_type <- function(vname, priority = "none", quiet = TRUE) {
 nmme_models_span <- function(by_type = FALSE,
                              priority_type = "none", 
                              quiet = TRUE) {
-  models_span_actual <- tab_mod_year_vname_type(priority = priority_type, ) %>%
+  models_span_actual <- tab_mod_year_vname_type(
+    priority = priority_type,
+    .quiet = quiet
+    ) %>%
     group_by(model, type) %>%
-    summarise(start = min(year), end = max(year)) %>%
-    ungroup()
+    summarise(start = min(year), end = max(year), .groups = "drop")
 
   if (by_type) {
     return(models_span_actual)
@@ -178,8 +191,7 @@ nmme_models_span <- function(by_type = FALSE,
   models_span_actual <- models_span_actual %>%
     tidyr::pivot_longer(start:end, names_to = "id", values_to = "year") %>%
     dplyr::group_by(model) %>%
-    dplyr::summarise(start = min(year), end = max(year)) %>%
-    dplyr::ungroup()
+    dplyr::summarise(start = min(year), end = max(year), .groups = "drop")
 
   models_span_actual
 }

@@ -1,69 +1,51 @@
 pcks <- c("terra", "tidyverse", "here", "checkmate", "metR", "fs", "glue", "qs")
 easypackages::libraries(pcks)
 
-## Funções para processamento dos dados netcdf------------------------------
+## Funções para processamento dos dados netcdf----------------------------------
+source(here("R/models-nmme.R"))
 source(here("R/data-proc-nc.R"))
 source(here("../proc-NMME/R/data-proc-rds.R"))
+
+# lista de modelos e periodos---------------------------------------------------
+nmme_models_span(by_type = TRUE, priority_type = "none")
+nmme_models_span(by_type = TRUE, priority_type = "FORECAST")
+# modelos que HIND e FORECAST para o mesmo ano
+plot_nmme_models_span()
+# NASA-GEOSS2S (2017)
+# GFDL-SPEAR (2020)
+# CanCM4i (2016:2018)
+
 
 
 ## Processamento para uma variavel e um modelo---------------------------------
 var_name = "prec"
+nc_dir = here::here("output", "ncdf")
+model = "CanCM4i"
 
-## listar todos os arquivos das previsões retrospectivas da precipitação CanCM4i
-nc_dir <- here::here("output", "ncdf")
 
 # count_ncs <- fs::dir_ls(nc_dir) %>%
 #   fs::path_ext() %>%
 #   table()
-## total de arquivos nc
-# count_ncs
-#  271 
-# Apos incluir CanSIPS-IC3 e GFDL-SPEAR
-# 342
 
-nc_files <- fs::dir_ls(path = nc_dir, glob = "*prec*.nc", recurse = TRUE)
+nc_files <- fs::dir_ls(path = nc_dir, 
+                       glob = glue::glue("*{var_name}_{model}*.nc"), 
+                       recurse = TRUE)
 
-model_counts <- nc_files_by_model_year(nc_files, vname = var_name)
-# HINDCASTAS
-# modelo          start   end  freq check_span     M     L     S     X     Y
-# <chr>        <int> <int> <int>      <dbl> <int> <int> <int> <int> <int>
-# 1  CanCM4i       1981  2018    38         38    10    12    12    56    76
-# 7  GFDL-SPEAR    1991  2020    30         30    15    12    12    56    76
-# 8  NASA-GEOSS2S  1981  2017    37         37     4     9    12    56    76
-# 10 NCEP-CFSv2    1982  2010    29         29    24    10    12    56    76
+metadata_model_files <- nmme_metadata(nc_files, summary = TRUE) 
+metadata_model_files_full <- nmme_metadata(nc_files) 
 
-# FORECASTS
-# modelo       start   end  freq check_span     M     L     S     X     Y
-# <chr>        <int> <int> <int>      <dbl> <int> <int> <int> <int> <int>
-#   1 CanCM4i     2016  2021     6          6    10    12    12    56    76
-# 2 CanSIPS-IC3   2021  2022     2          2    20    12     3    56    76
-# 3 CanSIPSv2     2016  2021     6          6    20    12    12    56    76
-# 4 CMC1-CanCM3   2011  2019     9          9    10    12    12    56    76
-# 5 CMC2-CanCM4   2011  2019     9          9    10    12    12    56    76
-# 6 GEM-NEMO      2016  2021     6          6    10    12    12    56    76
-# 7 GFDL-SPEAR    2020  2022     3          3    30    12    12    56    76
-# 8 NASA-GEOSS2S  2017  2022     6          6    10     9    12    56    76
-# 9 NCAR-CESM1    2016  2017     2          2    10    12     6    56    76
+# arquivos não íntegros (sem as dimensões esperadas para um arquivo anual)
+metadata_model_files_full  %>%
+  dplyr::filter(year %in% year[!nc_integrity])
+
+#browseURL("https://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.CanCM4i/.FORECAST/.MONTHLY/.prec/")
+
+
 
 # como o nome dos arquivos especifica o nome dos modelos
 #model_nm <- "CanCM4i"
 (model_nms <- unique(model_counts$modelo))
 #files_model <- nc_files[grep(model_nms, nc_files)]
-
-
-# # # para obter informacao do lead time
-# model_nm <- "CanSIPS-IC3"
-# model_files <- nc_files[grep(model_nm, nc_files)]
-# # variaveis e dimensoes com funcao do pacote metR
-# nc_info <- GlanceNetCDF(model_files[1])
-# nc_info
-# # nc_info é uma lista
-# str(nc_info)
-# # lead time pode ser obtido dela
-# str(nc_info$dims$L)
-# (lt <- nc_info$dims$L$vals)
-# membros
-# n_members <- length(nc_info$dims$M$vals)
 
 
 # PAREI AQUI

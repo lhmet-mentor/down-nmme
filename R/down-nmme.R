@@ -11,7 +11,14 @@ download_file_safe <- purrr::safely(download.file)
   var_name_down
 }
 
-
+.pick_vars_from_model <- function(.model){
+  # .model = names_vars_models()$model[1]
+  vars_mod <- dplyr::filter(names_vars_models(), model == .model) %>%
+    dplyr::select(-model)
+  vars <- c(t(vars_mod))
+  vars[!is.na(vars)]
+}
+  
 #' Baixa o arquivo anual da previsao retrospectiva do NMME para a AS
 #' Download da previsao retrospectiva do Sistema NMME recortado para 
 #' a America do Sul, incluindo os 12 tempos de antecedencia e os 10
@@ -75,6 +82,16 @@ down_nmme_by_ymv <- function(year = "1980",
     # nome dop arq default
     "data.nc"
   )
+  
+  # data_link <- paste0(
+  #   nmme_link(model, variable, type),
+  #   # Forecast Start Time (forecast_reference_time)
+  #   "S/%280000%201%20Jan%20{year}%29%280000%2030%20Dec%20{year}",
+  #   # sub dominio
+  #   "%29RANGEEDGES/X/%2830W%29%2885W%29RANGEEDGES/Y/%2860S%29%2815N%29RANGEEDGES/",
+  #   # nome dop arq default
+  #   "data.nc"
+  # )
   
   #out_dir <- here("output", variable)
   out_dir <- here("output", "ncdf", model)

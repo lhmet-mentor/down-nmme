@@ -126,33 +126,70 @@ cpc_links_from_model_year_month <- function(
 
 #http://leg.ufpr.br/~walmes/ensino/web-scraping/tutoriais/R-xml.html
 
-link <- "https://iridl.ldeo.columbia.edu/SOURCES/.Models/.NMME/.CanCM4i/.FORECAST/.MONTHLY/.prec/"
-r <- httr::GET(link, )
-doc <- xml2::read_html(r) 
-
-l <- doc %>%
-  xml_find_all(xpath = "/html/body/form/input[10]") %>% 
-  xml_attrs() %>%
-  unlist()
-l[c("name", "data-default")]
-
-
-ns <- doc %>%
-  xml_find_all(xpath = "/html/body/form/input")
-
-class(ns)
-methods(class = "xml_node")
 
 
 
-iri_info_model <-  map_dfr(xml_attrs(ns), 
-      function(x) {
-        # x <- xml_attrs(ns)[[6]]
-        sel <- names(x)  %in% c("name", "data-default")
-        if(sum(sel) > 1) return(x[sel])
-        NULL
-      }
-  ) 
+  
+  
+  
+
+
+
+forecast_start_times <- function(nmme_url){
+  # nmme_url = link
+  doc <- httr::GET(nmme_url) %>%
+    xml2::read_html()
+  
+  info_model <- doc %>%
+    xml2::xml_find_all(xpath = '//*[@id="info"]/div[3]/dl[1]') %>%
+    xml2::xml_text() %>%
+    textConnection() %>%
+    readLines()
+  
+  # forecast start time (S)
+  fst <- grep("forecast_reference_time", info_model, value = TRUE) %>%
+    stringr::str_extract_all("(?<=\\().+?(?=\\))") %>%
+    unlist() %>%
+    lubridate::fast_strptime(format = "0000 %d %b %Y")
+  fst <- lubridate::as_date(fst[!is.na(fst)])
+  fst 
+}
+
+#forecast_start_times(link)
+  
+  
+
+# l <- doc %>%
+#   xml_find_all(xpath = "/html/body/form/input[10]") %>% 
+#   xml_attrs() %>%
+#   unlist()
+# l[c("name", "data-default")]
+
+
+# # titulo
+# title <- xml_find_all(doc, xpath = '//*[@id="info"]/h2')
+# class(title)
+# methods(class = "xml_nodeset")
+# xml_text(title)
+# 
+# subtitle
+# 
+# ns <- xml_find_all(doc, xpath = '//*[@id="info"]')
+# class(ns)
+# as_list(ns)
+# 
+# class(ns)
+# methods(class = "xml_node")
+# 
+# 
+# iri_info_model <-  map_dfr(xml_attrs(ns), 
+#       function(x) {
+#         # x <- xml_attrs(ns)[[6]]
+#         sel <- names(x)  %in% c("name", "data-default")
+#         if(sum(sel) > 1) return(x[sel])
+#         NULL
+#       }
+#   ) 
   
 
 

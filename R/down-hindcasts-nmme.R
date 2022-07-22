@@ -21,12 +21,13 @@ source(here("../proc-NMME/R/data-proc-rds.R"))
 
 #------------------------------------------------------------------------------
 # lista de args para down_nmme_by_ymv() na ordem exigida pela funcao
-#nmme_models_span()
-#nmme_models_span(by_type = TRUE)
-
+# nmme_models_span()
+# nmme_models_span(by_type = TRUE)
+# names_vars_models()
 
 args_l <- tab_mod_year_vname_type(priority = "none")  %>% 
-  dplyr::filter(vname_ref == "tref")
+  dplyr::filter(vname_ref == "tmin", model == "CanCM4i", year == 2000)
+
 
 baixados <- purrr::pmap(as.list(args_l),
                              function(year, model, vname_ref, type) {

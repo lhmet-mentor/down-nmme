@@ -26,7 +26,7 @@ source(here("../proc-NMME/R/data-proc-rds.R"))
 # names_vars_models()
 
 args_l <- tab_mod_year_vname_type(priority = "none")  %>% 
-  dplyr::filter(vname_ref == "tmin", model == "CanCM4i", year == 2000)
+  dplyr::filter(vname_ref == "tmax", model == "CanCM4i", year == 2000)
 
 
 baixados <- purrr::pmap(as.list(args_l),

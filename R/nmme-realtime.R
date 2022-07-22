@@ -135,25 +135,6 @@ cpc_links_from_model_year_month <- function(
 
 
 
-forecast_start_times <- function(nmme_url){
-  # nmme_url = link
-  doc <- httr::GET(nmme_url) %>%
-    xml2::read_html()
-  
-  info_model <- doc %>%
-    xml2::xml_find_all(xpath = '//*[@id="info"]/div[3]/dl[1]') %>%
-    xml2::xml_text() %>%
-    textConnection() %>%
-    readLines()
-  
-  # forecast start time (S)
-  fst <- grep("forecast_reference_time", info_model, value = TRUE) %>%
-    stringr::str_extract_all("(?<=\\().+?(?=\\))") %>%
-    unlist() %>%
-    lubridate::fast_strptime(format = "0000 %d %b %Y")
-  fst <- lubridate::as_date(fst[!is.na(fst)])
-  fst 
-}
 
 #forecast_start_times(link)
   

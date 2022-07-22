@@ -153,9 +153,8 @@ down_nmme_by_ymv <- function(year = "1980",
   # year = pluck(al, "year")[2];  model = pluck(al, "model")[2]; variable = pluck(al, "vname_ref")[2]; type = pluck(al, "type")[2]; overwrite = FALSE
   type <- toupper(type)
   # year = 2000;  model = "NCEP-CFSv2"; variable = "prec"; type = "HINDCAST"
-  # year = 2021; model = "CanSIPS-IC3-GEM5-NEMO"; variable = "prec"; type = "FORECAST"
   year <- as.character(year)
-  
+
   data_link <- paste0(
     nmme_link(model, variable, type),
     # Forecast Start Time (forecast_reference_time)
@@ -168,7 +167,6 @@ down_nmme_by_ymv <- function(year = "1980",
   
   #out_dir <- here("output", variable)
   out_dir <- here("output", "ncdf", model)
-  
   
   if(as.logical(!fs::dir_exists(out_dir))){
     fs::dir_create(out_dir)
@@ -187,7 +185,6 @@ down_nmme_by_ymv <- function(year = "1980",
       return(dest_file)
     }
   }
-  
   
   Sys.sleep(1)
   
